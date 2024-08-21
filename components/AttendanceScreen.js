@@ -10,7 +10,7 @@ const AttendanceScreen = ({ route }) => {
       <View style={{ marginBottom: 20, padding: 10, borderWidth: 1 }}>
         <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Attendance</Text>
         {attendances.map(attendance => (
-          <Text key={attendance.id}>Attendance Date: {attendance.Date}, Status: {attendance.Status}</Text>
+          <Text key={attendance.id}>Attendance Date: {attendance.Date}, Status: {attendance.Attendance}</Text>
         ))}
       </View>
     </ScrollView>
