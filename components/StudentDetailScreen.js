@@ -1,8 +1,7 @@
-// StudentDetailScreen.js
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Button } from 'react-native';
 
-const StudentDetailScreen = ({ route }) => {
+const StudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
 
   return (
@@ -11,22 +10,33 @@ const StudentDetailScreen = ({ route }) => {
         <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Student ID: {student.id}</Text>
         <Text>Name: {student.StudentName}</Text>
 
+        {/* Navigation Buttons */}
         {student.LessonsData && (
-          <View>
-            <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Lessons:</Text>
-            {student.LessonsData.map(lesson => (
-              <Text key={lesson.id}>Lesson Date: {lesson.Date}, Passed: {lesson['Passed?']}</Text>
-            ))}
-          </View>
+          <Button
+            title="View Lessons"
+            onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData })}
+          />
         )}
 
         {student.BehaviorData && (
-          <View>
-            <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Behavior:</Text>
-            {student.BehaviorData.map(behavior => (
-              <Text key={behavior.id}>Behavior Date: {behavior.Date}, Behavior: {behavior.Behavior}</Text>
-            ))}
-          </View>
+          <Button
+            title="View Behavior"
+            onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData })}
+          />
+        )}
+
+        {student.AttendanceData && (
+          <Button
+            title="View Attendance"
+            onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData })}
+          />
+        )}
+
+        {student.CommentData && (
+          <Button
+            title="View Teachers Comments"
+            onPress={() => navigation.navigate('TeachersComment', { comments: student.CommentData })}
+          />
         )}
       </View>
     </ScrollView>

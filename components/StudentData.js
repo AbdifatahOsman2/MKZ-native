@@ -1,7 +1,7 @@
 // App.js (or another relevant component file)
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { fetchStudents, fetchLessons, fetchBehavior, fetchAttendance } from '../services/airtableService';
+import { fetchStudents, fetchLessons, fetchBehavior, fetchAttendance, fetchTeachersComment } from '../services/airtableService.js';
 
 const App = () => {
   const [students, setStudents] = useState([]);
@@ -21,6 +21,9 @@ const App = () => {
           }
           if (student.Attendance) {
             student.AttendanceData = await fetchAttendance(student.Attendance);
+          }
+          if (student.Comment) {
+            student.CommentData = await fetchTeachersComment(student.Comment);
           }
         }
 
@@ -65,7 +68,25 @@ const App = () => {
                 <Text key={attendance.id}>Attendance Date: {attendance.Date}, Status: {attendance.Status}</Text>
               ))}
             </View>
+          )}          {student.BehaviorData && (
+            <View>
+              <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Behavior:</Text>
+              {student.BehaviorData.map(behavior => (
+                <Text key={behavior.id}>Behavior Date: {behavior.Date}, Behavior: {behavior.Behavior}</Text>
+              ))}
+            </View>
           )}
+
+          {student.CommentData && (
+            <View>
+              <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Teachers Comment:</Text>
+              {student.CommentData.map(comment => (
+                <Text key={comment.id}>Comment Date: {comment.Date}, Comment: {comment.Comment}</Text>
+              ))}
+            </View>
+          )}
+
+
         </View>
       ))}
     </ScrollView>

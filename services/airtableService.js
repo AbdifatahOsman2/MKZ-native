@@ -1,4 +1,3 @@
-// airtableService.js
 import axios from 'axios';
 
 const AIRTABLE_API_KEY = 'patdQUtrzEpyj0U1m.679c92bc19ac4eb1afc4f3ed725f5bd8037a0536531344351d5dba4509c415f1';
@@ -7,12 +6,18 @@ const STUDENTS_TABLE = 'Students';
 const LESSONS_TABLE = 'Lessons';
 const BEHAVIOR_TABLE = 'Behavior';
 const ATTENDANCE_TABLE = 'Attendance';
+const TEACHERS_COMMENT_TABLE = 'TeachersComment';
 
 const airtableHeaders = {
   Authorization: `Bearer ${AIRTABLE_API_KEY}`,
 };
 
 const fetchTableData = async (tableName, recordIds = []) => {
+  // Ensure recordIds is always an array
+  if (!Array.isArray(recordIds)) {
+    recordIds = [];
+  }
+
   const filterByFormula = recordIds.length ? `OR(${recordIds.map(id => `RECORD_ID()='${id}'`).join(',')})` : '';
   const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?${filterByFormula ? `filterByFormula=${filterByFormula}` : ''}`;
 
@@ -39,11 +44,14 @@ export const fetchBehavior = async (behaviorIds) => {
 export const fetchAttendance = async (attendanceIds) => {
   return fetchTableData(ATTENDANCE_TABLE, attendanceIds);
 };
-fetchAttendance();
+
+export const fetchTeachersComment = async (commentIds) => {
+  return fetchTableData(TEACHERS_COMMENT_TABLE, commentIds);
+};
+
 export const fetchStudents = async () => {
   try {
     const students = await fetchTableData(STUDENTS_TABLE);
-    console.log('Students:', students[0].Attendance);
 
     for (const student of students) {
       if (student.Lessons) {
@@ -55,8 +63,10 @@ export const fetchStudents = async () => {
       if (student.Attendance) {
         student.AttendanceData = await fetchAttendance(student.Attendance);
       }
+      if (student.Comment) {
+        student.CommentData = await fetchTeachersComment(student.Comment);
+      }
     }
-
 
     return students;
   } catch (error) {
@@ -64,5 +74,3 @@ export const fetchStudents = async () => {
     throw error;
   }
 };
-
-// fetchStudents();
