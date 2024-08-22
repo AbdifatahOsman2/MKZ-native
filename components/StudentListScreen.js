@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image } from 'react-native';
 import { fetchStudents } from '../services/airtableService';
-
+import image from '../assets/Fm1-Image.png';
 const StudentListScreen = ({ navigation }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -29,6 +29,7 @@ const StudentListScreen = ({ navigation }) => {
 
   return (
     <ScrollView
+      contentContainerStyle={styles.scrollContainer} // Add this to push content down
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -42,8 +43,13 @@ const StudentListScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('StudentDetail', { student })}
           style={styles.studentContainer}
         >
-          <Text style={styles.studentId}>Student ID: {student.id}</Text>
-          <Text>Name: {student.StudentName}</Text>
+          <View style={styles.avatarContainer}>
+            <Image
+              source={image} // Replace with the correct image URL
+              style={styles.avatar}
+            />
+          </View>
+          <Text style={styles.studentName}>{student.StudentName}</Text>
         </TouchableOpacity>
       ))}
     </ScrollView>
@@ -51,14 +57,29 @@ const StudentListScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  studentContainer: {
-    marginBottom: 20,
-    padding: 10,
-    borderWidth: 1,
+  scrollContainer: {
+    paddingTop: 120, // Pushes the container down
   },
-  studentId: {
+  studentContainer: {
+    marginBottom: 15,
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: '#E8F1F2', // Matches the background in the image
+    flexDirection: 'row',
+    alignItems: 'center', // Centers content vertically
+    justifyContent: 'flex-start', // Aligns items horizontally
+  },
+  avatarContainer: {
+    marginRight: 20,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30, // Makes the avatar circular
+  },
+  studentName: {
+    fontSize: 18,
     fontWeight: 'bold',
-    fontSize: 16,
   },
 });
 

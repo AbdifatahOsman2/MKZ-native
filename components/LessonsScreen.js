@@ -1,20 +1,40 @@
-// LessonsScreen.js
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, FlatList, Text, StyleSheet } from 'react-native';
 
 const LessonsScreen = ({ route }) => {
   const { lessons } = route.params;
 
+  const renderLesson = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Text>Lesson Date: {item.Date}</Text>
+      <Text>Passed: {item['Passed?']}</Text>
+    </View>
+  );
+
   return (
-    <ScrollView>
-      <View style={{ marginBottom: 20, padding: 10, borderWidth: 1 }}>
-        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Lessons</Text>
-        {lessons.map(lesson => (
-          <Text key={lesson.id}>Lesson Date: {lesson.Date}, Passed: {lesson['Passed?']}</Text>
-        ))}
-      </View>
-    </ScrollView>
+    <View style={styles.container}>
+      <FlatList
+        data={lessons}
+        renderItem={renderLesson}
+        keyExtractor={(item) => item.id}
+      />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#ECECF8',
+    padding: 16,
+    paddingTop: 108
+  },
+  itemContainer: {
+    backgroundColor: 'white',
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 8,
+  },
+});
 
 export default LessonsScreen;

@@ -4,13 +4,15 @@ import image from '../assets/Fm1-Image.png';
 
 const StudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
-
+  console.log("studentDetail:",student);
+  console.log("studentTeacher:",student.teacher);
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Image source={image} style={styles.profileImage} />
         <Text style={styles.studentName}>{student.StudentName}</Text>
-        <Text style={styles.studentInfo}>Age / da' : {student.age}</Text>
+        <Text style={styles.studentInfo}>Age / da' : {student.Age}</Text>
         <Text style={styles.studentInfo}>Class / fasalka : {student.class}</Text>
         <Text style={styles.studentInfo}>Schedule / jadwalka : {student.schedule}</Text>
         <Text style={styles.studentInfo}>Teacher / Macallin : {student.teacher}</Text>
@@ -82,7 +84,7 @@ const styles = StyleSheet.create({
   },
   studentInfo: {
     fontSize: 16,
-    color: '#333',
+    color: '#000000',
     marginTop: 5,
   },
   buttonContainer: {

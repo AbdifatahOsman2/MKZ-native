@@ -7,6 +7,8 @@ const LESSONS_TABLE = 'Lessons';
 const BEHAVIOR_TABLE = 'Behavior';
 const ATTENDANCE_TABLE = 'Attendance';
 const TEACHERS_COMMENT_TABLE = 'TeachersComment';
+const TEACHERS_TABLE = 'Teachers';
+
 
 const airtableHeaders = {
   Authorization: `Bearer ${AIRTABLE_API_KEY}`,
@@ -49,6 +51,10 @@ export const fetchTeachersComment = async (commentIds) => {
   return fetchTableData(TEACHERS_COMMENT_TABLE, commentIds);
 };
 
+export const fetchTeachers = async (teacherIds) => {
+  return fetchTableData(TEACHERS_TABLE, teacherIds);
+};
+
 export const fetchStudents = async () => {
   try {
     const students = await fetchTableData(STUDENTS_TABLE);
@@ -65,6 +71,9 @@ export const fetchStudents = async () => {
       }
       if (student.Comment) {
         student.CommentData = await fetchTeachersComment(student.Comment);
+      }
+      if(student.teacher) {
+        student.teacherData = await fetchTeachers([student.teacher]);
       }
     }
 
