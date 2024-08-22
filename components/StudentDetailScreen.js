@@ -4,8 +4,6 @@ import image from '../assets/Fm1-Image.png';
 
 const StudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
-  console.log("studentDetail:",student);
-  console.log("studentTeacher:",student.teacher);
   
   return (
     <ScrollView contentContainerStyle={styles.container}>

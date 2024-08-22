@@ -13,10 +13,13 @@ const TeachersCommentScreen = ({ route }) => {
 
   const renderComment = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Text>Comment Date: {item.Date}</Text>
-      <TouchableOpacity onPress={() => openModal(item)}>
-        <Text style={styles.viewText}>View</Text>
-      </TouchableOpacity>
+      <View style={styles.row}>
+        <Text style={styles.dateText}>{item.Date}</Text>
+        <Text style={styles.commentText}>Teacher comments</Text>
+        <TouchableOpacity style={styles.viewButton} onPress={() => openModal(item)}>
+          <Text style={styles.viewButtonText}>View</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -54,17 +57,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ECECF8',
     padding: 16,
-    paddingTop: 108
+    paddingTop: 108,
   },
   itemContainer: {
     backgroundColor: 'white',
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
   },
-  viewText: {
-    color: 'blue',
-    marginTop: 10,
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  commentText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  viewButton: {
+    backgroundColor: '#E0E0E0',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  viewButtonText: {
+    fontSize: 14,
+    color: '#000',
   },
   modalContainer: {
     flex: 1,
