@@ -3,11 +3,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';  // Importing Ionicons for the back arrow
+import AuthScreen from './components/AuthScreen'; // Import the new AuthScreen
 import StudentListScreen from './components/StudentListScreen';
 import StudentDetailScreen from './components/StudentDetailScreen';
 import LessonsScreen from './components/LessonsScreen';
 import BehaviorScreen from './components/BehaviorScreen';
 import AttendanceScreen from './components/AttendanceScreen';
+import SplashScreen from './components/SplashScreen';
 import TeachersCommentScreen from './components/TeachersCommentScreen';
 
 const Stack = createStackNavigator();
@@ -15,17 +17,22 @@ const Stack = createStackNavigator();
 const Navigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="StudentList">
+      <Stack.Navigator initialRouteName="SplashScreen">
+      <Stack.Screen
+      name="SplashScreen"
+      component={SplashScreen}
+      options={{ headerShown: false }} // Hiding the header for the auth screen
+    />
+        <Stack.Screen
+          name="AuthScreen"
+          component={AuthScreen}
+          options={{ headerShown: false }} // Hiding the header for the auth screen
+        />
         <Stack.Screen
           name="StudentList"
           component={StudentListScreen}
-          options={{ headerShown: true , headerTransparent: true,
-            headerStyle: {
-              backgroundColor: 'rgba(0, 0, 0, 0)',  // Transparent background
-            }}}  // Hiding the header
-          
+          options={{ headerShown: false }}
         />
-
         <Stack.Screen
           name="StudentDetail"
           component={StudentDetailScreen}
@@ -36,12 +43,11 @@ const Navigation = () => {
               </TouchableOpacity>
             ),
             title: 'Student Detail',
-            headerTransparent: true,  // Make the header background transparent
-            headerStyle: {
-              backgroundColor: 'rgba(0, 0, 0, 0)',  // Transparent background
-            },
+            headerTransparent: true,
+            headerStyle: { backgroundColor: 'rgba(0, 0, 0, 0)' },
           })}
         />
+        {/* Other Screens */}
         <Stack.Screen
           name="Lessons"
           component={LessonsScreen}
@@ -53,9 +59,7 @@ const Navigation = () => {
             ),
             title: 'Lessons',
             headerTransparent: true,
-            headerStyle: {
-              backgroundColor: 'rgba(0, 0, 0, 0)',
-            },
+            headerStyle: { backgroundColor: 'rgba(0, 0, 0, 0)' },
           })}
         />
         <Stack.Screen
@@ -69,9 +73,7 @@ const Navigation = () => {
             ),
             title: 'Behavior',
             headerTransparent: true,
-            headerStyle: {
-              backgroundColor: 'rgba(0, 0, 0, 0)',
-            },
+            headerStyle: { backgroundColor: 'rgba(0, 0, 0, 0)' },
           })}
         />
         <Stack.Screen
@@ -85,9 +87,7 @@ const Navigation = () => {
             ),
             title: 'Attendance',
             headerTransparent: true,
-            headerStyle: {
-              backgroundColor: 'rgba(0, 0, 0, 0)',
-            },
+            headerStyle: { backgroundColor: 'rgba(0, 0, 0, 0)' },
           })}
         />
         <Stack.Screen
@@ -101,9 +101,7 @@ const Navigation = () => {
             ),
             title: 'Teachers Comment',
             headerTransparent: true,
-            headerStyle: {
-              backgroundColor: 'rgba(0, 0, 0, 0)',
-            },
+            headerStyle: { backgroundColor: 'rgba(0, 0, 0, 0)' },
           })}
         />
       </Stack.Navigator>

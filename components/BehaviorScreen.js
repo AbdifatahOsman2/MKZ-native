@@ -11,7 +11,7 @@ const BehaviorScreen = ({ route }) => {
         <Text style={styles.behaviorText}>Behavior / Edeb</Text>
         <Text style={styles.statusText}>{item.Behavior}</Text>
         <Text style={styles.emoji}>
-          {item.Behavior === 'Good' ? '😊' : '😐'}
+        {item.Behavior.includes('Good') ? '😊' : '😢'}
         </Text>
       </View>
     </View>

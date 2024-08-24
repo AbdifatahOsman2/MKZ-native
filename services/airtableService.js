@@ -72,11 +72,13 @@ export const fetchStudents = async () => {
       if (student.Comment) {
         student.CommentData = await fetchTeachersComment(student.Comment);
       }
-      if(student.teacher) {
-        student.teacherData = await fetchTeachers([student.teacher]);
+      if (student.teacher) {
+        // Fetch the teacher's details based on the array of linked teacher IDs
+        const teacherDetails = await fetchTeachers(student.teacher);
+        // Assuming you want to display the teacher's name(s)
+        student.teacherName = teacherDetails.map(teacher => teacher.Name).join(', ') || 'Unknown';
       }
     }
-
     return students;
   } catch (error) {
     console.error('Error fetching students with linked data:', error);
