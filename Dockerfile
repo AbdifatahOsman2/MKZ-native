@@ -20,4 +20,4 @@ RUN rm -f .env
 EXPOSE 19000
 
 # Start the app
-CMD ["npx", "expo", "start", "--tunnel", "-y"]
+CMD ["npx", "expo", "start"]
