@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install the dependencies
-RUN npm install
+RUN npm install -y
 
 # Copy the rest of the project files
 COPY . .
@@ -20,4 +20,4 @@ RUN rm -f .env
 EXPOSE 19000
 
 # Start the app
-CMD ["npx", "expo", "start", "--tunnel"]
+CMD ["npx", "expo", "start", "--tunnel", "-y"]
