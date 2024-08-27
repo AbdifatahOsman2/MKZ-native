@@ -48,19 +48,21 @@ const AuthScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Social Media Sign In Options */}
+      <View style={styles.orContainer}>
       <Text style={styles.orText}>Other sign in options</Text>
       <View style={styles.socialIconsContainer}>
         <TouchableOpacity style={styles.socialIcon}>
-          <Icon name="facebook" size={30} color="#3b5998" />
+        <Icon name="facebook" size={30} color="#3b5998" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialIcon}>
-          <Icon name="google" size={30} color="#DB4437" />
+        <Icon name="google" size={30} color="#DB4437" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialIcon}>
-          <Icon name="apple" size={30} color="#000" />
+        <Icon name="apple" size={30} color="#000" />
         </TouchableOpacity>
-      </View>
-    </View>
+        </View>
+        </View>
+        </View>
   );
 };
 
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#FFF',
+    backgroundColor: '#ECECF8',
     paddingTop: 80,
   },
   logoContainer: {
@@ -76,8 +78,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 120,
+    height: 120,
   },
   title: {
     fontSize: 26,
@@ -155,11 +157,11 @@ const styles = StyleSheet.create({
   orText: {
     marginBottom: 10,
     color: '#888',
+
   },
   socialIconsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 30,
   },
   socialIcon: {
     marginHorizontal: 15,
@@ -171,6 +173,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 3 },
+  },
+  orContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: 120,
+    gap: 10,
   },
 });
 

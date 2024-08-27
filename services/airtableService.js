@@ -1,17 +1,17 @@
 import axios from 'axios';
 
-const AIRTABLE_API_KEY = 'patdQUtrzEpyj0U1m.679c92bc19ac4eb1afc4f3ed725f5bd8037a0536531344351d5dba4509c415f1';
-const AIRTABLE_BASE_ID = 'appGLLUgRGvgQGyXC';
 const STUDENTS_TABLE = 'Students';
 const LESSONS_TABLE = 'Lessons';
 const BEHAVIOR_TABLE = 'Behavior';
 const ATTENDANCE_TABLE = 'Attendance';
 const TEACHERS_COMMENT_TABLE = 'TeachersComment';
 const TEACHERS_TABLE = 'Teachers';
+const apiKey = precess.env.EXPO_AIRTABLE_API_KEY;
+const baseId = precess.env.EXPO_AIRTABLE_BASE_ID;
 
 
 const airtableHeaders = {
-  Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+  Authorization: `Bearer ${apiKey}`,
 };
 
 const fetchTableData = async (tableName, recordIds = []) => {
@@ -21,7 +21,7 @@ const fetchTableData = async (tableName, recordIds = []) => {
   }
 
   const filterByFormula = recordIds.length ? `OR(${recordIds.map(id => `RECORD_ID()='${id}'`).join(',')})` : '';
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?${filterByFormula ? `filterByFormula=${filterByFormula}` : ''}`;
+  const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${filterByFormula ? `filterByFormula=${filterByFormula}` : ''}`;
 
   try {
     const response = await axios.get(url, { headers: airtableHeaders });

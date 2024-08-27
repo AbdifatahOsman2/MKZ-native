@@ -17,7 +17,7 @@ const SplashScreen = () => {
     // Redirect to AuthScreen after 2 seconds
     const timeout = setTimeout(() => {
       navigation.replace('AuthScreen');
-    }, 5000);
+    }, 3000);
 
     return () => clearTimeout(timeout); // Cleanup the timeout on unmount
   }, [fadeAnim, navigation]);
