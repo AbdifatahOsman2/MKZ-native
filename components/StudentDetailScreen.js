@@ -28,7 +28,6 @@ const StudentDetailScreen = ({ route, navigation }) => {
         </View>
       </View>
 
-
       <View style={styles.buttonContainer}>
         {student.LessonsData && (
           <TouchableOpacity
@@ -49,7 +48,6 @@ const StudentDetailScreen = ({ route, navigation }) => {
             <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
           </TouchableOpacity>
         )}
-
         {student.AttendanceData && (
           <TouchableOpacity
             style={styles.button}
