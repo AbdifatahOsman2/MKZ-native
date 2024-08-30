@@ -1,9 +1,45 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Assuming this is installed
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { app, auth } from '../firebaseConfig';  // Import the initialized app and auth here
 import Logo from '../assets/Logo.png';
+
+const db = getFirestore(app);
+
 const AuthScreen = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('Parent'); // Default role is Parent
+
+  const handleAuth = async () => {
+    try {
+      if (isLogin) {
+        // Handle login
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Navigate to StudentList screen and pass ParentID
+        navigation.navigate('StudentList', { ParentID: user.uid });
+
+      } else {
+        // Handle registration
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Store user role and UID as ParentID in Firestore
+        const userDocRef = doc(db, 'users', user.uid);  
+        await setDoc(userDocRef, { role: 'Parent', ParentID: user.uid });
+
+        // Navigate to StudentList screen and pass ParentID
+        navigation.navigate('StudentList', { ParentID: user.uid });
+      }
+    } catch (error) {
+      console.error(error);
+      // Handle errors here (e.g., show an alert)
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -33,8 +69,30 @@ const AuthScreen = ({ navigation }) => {
 
       {/* Input fields */}
       <View style={styles.inputContainer}>
-        <TextInput placeholder="Your email" style={styles.input} />
-        <TextInput placeholder="Password" style={styles.input} secureTextEntry />
+        <TextInput
+          placeholder="Your email"
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          placeholder="Password"
+          style={styles.input}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        {!isLogin && (
+          <View style={styles.roleContainer}>
+            <Text style={styles.roleLabel}>Register as:</Text>
+            <TouchableOpacity onPress={() => setRole('Parent')}>
+              <Text style={role === 'Parent' ? styles.activeText : styles.inactiveText}>Parent</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setRole('Teacher')}>
+              <Text style={role === 'Teacher' ? styles.activeText : styles.inactiveText}>Teacher</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         {isLogin ? (
           <TouchableOpacity>
             <Text style={styles.forgotPassword}>Forgot password?</Text>
@@ -43,28 +101,14 @@ const AuthScreen = ({ navigation }) => {
       </View>
 
       {/* Submit Button */}
-      <TouchableOpacity style={styles.submitButton} onPress={() => navigation.navigate('StudentList')}>
+      <TouchableOpacity style={styles.submitButton} onPress={handleAuth}>
         <Text style={styles.submitButtonText}>{isLogin ? 'Log In' : 'Register'}</Text>
       </TouchableOpacity>
-
-      {/* Social Media Sign In Options */}
-      <View style={styles.orContainer}>
-      <Text style={styles.orText}>Other sign in options</Text>
-      <View style={styles.socialIconsContainer}>
-        <TouchableOpacity style={styles.socialIcon}>
-        <Icon name="facebook" size={30} color="#3b5998" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialIcon}>
-        <Icon name="google" size={30} color="#DB4437" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialIcon}>
-        <Icon name="apple" size={30} color="#000" />
-        </TouchableOpacity>
-        </View>
-        </View>
-        </View>
+    </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {

@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icons
+import Icon from 'react-native-vector-icons/FontAwesome'; 
 import { fetchStudents } from '../services/airtableService';
-
-// Import the gender-based images
 import maleImage from '../assets/M-1-Image.png'; 
 import femaleImage from '../assets/Fm1-Image.png';
 
-const StudentListScreen = ({ navigation }) => {
+const StudentListScreen = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const { ParentID } = route.params; // Get ParentID from route params
 
   // Fetch students data
   const getStudentsData = async () => {
     try {
-      const studentsData = await fetchStudents();
+      const studentsData = await fetchStudents(ParentID);
       setStudents(studentsData);
     } catch (error) {
       console.error(error);
@@ -36,7 +36,8 @@ const StudentListScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header with icons */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('AuthScreen')}>
+        {/* Navigate to SettingsPage instead of AuthScreen */}
+        <TouchableOpacity onPress={() => navigation.navigate('SettingsPage')}>
           <View style={styles.iconWrapper}>
             <Icon name="cog" size={24} color="#000" />
           </View>

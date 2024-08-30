@@ -11,6 +11,8 @@ import BehaviorScreen from './components/BehaviorScreen';
 import AttendanceScreen from './components/AttendanceScreen';
 import SplashScreen from './components/SplashScreen';
 import TeachersCommentScreen from './components/TeachersCommentScreen';
+import SettingsPage from './components/SettingsPage';
+import AboutPage from './components/AboutPage';
 
 const Stack = createStackNavigator();
 
@@ -104,6 +106,8 @@ const Navigation = () => {
             headerStyle: { backgroundColor: 'rgba(0, 0, 0, 0)' },
           })}
         />
+        <Stack.Screen name="SettingsPage" component={SettingsPage} />
+        <Stack.Screen name="AboutPage" component={AboutPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );

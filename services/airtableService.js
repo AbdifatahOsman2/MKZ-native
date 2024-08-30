@@ -51,13 +51,17 @@ export const fetchTeachersComment = async (commentIds) => {
   return fetchTableData(TEACHERS_COMMENT_TABLE, commentIds);
 };
 
-export const fetchTeachers = async (teacherIds) => {
-  return fetchTableData(TEACHERS_TABLE, teacherIds);
-};
-
-export const fetchStudents = async () => {
+export const fetchStudents = async (ParentID) => {
   try {
-    const students = await fetchTableData(STUDENTS_TABLE);
+    // Fetch students where the ParentID matches the provided ParentID
+    const filterByFormula = `AND({ParentID} = '${ParentID}')`;
+    const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}?filterByFormula=${filterByFormula}`;
+
+    const response = await axios.get(url, { headers: airtableHeaders });
+    const students = response.data.records.map(record => ({
+      id: record.id,
+      ...record.fields,
+    }));
 
     for (const student of students) {
       if (student.Lessons) {
@@ -73,12 +77,11 @@ export const fetchStudents = async () => {
         student.CommentData = await fetchTeachersComment(student.Comment);
       }
       if (student.teacher) {
-        // Fetch the teacher's details based on the array of linked teacher IDs
-        const teacherDetails = await fetchTeachers(student.teacher);
-        // Assuming you want to display the teacher's name(s)
+        const teacherDetails = await fetchTeachersComment(student.teacher);
         student.teacherName = teacherDetails.map(teacher => teacher.Name).join(', ') || 'Unknown';
       }
     }
+
     return students;
   } catch (error) {
     console.error('Error fetching students with linked data:', error);
