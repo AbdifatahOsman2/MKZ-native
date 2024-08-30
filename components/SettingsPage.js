@@ -12,7 +12,7 @@ const SettingsPage = ({ navigation }) => {
         navigation.replace('AuthScreen');
       })
       .catch((error) => {
-        Alert.alert('Logout Error', error.message);
+        Alert.alert('Logout Err', error.message);
       });
   };
 
