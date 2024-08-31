@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { app, auth } from '../firebaseConfig';  // Import the initialized app and auth here
 import Logo from '../assets/Logo.png';
 
@@ -20,20 +20,36 @@ const AuthScreen = ({ navigation }) => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Navigate to StudentList screen and pass ParentID
-        navigation.navigate('StudentList', { ParentID: user.uid });
+        // Fetch user role from Firestore
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.data();
+
+        if (userData.role === 'Parent') {
+          navigation.navigate('StudentList', { ParentID: user.uid });
+        } else if (userData.role === 'Teacher') {
+          navigation.navigate('TeachersView', { TeacherID: user.uid });
+        }
 
       } else {
         // Handle registration
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Store user role and UID as ParentID in Firestore
-        const userDocRef = doc(db, 'users', user.uid);  
-        await setDoc(userDocRef, { role: 'Parent', ParentID: user.uid });
+        // Store user role and UID in Firestore
+        const userDocRef = doc(db, 'users', user.uid);
+        const userData = {
+          role: role,
+          [`${role}ID`]: user.uid // Dynamically create either ParentID or TeacherID
+        };
+        await setDoc(userDocRef, userData);
 
-        // Navigate to StudentList screen and pass ParentID
-        navigation.navigate('StudentList', { ParentID: user.uid });
+        // Navigate to appropriate screen
+        if (role === 'Parent') {
+          navigation.navigate('StudentList', { ParentID: user.uid });
+        } else if (role === 'Teacher') {
+          navigation.navigate('TeachersView', { TeacherID: user.uid });
+        }
       }
     } catch (error) {
       console.error(error);
@@ -107,7 +123,6 @@ const AuthScreen = ({ navigation }) => {
     </View>
   );
 };
-
 
 
 const styles = StyleSheet.create({

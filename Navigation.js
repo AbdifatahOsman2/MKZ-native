@@ -4,8 +4,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';  // Importing Ionicons for the back arrow
 import AuthScreen from './components/AuthScreen'; // Import the new AuthScreen
-import StudentListScreen from './components/StudentListScreen';
-import StudentDetailScreen from './components/StudentDetailScreen';
+import StudentListScreen from './components/ParentsView';
+import StudentDetailScreen from './components/ParentsViewTwo';
 import LessonsScreen from './components/LessonsScreen';
 import BehaviorScreen from './components/BehaviorScreen';
 import AttendanceScreen from './components/AttendanceScreen';
@@ -13,6 +13,9 @@ import SplashScreen from './components/SplashScreen';
 import TeachersCommentScreen from './components/TeachersCommentScreen';
 import SettingsPage from './components/SettingsPage';
 import AboutPage from './components/AboutPage';
+import TeachersView from './components/TeachersView';
+import TeacherStudentDetailScreen from './components/TeacherStudentDetailScreen';
+import AddStudent from './components/AddStudent';
 
 const Stack = createStackNavigator();
 
@@ -108,6 +111,11 @@ const Navigation = () => {
         />
         <Stack.Screen name="SettingsPage" component={SettingsPage} />
         <Stack.Screen name="AboutPage" component={AboutPage} />
+        <Stack.Screen name="TeachersView" component={TeachersView} options={{ headerShown: false }}/>
+        <Stack.Screen name="TeacherStudentDetail" component={TeacherStudentDetailScreen} />
+        <Stack.Screen name="AddStudent" component={AddStudent} />
+
+
       </Stack.Navigator>
     </NavigationContainer>
   );

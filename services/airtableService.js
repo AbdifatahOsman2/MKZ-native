@@ -5,7 +5,7 @@ const LESSONS_TABLE = 'Lessons';
 const BEHAVIOR_TABLE = 'Behavior';
 const ATTENDANCE_TABLE = 'Attendance';
 const TEACHERS_COMMENT_TABLE = 'TeachersComment';
-const TEACHERS_TABLE = 'Teachers';
+// const TEACHERS_TABLE = 'Teachers';
 
 const apiKey =  'patdQUtrzEpyj0U1m.679c92bc19ac4eb1afc4f3ed725f5bd8037a0536531344351d5dba4509c415f1';
 const baseId = 'appGLLUgRGvgQGyXC';
@@ -51,11 +51,15 @@ export const fetchTeachersComment = async (commentIds) => {
   return fetchTableData(TEACHERS_COMMENT_TABLE, commentIds);
 };
 
-export const fetchStudents = async (ParentID) => {
+
+// airtableService.js (modify fetchStudents)
+export const fetchStudents = async (ParentID = null) => {
   try {
-    // Fetch students where the ParentID matches the provided ParentID
-    const filterByFormula = `AND({ParentID} = '${ParentID}')`;
-    const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}?filterByFormula=${filterByFormula}`;
+    let url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
+    if (ParentID) {
+      const filterByFormula = `AND({ParentID} = '${ParentID}')`;
+      url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
+    }
 
     const response = await axios.get(url, { headers: airtableHeaders });
     const students = response.data.records.map(record => ({
@@ -63,6 +67,7 @@ export const fetchStudents = async (ParentID) => {
       ...record.fields,
     }));
 
+    // Fetch linked data for each student
     for (const student of students) {
       if (student.Lessons) {
         student.LessonsData = await fetchLessons(student.Lessons);
@@ -76,15 +81,50 @@ export const fetchStudents = async (ParentID) => {
       if (student.Comment) {
         student.CommentData = await fetchTeachersComment(student.Comment);
       }
-      if (student.teacher) {
-        const teacherDetails = await fetchTeachersComment(student.teacher);
-        student.teacherName = teacherDetails.map(teacher => teacher.Name).join(', ') || 'Unknown';
-      }
     }
 
     return students;
   } catch (error) {
     console.error('Error fetching students with linked data:', error);
+    throw error;
+  }
+};
+
+export const createStudent = async (studentData) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
+  try {
+    const response = await axios.post(url, {
+      fields: studentData,
+    }, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating student:', error);
+    throw error;
+  }
+};
+
+// Update an existing record
+export const updateStudent = async (recordId, updatedData) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}/${recordId}`;
+  try {
+    const response = await axios.patch(url, {
+      fields: updatedData,
+    }, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating student:', error);
+    throw error;
+  }
+};
+
+// Delete a record
+export const deleteStudent = async (recordId) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}/${recordId}`;
+  try {
+    const response = await axios.delete(url, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting student:', error);
     throw error;
   }
 };
