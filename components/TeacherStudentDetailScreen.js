@@ -11,7 +11,8 @@ import commentIcon from '../assets/Commentbtn.png';
 
 const TeacherStudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
-  console.log(student.teacherName);
+//   console.log('Student:', route.params.student.id);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
@@ -29,44 +30,37 @@ const TeacherStudentDetailScreen = ({ route, navigation }) => {
       </View>
 
       <View style={styles.buttonContainer}>
-        {student.LessonsData && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData })}
-          >
-            <Image source={lessonIcon} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>Lesson / Cashar</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
+        >
+          <Image source={lessonIcon} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Lesson / Cashar</Text>
+        </TouchableOpacity>
 
-        {student.BehaviorData && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData })}
-          >
-            <Image source={behaviorIcon} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
-          </TouchableOpacity>
-        )}
-        {student.AttendanceData && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData })}
-          >
-            <Image source={attendanceIcon} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>Attendance / imaanaha</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData || [] })}
+        >
+          <Image source={behaviorIcon} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
+        </TouchableOpacity>
 
-        {student.CommentData && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('TeachersComment', { comments: student.CommentData })}
-          >
-            <Image source={commentIcon} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData || [] })}
+        >
+          <Image source={attendanceIcon} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Attendance / imaanaha</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('TeachersComment', { comments: student.CommentData || [] })}
+        >
+          <Image source={commentIcon} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -147,3 +141,8 @@ const styles = StyleSheet.create({
   });
   
 export default TeacherStudentDetailScreen;
+
+
+
+
+

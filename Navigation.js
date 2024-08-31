@@ -16,7 +16,7 @@ import AboutPage from './components/AboutPage';
 import TeachersView from './components/TeachersView';
 import TeacherStudentDetailScreen from './components/TeacherStudentDetailScreen';
 import AddStudent from './components/AddStudent';
-
+import AddLesson from './components/AddLesson';
 const Stack = createStackNavigator();
 
 const Navigation = () => {
@@ -114,7 +114,7 @@ const Navigation = () => {
         <Stack.Screen name="TeachersView" component={TeachersView} options={{ headerShown: false }}/>
         <Stack.Screen name="TeacherStudentDetail" component={TeacherStudentDetailScreen} />
         <Stack.Screen name="AddStudent" component={AddStudent} />
-
+        <Stack.Screen name="AddLesson" component={AddLesson} />
 
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, FlatList, Text, StyleSheet, Image } from 'react-native';
+import { View, FlatList, Text, StyleSheet, Image, Button } from 'react-native';
 import openQuran from '../assets/openQuran.png';
 
-const LessonsScreen = ({ route }) => {
-  const { lessons } = route.params;
+const LessonsScreen = ({ route, navigation }) => {
+  const { lessons, TeacherID } = route.params;
+  const studentId = route.params.StudentID;
+  console.log(route.params.StudentID);
 
   const renderLesson = ({ item }) => (
     <View style={styles.itemContainer}>
@@ -12,14 +14,28 @@ const LessonsScreen = ({ route }) => {
         <Text style={styles.lessonStatus}>{item['Passed?']}</Text>
       </View>
       <Image
-        source={openQuran} // Replace with actual icon URL
+        source={openQuran}
         style={styles.icon}
       />
     </View>
   );
 
+  // Function to navigate to the add lesson screen
+  const handleAddLesson = () => {
+    // You might need to navigate with some parameters to identify the student etc.
+    navigation.navigate('AddLesson', { studentId: studentId }); // Update with actual parameters
+  };
+
   return (
     <View style={styles.container}>
+      {/* Show add button only if TeacherID is present */}
+      {TeacherID && (
+        <Button
+          title="Add New Lesson"
+          onPress={handleAddLesson}
+          color="#007BFF" // Customizable color
+        />
+      )}
       <FlatList
         data={lessons}
         renderItem={renderLesson}
@@ -59,10 +75,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000',
     fontWeight: 'bold',
-  },
-  lessonType: {
-    fontSize: 16,
-    color: '#000',
   },
   icon: {
     width: 24,

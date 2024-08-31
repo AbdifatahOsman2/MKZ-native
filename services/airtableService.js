@@ -93,15 +93,24 @@ export const fetchStudents = async (ParentID = null) => {
 export const createStudent = async (studentData) => {
   const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
   try {
-    const response = await axios.post(url, {
-      fields: studentData,
-    }, { headers: airtableHeaders });
+    // Format the data as an array of record objects
+    const payload = {
+      records: [
+        {
+          fields: studentData
+        }
+      ]
+    };
+
+    const response = await axios.post(url, payload, { headers: airtableHeaders });
+
     return response.data;
   } catch (error) {
-    console.error('Error creating student:', error);
+    console.error('Error creating student:', error.response ? error.response.data : error);  // Log detailed error
     throw error;
   }
 };
+
 
 // Update an existing record
 export const updateStudent = async (recordId, updatedData) => {
@@ -125,6 +134,18 @@ export const deleteStudent = async (recordId) => {
     return response.data;
   } catch (error) {
     console.error('Error deleting student:', error);
+    throw error;
+  }
+};
+
+
+export const createLesson = async (lessonData) => {
+  const url = `https://api.airtable.com/v0/your_base_id/Lessons`;
+  try {
+    const response = await axios.post(url, { fields: lessonData }, { headers: { Authorization: `Bearer your_api_key` } });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating lesson:', error);
     throw error;
   }
 };
