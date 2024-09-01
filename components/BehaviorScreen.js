@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, FlatList, Text, StyleSheet } from 'react-native';
+import { View, FlatList, Text, StyleSheet, Button } from 'react-native';
 
-const BehaviorScreen = ({ route }) => {
-  const { behaviors } = route.params;
+const BehaviorScreen = ({ route, navigation }) => {
+  const { behaviors, TeacherID } = route.params;  // Make sure TeacherID is passed as a parameter
+  const studentId = route.params.StudentID;
 
   const renderBehavior = ({ item }) => (
     <View style={styles.itemContainer}>
@@ -11,14 +12,27 @@ const BehaviorScreen = ({ route }) => {
         <Text style={styles.behaviorText}>Behavior / Edeb</Text>
         <Text style={styles.statusText}>{item.Behavior}</Text>
         <Text style={styles.emoji}>
-        {item.Behavior.includes('Good') ? '😊' : '😢'}
+          {item.Behavior.includes('Good') ? '😊' : '😢'}
         </Text>
       </View>
     </View>
   );
 
+  // Function to navigate to the add behavior screen
+  const handleAddBehavior = () => {
+    navigation.navigate('AddBehavior',  { studentId: studentId }); // Assuming TeacherID is needed for creating behaviors
+  };
+
   return (
     <View style={styles.container}>
+      {/* Show add button only if TeacherID is present */}
+      {TeacherID && (
+        <Button
+          title="Add New Behavior"
+          onPress={handleAddBehavior}
+          color="#007BFF" // Customizable color
+        />
+      )}
       <FlatList
         data={behaviors}
         renderItem={renderBehavior}

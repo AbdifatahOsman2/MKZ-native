@@ -5,13 +5,13 @@ import openQuran from '../assets/openQuran.png';
 const LessonsScreen = ({ route, navigation }) => {
   const { lessons, TeacherID } = route.params;
   const studentId = route.params.StudentID;
-  console.log(route.params.StudentID);
+
 
   const renderLesson = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.textContainer}>
         <Text style={styles.lessonDate}>{item.Date}</Text>
-        <Text style={styles.lessonStatus}>{item['Passed?']}</Text>
+        <Text style={styles.lessonStatus}>{item['Passed']}</Text>
       </View>
       <Image
         source={openQuran}

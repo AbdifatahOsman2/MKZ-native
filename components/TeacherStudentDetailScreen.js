@@ -11,7 +11,7 @@ import commentIcon from '../assets/Commentbtn.png';
 
 const TeacherStudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
-//   console.log('Student:', route.params.student.id);
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -40,7 +40,7 @@ const TeacherStudentDetailScreen = ({ route, navigation }) => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData || [] })}
+          onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
         >
           <Image source={behaviorIcon} style={styles.buttonIcon} />
           <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
@@ -48,7 +48,7 @@ const TeacherStudentDetailScreen = ({ route, navigation }) => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData || [] })}
+          onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
         >
           <Image source={attendanceIcon} style={styles.buttonIcon} />
           <Text style={styles.buttonText}>Attendance / imaanaha</Text>
@@ -56,7 +56,7 @@ const TeacherStudentDetailScreen = ({ route, navigation }) => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('TeachersComment', { comments: student.CommentData || [] })}
+          onPress={() => navigation.navigate('TeachersComment', { comments: student.TeachersComment,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
         >
           <Image source={commentIcon} style={styles.buttonIcon} />
           <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>

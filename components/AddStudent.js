@@ -23,7 +23,6 @@ const AddStudent = ({ navigation }) => {
         };
         try {
             const result = await createStudent(studentData);
-            console.log('Student Created:', result);
             navigation.goBack(); // Navigate back after submission
         } catch (error) {
             console.error('Failed to create student:', error);

@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, FlatList, Text, StyleSheet } from 'react-native';
+import { View, FlatList, Text, StyleSheet, Button } from 'react-native';
 
-const AttendanceScreen = ({ route }) => {
-  const { attendances } = route.params;
+const AttendanceScreen = ({ route, navigation }) => {
+  const { attendances, TeacherID } = route.params;
+  const studentId = route.params.StudentID;
 
   const renderAttendance = ({ item }) => (
     <View style={styles.itemContainer}>
@@ -13,10 +14,22 @@ const AttendanceScreen = ({ route }) => {
     </View>
   );
 
+  // Function to navigate to the add attendance screen
+  const handleAddAttendance = () => {
+    navigation.navigate('AddAttendance', { studentId: studentId }); // Pass the studentId to the AddAttendance screen
+  };
+
   return (
     <View style={styles.container}>
+      {/* Show add button only if TeacherID is present */}
+      {TeacherID && (
+        <Button
+          title="Add New Attendance"
+          onPress={handleAddAttendance}
+          color="#007BFF" // Customizable color
+        />
+      )}
       <FlatList
-        style={styles.Items}
         data={attendances}
         renderItem={renderAttendance}
         keyExtractor={(item) => item.id}

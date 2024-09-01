@@ -4,13 +4,12 @@ import { createLesson } from '../services/airtableService'; // Ensure you have a
 
 const AddLesson = ({ navigation, route }) => {
   const { studentId } = route.params;
-  console.log(route.params);
   const [date, setDate] = useState('');
   const [passed, setPassed] = useState('');
 
   const handleSubmit = async () => {
     const lessonData = {
-      Students: studentId,
+      Students: [studentId],
       Date: date,
       Passed: passed
     };
@@ -27,7 +26,7 @@ const AddLesson = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text>Student ID: {studentId}</Text>
       <TextInput
-        placeholder="Date (YYYY-MM-DD)"
+        placeholder="2024-08-13"
         value={date}
         onChangeText={setDate}
         style={styles.input}

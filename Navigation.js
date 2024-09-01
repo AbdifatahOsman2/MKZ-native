@@ -17,6 +17,10 @@ import TeachersView from './components/TeachersView';
 import TeacherStudentDetailScreen from './components/TeacherStudentDetailScreen';
 import AddStudent from './components/AddStudent';
 import AddLesson from './components/AddLesson';
+import AddBehavior from './components/AddBehavior';
+import AddAttendance from './components/AddAttendance';
+import AddComment from './components/AddComment';
+
 const Stack = createStackNavigator();
 
 const Navigation = () => {
@@ -115,7 +119,9 @@ const Navigation = () => {
         <Stack.Screen name="TeacherStudentDetail" component={TeacherStudentDetailScreen} />
         <Stack.Screen name="AddStudent" component={AddStudent} />
         <Stack.Screen name="AddLesson" component={AddLesson} />
-
+        <Stack.Screen name="AddBehavior" component={AddBehavior} />
+        <Stack.Screen name="AddAttendance" component={AddAttendance} />
+        <Stack.Screen name="AddComment" component={AddComment} />
       </Stack.Navigator>
     </NavigationContainer>
   );

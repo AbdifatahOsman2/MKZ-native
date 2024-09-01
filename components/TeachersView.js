@@ -15,7 +15,6 @@ const TeachersView = ({ navigation, route }) => {
     try {
       const studentsData = await fetchStudents(null, TeacherID);
       setStudents(studentsData);
-      console.log('Fetched Students:', studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);
     }

@@ -140,12 +140,52 @@ export const deleteStudent = async (recordId) => {
 
 
 export const createLesson = async (lessonData) => {
-  const url = `https://api.airtable.com/v0/your_base_id/Lessons`;
+  const url = `https://api.airtable.com/v0/${baseId}/${LESSONS_TABLE}`;
   try {
-    const response = await axios.post(url, { fields: lessonData }, { headers: { Authorization: `Bearer your_api_key` } });
+    const response = await axios.post(url, { fields: lessonData }, { headers: airtableHeaders });
     return response.data;
   } catch (error) {
     console.error('Error creating lesson:', error);
     throw error;
   }
+};
+
+export const createBehavior = async (behaviorData) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${BEHAVIOR_TABLE}`;
+  try {
+    const response = await axios.post(url, { fields: behaviorData }, { headers: airtableHeaders });
+    console.log('Submitting behavior data:', { fields: behaviorData });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating behavior:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+
+export const createAttendance = async (attendanceData) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${ATTENDANCE_TABLE}`;
+  try {
+    const response = await axios.post(url, { fields: attendanceData }, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating behavior:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+
+export const createTeachersComment = async (commentData) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${TEACHERS_COMMENT_TABLE}`;
+  try {
+    const response = await axios.post(url, { fields: commentData }, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating teacher\'s comment:', error);
+    throw error;
+  }
+};
+
+const testAttendanceData = {
+  Students: ["rec019VkiSBE0dqqu"],
+  Date: "2022-01-01",
+  Attendance: "present" // Make sure the field names match those in your Airtable
 };

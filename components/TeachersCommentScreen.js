@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
 
-const TeachersCommentScreen = ({ route }) => {
-  const { comments } = route.params;
+const TeachersCommentScreen = ({ route, navigation }) => {
+  const { comments, TeacherID} = route.params; 
+  const studentId = route.params.StudentID;
+  console.log("comms:", comments); // returns an array of comments ex: ```comms: ["reccpudYa0VyJOeVl", "recK5PWvxlMxVl3YQ", "rec6wMtga3zhuQutv", "recLiH2U9256Zkx2H"]```
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComment, setSelectedComment] = useState(null);
 
@@ -23,8 +25,19 @@ const TeachersCommentScreen = ({ route }) => {
     </View>
   );
 
+  const handleAddComment = () => {
+    navigation.navigate('AddComment', { studentId: studentId }); // Pass the studentId to the AddTeachersComment screen
+  };
+
   return (
     <View style={styles.container}>
+      {TeacherID && (
+        <Button
+          title="Add New Comment"
+          onPress={handleAddComment}
+          color="#007BFF"
+        />
+      )}
       <FlatList
         data={comments}
         renderItem={renderComment}
