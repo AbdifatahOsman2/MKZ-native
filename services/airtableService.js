@@ -47,9 +47,14 @@ export const fetchAttendance = async (attendanceIds) => {
   return fetchTableData(ATTENDANCE_TABLE, attendanceIds);
 };
 
+
 export const fetchTeachersComment = async (commentIds) => {
   return fetchTableData(TEACHERS_COMMENT_TABLE, commentIds);
 };
+
+
+
+
 
 
 // airtableService.js (modify fetchStudents)
@@ -82,7 +87,7 @@ export const fetchStudents = async (ParentID = null) => {
         student.CommentData = await fetchTeachersComment(student.Comment);
       }
     }
-
+    console.log(students);
     return students;
   } catch (error) {
     console.error('Error fetching students with linked data:', error);
@@ -184,8 +189,11 @@ export const createTeachersComment = async (commentData) => {
   }
 };
 
-const testAttendanceData = {
-  Students: ["rec019VkiSBE0dqqu"],
-  Date: "2022-01-01",
-  Attendance: "present" // Make sure the field names match those in your Airtable
-};
+// Simulate fetching comments
+fetchStudents()
+  .then(student => {
+    console.log("Fetched Comments:", student[0].Comment);
+  })
+  .catch(error => {
+    console.error("Error fetching comments:", student);
+  });

@@ -11,6 +11,7 @@ import commentIcon from '../assets/Commentbtn.png';
 
 const TeacherStudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
+  console.log("Student:", student);
 
 
   return (
@@ -56,7 +57,7 @@ const TeacherStudentDetailScreen = ({ route, navigation }) => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('TeachersComment', { comments: student.TeachersComment,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
+          onPress={() => navigation.navigate('TeachersComment', { comments: student.TeachersComment,TeacherID: student.TeacherID, StudentID: student.id, cm : student.Comment  || [] })}
         >
           <Image source={commentIcon} style={styles.buttonIcon} />
           <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>

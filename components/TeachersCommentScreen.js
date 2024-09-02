@@ -2,9 +2,17 @@ import React, { useState } from 'react';
 import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
 
 const TeachersCommentScreen = ({ route, navigation }) => {
-  const { comments, TeacherID} = route.params; 
-  const studentId = route.params.StudentID;
-  console.log("comms:", comments); // returns an array of comments ex: ```comms: ["reccpudYa0VyJOeVl", "recK5PWvxlMxVl3YQ", "rec6wMtga3zhuQutv", "recLiH2U9256Zkx2H"]```
+  const { TeacherID, cm } = route.params;
+  
+
+  // Transform string comments into objects
+  const formattedComments = cm.map((comment, index) => ({
+    id: index.toString(), // Create a unique ID since your data may not include it
+    comment: comment,
+    index: index + 1 
+  }));
+
+  const [comments, setComments] = useState(formattedComments);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComment, setSelectedComment] = useState(null);
 
@@ -13,11 +21,11 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     setModalVisible(true);
   };
 
+
   const renderComment = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.row}>
-        <Text style={styles.dateText}>{item.Date}</Text>
-        <Text style={styles.commentText}>Teacher comments</Text>
+        <Text style={styles.commentText}>Teacher comment #{item.index}</Text>
         <TouchableOpacity style={styles.viewButton} onPress={() => openModal(item)}>
           <Text style={styles.viewButtonText}>View</Text>
         </TouchableOpacity>
@@ -26,7 +34,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
   );
 
   const handleAddComment = () => {
-    navigation.navigate('AddComment', { studentId: studentId }); // Pass the studentId to the AddTeachersComment screen
+    navigation.navigate('AddComment', { studentId: route.params.StudentID });
   };
 
   return (
@@ -53,7 +61,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalText}>Comment: {selectedComment.Comment}</Text>
+              <Text style={styles.modalText}>Comment: {selectedComment ? selectedComment.comment : "No comment available"}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Text style={styles.closeText}>Close</Text>
               </TouchableOpacity>
@@ -64,6 +72,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -128,5 +137,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
 
 export default TeachersCommentScreen;
