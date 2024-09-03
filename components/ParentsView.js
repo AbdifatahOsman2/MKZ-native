@@ -57,22 +57,22 @@ const StudentListScreen = ({ navigation, route }) => {
             onRefresh={onRefresh}
           />
         }
-      >
-        {students.map(student => (
+      >{students.length > 0 ? (
+        students.map(student => (
           <TouchableOpacity
             key={student.id}
             onPress={() => navigation.navigate('StudentDetail', { student })}
             style={styles.studentContainer}
           >
             <View style={styles.avatarContainer}>
-              <Image
-                source={student.Gender === 'Male' ? maleImage : femaleImage}
-                style={styles.avatar}
-              />
+              <Image source={student.Gender === 'Male' ? maleImage : femaleImage} style={styles.avatar} />
             </View>
             <Text style={styles.studentName}>{student.StudentName}</Text>
           </TouchableOpacity>
-        ))}
+        ))
+      ) : (
+        <Text>No students available If this is your first time regirstering, please wait for the teacher to register your students accounts.</Text>
+      )}
       </ScrollView>
     </View>
   );

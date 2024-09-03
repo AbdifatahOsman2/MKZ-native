@@ -4,17 +4,21 @@ const LESSONS_TABLE = 'Lessons';
 const BEHAVIOR_TABLE = 'Behavior';
 const ATTENDANCE_TABLE = 'Attendance';
 const TEACHERS_COMMENT_TABLE = 'TeachersComment';
+import config from '../config';
 // const TEACHERS_TABLE = 'Teachers';
 
-const apiKey =  'patdQUtrzEpyj0U1m.679c92bc19ac4eb1afc4f3ed725f5bd8037a0536531344351d5dba4509c415f1';
-const baseId = 'appGLLUgRGvgQGyXC';
-console.log(process.env.EXPO_PUBLIC_AIRTABLE_API_KEY);
+const apiKey =  config.AIRTABLE_API_KEY;
+const baseId = config.AIRTABLE_BASE_ID;
+console.log('API Key:', config.AIRTABLE_API_KEY);
+console.log('Base ID:', process.env.EXPO_PUBLIC_AIRTABLE_BASE_ID);
 
 const airtableHeaders = {
   Authorization: `Bearer ${apiKey}`,
 };
 
+
 const fetchTableData = async (tableName, recordIds = []) => {
+  
   // Ensure recordIds is always an array
   if (!Array.isArray(recordIds)) {
     recordIds = [];
