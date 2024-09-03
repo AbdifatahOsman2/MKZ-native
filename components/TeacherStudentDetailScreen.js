@@ -11,7 +11,6 @@ import commentIcon from '../assets/Commentbtn.png';
 
 const TeacherStudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
-  console.log("Student:", student);
 
 
   return (

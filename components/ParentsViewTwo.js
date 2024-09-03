@@ -11,7 +11,7 @@ import commentIcon from '../assets/Commentbtn.png';
 
 const StudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
-  console.log(student.teacherName);
+  console.log("student",student);
   
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -62,7 +62,7 @@ const StudentDetailScreen = ({ route, navigation }) => {
         {student.CommentData && (
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('TeachersComment', { comments: student.CommentData })}
+            onPress={() => navigation.navigate('TeachersComment', { comments: student.CommentData, cm : student.Comment })}
           >
             <Image source={commentIcon} style={styles.buttonIcon} />
             <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>

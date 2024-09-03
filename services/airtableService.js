@@ -1,5 +1,4 @@
 import axios from 'axios';
-import {EXPO_AIRTABLE_API_KEY, EXPO_AIRTABLE_BASE_ID} from '@env'
 const STUDENTS_TABLE = 'Students';
 const LESSONS_TABLE = 'Lessons';
 const BEHAVIOR_TABLE = 'Behavior';
@@ -9,6 +8,7 @@ const TEACHERS_COMMENT_TABLE = 'TeachersComment';
 
 const apiKey =  'patdQUtrzEpyj0U1m.679c92bc19ac4eb1afc4f3ed725f5bd8037a0536531344351d5dba4509c415f1';
 const baseId = 'appGLLUgRGvgQGyXC';
+console.log(process.env.EXPO_PUBLIC_AIRTABLE_API_KEY);
 
 const airtableHeaders = {
   Authorization: `Bearer ${apiKey}`,
@@ -65,7 +65,6 @@ export const fetchStudents = async (ParentID = null) => {
       const filterByFormula = `AND({ParentID} = '${ParentID}')`;
       url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
     }
-
     const response = await axios.get(url, { headers: airtableHeaders });
     const students = response.data.records.map(record => ({
       id: record.id,
@@ -189,11 +188,3 @@ export const createTeachersComment = async (commentData) => {
   }
 };
 
-// Simulate fetching comments
-fetchStudents()
-  .then(student => {
-    console.log("Fetched Comments:", student[0].Comment);
-  })
-  .catch(error => {
-    console.error("Error fetching comments:", student);
-  });
