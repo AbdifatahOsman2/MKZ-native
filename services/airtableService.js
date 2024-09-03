@@ -9,8 +9,6 @@ import config from '../config';
 
 const apiKey =  config.AIRTABLE_API_KEY;
 const baseId = config.AIRTABLE_BASE_ID;
-console.log('API Key:', config.AIRTABLE_API_KEY);
-console.log('Base ID:', process.env.EXPO_PUBLIC_AIRTABLE_BASE_ID);
 
 const airtableHeaders = {
   Authorization: `Bearer ${apiKey}`,
@@ -90,7 +88,6 @@ export const fetchStudents = async (ParentID = null) => {
         student.CommentData = await fetchTeachersComment(student.Comment);
       }
     }
-    console.log(students);
     return students;
   } catch (error) {
     console.error('Error fetching students with linked data:', error);
@@ -162,7 +159,6 @@ export const createBehavior = async (behaviorData) => {
   const url = `https://api.airtable.com/v0/${baseId}/${BEHAVIOR_TABLE}`;
   try {
     const response = await axios.post(url, { fields: behaviorData }, { headers: airtableHeaders });
-    console.log('Submitting behavior data:', { fields: behaviorData });
     return response.data;
   } catch (error) {
     console.error('Error creating behavior:', error.response ? error.response.data : error.message);

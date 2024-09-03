@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'rea
 // img
 import maleImage from '../assets/M-1-Image.png'; 
 import femaleImage from '../assets/Fm1-Image.png';
-
+import { deleteStudent } from '../services/airtableService';
 import lessonIcon from '../assets/Lessonbtn.png';  
 import behaviorIcon from '../assets/Behaviorbtn.png';
 import attendanceIcon from '../assets/Attendancebtn.png';
@@ -12,6 +12,24 @@ import commentIcon from '../assets/Commentbtn.png';
 const TeacherStudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
 
+  const handleDelete = async () => {
+    Alert.alert(
+      "Delete Student",
+      "Are you sure you want to delete this student?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: async () => {
+          try {
+            await deleteStudent(student.id);
+            navigation.goBack(); // Navigate back after deletion
+          } catch (error) {
+            Alert.alert("Error", "Failed to delete student.");
+            console.error('Failed to delete student:', error);
+          }
+        }},
+      ]
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -30,38 +48,44 @@ const TeacherStudentDetailScreen = ({ route, navigation }) => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
-        >
-          <Image source={lessonIcon} style={styles.buttonIcon} />
-          <Text style={styles.buttonText}>Lesson / Cashar</Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+      style={styles.button}
+      onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
+    >
+      <Image source={lessonIcon} style={styles.buttonIcon} />
+      <Text style={styles.buttonText}>Lesson / Cashar</Text>
+    </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
-        >
-          <Image source={behaviorIcon} style={styles.buttonIcon} />
-          <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
-        </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.button}
+      onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
+    >
+      <Image source={behaviorIcon} style={styles.buttonIcon} />
+      <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
+    </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
-        >
-          <Image source={attendanceIcon} style={styles.buttonIcon} />
-          <Text style={styles.buttonText}>Attendance / imaanaha</Text>
-        </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.button}
+      onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
+    >
+      <Image source={attendanceIcon} style={styles.buttonIcon} />
+      <Text style={styles.buttonText}>Attendance / imaanaha</Text>
+    </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('TeachersComment', { comments: student.TeachersComment,TeacherID: student.TeacherID, StudentID: student.id, cm : student.Comment  || [] })}
-        >
-          <Image source={commentIcon} style={styles.buttonIcon} />
-          <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>
-        </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.button}
+      onPress={() => navigation.navigate('TeachersComment', { comments: student.TeachersComment,TeacherID: student.TeacherID, StudentID: student.id, cm : student.Comment  || [] })}
+    >
+      <Image source={commentIcon} style={styles.buttonIcon} />
+      <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>
+    </TouchableOpacity>
+
       </View>
+
+      {/* Add delete button at the bottom of the screen */}
+      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+        <Text style={styles.deleteButtonText}>Delete Student</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -75,6 +99,19 @@ const styles = StyleSheet.create({
       padding: 45,
       backgroundColor: '#A1C9F1',
   
+    },
+    deleteButton: {
+      backgroundColor: '#ff6347', // Tomato color for delete
+      padding: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: 0,
+      marginHorizontal: 40,
+    },
+    deleteButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
     },
     textContainer:{
       justifyContent: 'center',

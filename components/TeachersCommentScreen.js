@@ -61,7 +61,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalText}>Comment: {selectedComment ? selectedComment.comment : "No comment available"}</Text>
+              <Text style={styles.modalText}>{selectedComment ? selectedComment.comment : "No comment available"}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Text style={styles.closeText}>Close</Text>
               </TouchableOpacity>

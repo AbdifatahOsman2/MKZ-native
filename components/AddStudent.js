@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, ScrollView, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import { createStudent } from '../services/airtableService';
 import RNPickerSelect from 'react-native-picker-select'; // Import the Picker Select
 
@@ -9,33 +9,40 @@ const AddStudent = ({ navigation }) => {
     const [classroom, setClassroom] = useState('Quran');
     const [schedule, setSchedule] = useState('Sat-Sun');
     const [gender, setGender] = useState('Male');
-    const [parentID, setParentID] = useState('');
-    const [teacherID, setTeacherID] = useState('');
-    
+    const [error, setError] = useState('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
     const handleSubmit = async () => {
+        if (!studentName || !age || !classroom || !schedule || !gender) {
+            setError('Please fill in all fields.');
+            return;
+        }
+
         const studentData = {
             StudentName: studentName,
             Age: age, // Convert age to integer
             class: classroom,
             schedule: schedule,
-            Gender: gender,
-            ParentID: parentID
+            Gender: gender
         };
         try {
-            const result = await createStudent(studentData);
-            navigation.goBack(); // Navigate back after submission
+            await createStudent(studentData);
+            setShowSuccessModal(true);
         } catch (error) {
             console.error('Failed to create student:', error);
+            setError('Failed to submit. Please try again.');
         }
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.label}>Student Name</Text>
+            <TextInput placeholder="Student Name" value={studentName} onChangeText={setStudentName} style={styles.input} />
+            
+            <Text style={styles.label}>Age</Text>
+            <TextInput placeholder="Age" value={age} onChangeText={setAge} style={styles.input} keyboardType="numeric" />
 
-        <TextInput placeholder="Student Name" value={studentName} onChangeText={setStudentName} style={styles.input} />
-        <TextInput placeholder="Age" value={age} onChangeText={setAge} style={styles.input} keyboardType="numeric" />
-
-            <Text>Class</Text>
+            <Text style={styles.label}>Class</Text>
             <RNPickerSelect
                 onValueChange={(value) => setClassroom(value)}
                 items={[
@@ -46,18 +53,18 @@ const AddStudent = ({ navigation }) => {
                 value={classroom}
             />
 
-            <Text>Schedule</Text>
+            <Text style={styles.label}>Schedule</Text>
             <RNPickerSelect
                 onValueChange={(value) => setSchedule(value)}
                 items={[
-                    { label: 'Sat-Sun', value: 'Sat-Sun' },
-                    { label: 'Mon-Fri', value: 'Mon-Fri' },
+                    { label: 'Sat-Sun, Fri', value: 'Sat-Sun' },
+                    { label: 'Sat-Sun, Wed', value: 'Sat-Sun, Wed' },
                 ]}
                 style={pickerSelectStyles}
                 value={schedule}
             />
 
-            <Text>Gender</Text>
+            <Text style={styles.label}>Gender</Text>
             <RNPickerSelect
                 onValueChange={(value) => setGender(value)}
                 items={[
@@ -68,9 +75,35 @@ const AddStudent = ({ navigation }) => {
                 value={gender}
             />
 
-            <TextInput placeholder="Parent ID" value={parentID} onChangeText={setParentID} style={styles.input} />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            <Button title="Submit" onPress={handleSubmit} color="#007BFF" />
 
-            <Button title="Submit" onPress={handleSubmit} />
+            {showSuccessModal && (
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={showSuccessModal}
+                    onRequestClose={() => {
+                        setShowSuccessModal(false);
+                        navigation.goBack();
+                    }}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <Text style={styles.modalText}>Student added successfully!</Text>
+                            <TouchableOpacity
+                                style={styles.buttonClose}
+                                onPress={() => {
+                                    setShowSuccessModal(false);
+                                    navigation.goBack();
+                                }}
+                            >
+                                <Text style={styles.textStyle}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            )}
         </ScrollView>
     );
 };
@@ -78,13 +111,63 @@ const AddStudent = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         padding: 20,
-        flex: 1,
+        backgroundColor: '#f4f4f4',
+        alignItems: 'stretch'
     },
     input: {
-        height: 40,
-        marginVertical: 12,
+        height: 50,
+        backgroundColor: 'white',
+        borderColor: '#ccc',
         borderWidth: 1,
+        marginBottom: 20,
+        paddingHorizontal: 10,
+        fontSize: 16
+    },
+    label: {
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 10
+    },
+    errorText: {
+        fontSize: 16,
+        color: 'red',
+        marginBottom: 10
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+    buttonClose: {
+        backgroundColor: "#2196F3",
+        borderRadius: 20,
         padding: 10,
+        elevation: 2
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
     }
 });
 
