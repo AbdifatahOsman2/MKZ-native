@@ -1,25 +1,50 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Image, StyleSheet, Animated } from 'react-native';
+import { View, Image, StyleSheet, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import bg from '../assets/BG1.png';
+
 const SplashScreen = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
+  const auth = getAuth(); // Ensure you have initialized Firebase Auth
+  const db = getFirestore(); // Ensure Firestore is initialized
 
   useEffect(() => {
-    // Fade in animation
+    // Start fade in animation
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 1000, // 1 second fade in
+      duration: 1000,
       useNativeDriver: true,
     }).start();
 
-    // Redirect to AuthScreen after 2 seconds
-    const timeout = setTimeout(() => {
-      navigation.replace('AuthScreen');
-    }, 3000);
+    const subscriber = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // User is logged in, fetch user data
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          // Use a timeout to ensure the SplashScreen is visible for at least 2.5 seconds
+          setTimeout(() => {
+            if (userData.role === 'Parent') {
+              navigation.replace('StudentList', { ParentID: user.uid });
+            } else if (userData.role === 'Teacher') {
+              navigation.replace('TeachersView', { TeacherID: user.uid });
+            }
+          }, 2500);
+        }
+      } else {
+        // No user is signed in
+        setTimeout(() => {
+          navigation.replace('AuthScreen');
+        }, 2500);
+      }
+    });
 
-    return () => clearTimeout(timeout); // Cleanup the timeout on unmount
+    // Cleanup on unmount
+    return () => subscriber();
   }, [fadeAnim, navigation]);
 
   return (
@@ -34,7 +59,7 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0D0D', // Background color similar to the splash screen
+    backgroundColor: '#0D0D0D',
   },
   imageContainer: {
     flex: 1,

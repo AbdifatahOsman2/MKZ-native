@@ -110,6 +110,7 @@ const AddStudent = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     container: {
+        paddingTop: 120,
         padding: 20,
         backgroundColor: '#f4f4f4',
         alignItems: 'stretch'

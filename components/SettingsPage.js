@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { getAuth, signOut } from 'firebase/auth';
+import { Ionicons } from '@expo/vector-icons';
 
 const SettingsPage = ({ navigation }) => {
   const auth = getAuth();
@@ -12,46 +13,54 @@ const SettingsPage = ({ navigation }) => {
         navigation.replace('AuthScreen');
       })
       .catch((error) => {
-        Alert.alert('Logout Err', error.message);
+        Alert.alert('Logout Error', error.message);
       });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AboutPage')}>
-      <Text style={styles.buttonText}>About</Text>
-    </TouchableOpacity>
-    </View>
+    <ScrollView style={styles.container}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>General</Text>
+        <TouchableOpacity style={styles.option} onPress={() => navigation.navigate('AboutPage')}>
+          <Text style={styles.optionText}>About</Text>
+          <Ionicons name="chevron-forward-outline" size={20} color="#ccc" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.option} onPress={handleLogout}>
+          <Text style={styles.optionText}>Sign out</Text>
+          <Ionicons name="chevron-forward-outline" size={20} color="#ccc" />
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    backgroundColor: '#fff',
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
+  section: {
+    marginTop: 100,
+    paddingHorizontal: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
+    paddingBottom: 8,
+    paddingTop: 16,
   },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginTop: 10,
+  option: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
-  buttonText: {
-    color: '#fff',
+  optionText: {
     fontSize: 16,
+    color: '#333',
   },
 });
 

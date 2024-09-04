@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-import { app, auth } from '../firebaseConfig';  // Import the initialized app and auth here
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { app, auth } from '../firebaseConfig'; 
 import Logo from '../assets/Logo.png';
+
 
 const db = getFirestore(app);
 
@@ -13,49 +15,38 @@ const AuthScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Parent'); // Default role is Parent
 
-  const handleAuth = async () => {
-    try {
-      if (isLogin) {
-        // Handle login
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
 
-        // Fetch user role from Firestore
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        const userData = userDoc.data();
-
-        if (userData.role === 'Parent') {
-          navigation.navigate('StudentList', { ParentID: user.uid });
-        } else if (userData.role === 'Teacher') {
-          navigation.navigate('TeachersView', { TeacherID: user.uid });
-        }
-
-      } else {
-        // Handle registration
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Store user role and UID in Firestore
-        const userDocRef = doc(db, 'users', user.uid);
-        const userData = {
-          role: role,
-          [`${role}ID`]: user.uid // Dynamically create either ParentID or TeacherID
-        };
-        await setDoc(userDocRef, userData);
-
-        // Navigate to appropriate screen
-        if (role === 'Parent') {
-          navigation.navigate('StudentList', { ParentID: user.uid });
-        } else if (role === 'Teacher') {
-          navigation.navigate('TeachersView', { TeacherID: user.uid });
-        }
-      }
-    } catch (error) {
-      console.error(error);
-      // Handle errors here (e.g., show an alert)
+const handleAuth = async () => {
+  try {
+    let userCredential;
+    if (isLogin) {
+      userCredential = await signInWithEmailAndPassword(auth, email, password);
+    } else {
+      userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Additional logic for setting up a new user
+      const userDocRef = doc(db, 'users', userCredential.user.uid);
+      await setDoc(userDocRef, {
+        role: role,
+        [`${role}ID`]: userCredential.user.uid,
+      });
     }
-  };
+    // Store user token for session persistence
+    const token = await userCredential.user.getIdToken();
+    await AsyncStorage.setItem('userToken', token);
+
+    // Navigation based on user role
+    const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
+    if (userData.data().role === 'Parent') {
+      navigation.navigate('StudentList', { ParentID: userCredential.user.uid });
+    } else {
+      navigation.navigate('TeachersView', { TeacherID: userCredential.user.uid });
+    }
+  } catch (error) {
+    console.error(error);
+    Alert.alert("Authentication Failed", error.message);
+  }
+};
+
 
   return (
     <View style={styles.container}>

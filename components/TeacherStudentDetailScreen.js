@@ -1,5 +1,7 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 // img
 import maleImage from '../assets/M-1-Image.png'; 
 import femaleImage from '../assets/Fm1-Image.png';
@@ -9,10 +11,21 @@ import behaviorIcon from '../assets/Behaviorbtn.png';
 import attendanceIcon from '../assets/Attendancebtn.png';
 import commentIcon from '../assets/Commentbtn.png';
 
-const TeacherStudentDetailScreen = ({ route, navigation }) => {
+const TeacherStudentDetailScreen = ({ route }) => {
+  const navigation = useNavigation();
   const { student } = route.params;
 
-  const handleDelete = async () => {
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity onPress={handleDelete} style={{ paddingRight: 10 }}>
+          <Ionicons name="settings" size={24} color="black" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
+  const handleDelete = () => {
     Alert.alert(
       "Delete Student",
       "Are you sure you want to delete this student?",
@@ -48,49 +61,42 @@ const TeacherStudentDetailScreen = ({ route, navigation }) => {
       </View>
 
       <View style={styles.buttonContainer}>
-      <TouchableOpacity
-      style={styles.button}
-      onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
-    >
-      <Image source={lessonIcon} style={styles.buttonIcon} />
-      <Text style={styles.buttonText}>Lesson / Cashar</Text>
-    </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
+        >
+          <Image source={lessonIcon} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Lesson / Cashar</Text>
+        </TouchableOpacity>
 
-    <TouchableOpacity
-      style={styles.button}
-      onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
-    >
-      <Image source={behaviorIcon} style={styles.buttonIcon} />
-      <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
-    </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
+        >
+          <Image source={behaviorIcon} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
+        </TouchableOpacity>
 
-    <TouchableOpacity
-      style={styles.button}
-      onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
-    >
-      <Image source={attendanceIcon} style={styles.buttonIcon} />
-      <Text style={styles.buttonText}>Attendance / imaanaha</Text>
-    </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData,TeacherID: student.TeacherID, StudentID: student.id  || [] })}
+        >
+          <Image source={attendanceIcon} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Attendance / imaanaha</Text>
+        </TouchableOpacity>
 
-    <TouchableOpacity
-      style={styles.button}
-      onPress={() => navigation.navigate('TeachersComment', { comments: student.TeachersComment,TeacherID: student.TeacherID, StudentID: student.id, cm : student.Comment  || [] })}
-    >
-      <Image source={commentIcon} style={styles.buttonIcon} />
-      <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>
-    </TouchableOpacity>
-
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('TeachersComment', { comments: student.TeachersComment,TeacherID: student.TeacherID, StudentID: student.id, cm : student.Comment  || [] })}
+        >
+          <Image source={commentIcon} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* Add delete button at the bottom of the screen */}
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-        <Text style={styles.deleteButtonText}>Delete Student</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
 
-// Add appropriate styles
 const styles = StyleSheet.create({
     container: {
       flexGrow: 1,
@@ -98,20 +104,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       padding: 45,
       backgroundColor: '#A1C9F1',
-  
-    },
-    deleteButton: {
-      backgroundColor: '#ff6347', // Tomato color for delete
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      marginTop: 0,
-      marginHorizontal: 40,
-    },
-    deleteButtonText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
     },
     textContainer:{
       justifyContent: 'center',
@@ -148,15 +140,14 @@ const styles = StyleSheet.create({
       flexWrap: 'wrap',
       justifyContent: 'space-between',
       marginTop: 40,
-  
     },
     button: {
       backgroundColor: '#FFFFFF',
       padding: 10,
       margin: 10,
       borderRadius: 8,
-      width: 140,  // Adjust width to match the example
-      height: 120,  // Adjust height to match the example
+      width: 140,
+      height: 120,
       alignItems: 'center',
       justifyContent: 'center',
       shadowColor: '#000',
@@ -166,7 +157,7 @@ const styles = StyleSheet.create({
       elevation: 3,
     },
     buttonIcon: {
-      width: 30,  // Size of the small image icon
+      width: 30,
       height: 30,
       marginBottom: 5,
     },
@@ -175,11 +166,6 @@ const styles = StyleSheet.create({
       color: '#333',
       textAlign: 'center',
     },
-  });
-  
+});
+
 export default TeacherStudentDetailScreen;
-
-
-
-
-

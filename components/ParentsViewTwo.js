@@ -11,8 +11,7 @@ import commentIcon from '../assets/Commentbtn.png';
 
 const StudentDetailScreen = ({ route, navigation }) => {
   const { student } = route.params;
-  console.log("student",student);
-  
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>

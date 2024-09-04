@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, Button } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, Button, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudents } from '../services/airtableService';
 import maleImage from '../assets/M-1-Image.png'; 
@@ -38,7 +38,7 @@ const TeachersView = ({ navigation, route }) => {
             <Icon name="cog" size={24} color="#000" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+        <TouchableOpacity onPress={() => Alert.alert('Notification!')}>
           <View style={styles.iconWrapper}>
             <Icon name="bell" size={24} color="#000" />
           </View>
@@ -76,6 +76,7 @@ const TeachersView = ({ navigation, route }) => {
 
 // Add appropriate styles
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: '#FFF',
