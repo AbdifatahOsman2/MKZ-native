@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ScrollView, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import { createStudent } from '../services/airtableService';
-import RNPickerSelect from 'react-native-picker-select'; // Import the Picker Select
+import RNPickerSelect from 'react-native-picker-select';
+import { getParentIds} from '../firebaseConfig';
+// fetch teachers table and add teachers as an option
 
 const AddStudent = ({ navigation }) => {
     const [studentName, setStudentName] = useState('');
@@ -9,11 +11,27 @@ const AddStudent = ({ navigation }) => {
     const [classroom, setClassroom] = useState('Quran');
     const [schedule, setSchedule] = useState('Sat-Sun');
     const [gender, setGender] = useState('Male');
+    const [parentId, setParentId] = useState('');
+    const [parentIds, setParentIds] = useState([]);
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+    useEffect(() => {
+        async function fetchParentIds() {
+            try {
+                const ids = await getParentIds();
+                setParentIds(ids.map(id => ({ label: id, value: id })));
+                console.log('Parent IDDDs:', ids);
+            } catch (error) {
+                console.error('Failed to fetch parent IDs:', error);
+            }
+        }
+
+        fetchParentIds();
+    }, []);
+
     const handleSubmit = async () => {
-        if (!studentName || !age || !classroom || !schedule || !gender) {
+        if (!studentName || !age || !classroom || !schedule || !gender || !parentId) {
             setError('Please fill in all fields.');
             return;
         }
@@ -23,8 +41,10 @@ const AddStudent = ({ navigation }) => {
             Age: age,
             class: classroom,
             schedule: schedule,
-            Gender: gender
+            Gender: gender,
+            ParentID: parentId
         };
+
         try {
             await createStudent(studentData);
             setShowSuccessModal(true);
@@ -39,7 +59,6 @@ const AddStudent = ({ navigation }) => {
             <Text style={styles.label}>Student Name</Text>
             <TextInput
                 placeholder="Student Name"
-                placeholderTextColor="#999"
                 value={studentName}
                 onChangeText={setStudentName}
                 style={styles.input}
@@ -48,7 +67,6 @@ const AddStudent = ({ navigation }) => {
             <Text style={styles.label}>Age</Text>
             <TextInput
                 placeholder="Age"
-                placeholderTextColor="#999"
                 value={age}
                 onChangeText={setAge}
                 style={styles.input}
@@ -64,19 +82,17 @@ const AddStudent = ({ navigation }) => {
                 ]}
                 style={pickerSelectStyles}
                 value={classroom}
-                placeholder={{ label: "Select class", value: null }}
             />
 
             <Text style={styles.label}>Schedule</Text>
             <RNPickerSelect
                 onValueChange={(value) => setSchedule(value)}
                 items={[
-                    { label: 'Sat-Sun, Fri', value: 'Sat-Sun' },
-                    { label: 'Sat-Sun, Wed', value: 'Sat-Sun, Wed' },
+                    { label: 'Sat-Sun', value: 'Sat-Sun' },
+                    { label: 'Mon-Fri', value: 'Mon-Fri' },
                 ]}
                 style={pickerSelectStyles}
                 value={schedule}
-                placeholder={{ label: "Select schedule", value: null }}
             />
 
             <Text style={styles.label}>Gender</Text>
@@ -88,13 +104,19 @@ const AddStudent = ({ navigation }) => {
                 ]}
                 style={pickerSelectStyles}
                 value={gender}
-                placeholder={{ label: "Select gender", value: null }}
             />
 
-            {error && <Text style={styles.errorText}>{error}</Text>}
-            <View style={styles.buttonContainer}>
-                <Button title="Submit" onPress={handleSubmit} color="#007BFF" />
-            </View>
+            <Text style={styles.label}>Parent ID</Text>
+            <RNPickerSelect
+                onValueChange={(value) => setParentId(value)}
+                items={parentIds}
+                style={pickerSelectStyles}
+                value={parentId}
+                placeholder={{ label: "Select Parent ID", value: null }}
+            />
+
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            <Button title="Submit" onPress={handleSubmit} color="#2dba4e" style= {{paddingTop: 20}} />
 
             {showSuccessModal && (
                 <Modal
@@ -152,7 +174,7 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 16,
         color: 'red',
-        marginBottom: 10
+        marginBottom: 20
     },
     centeredView: {
         flex: 1,

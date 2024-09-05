@@ -43,7 +43,7 @@ const TeachersView = ({ navigation, route }) => {
           style={styles.iconWrapper}
           onPress={() => navigation.navigate('AddStudent')}
         >
-          <Icon name="plus" size={14} color="#007BFF" />
+          <Icon name="plus" size={10} color="#007BFF" />
         </TouchableOpacity>
       </View>
       <TextInput
@@ -99,11 +99,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 70,
     paddingBottom: 10,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
