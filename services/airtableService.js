@@ -188,3 +188,48 @@ export const createTeachersComment = async (commentData) => {
   }
 };
 
+// New delete functions for Lessons, Behavior, Attendance, and TeachersComment
+export const deleteLesson = async (lessonId) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${LESSONS_TABLE}/${lessonId}`;
+  try {
+    const response = await axios.delete(url, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting lesson:', error);
+    throw error;
+  }
+};
+
+export const deleteBehavior = async (behaviorId) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${BEHAVIOR_TABLE}/${behaviorId}`;
+  try {
+    const response = await axios.delete(url, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting behavior:', error);
+    throw error;
+  }
+};
+
+export const deleteAttendance = async (attendanceId) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${ATTENDANCE_TABLE}/${attendanceId}`;
+  try {
+    const response = await axios.delete(url, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting attendance:', error);
+    throw error;
+  }
+};
+
+export const deleteTeachersComment = async (commentId) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${TEACHERS_COMMENT_TABLE}/${commentId}`;
+  try {
+    const response = await axios.delete(url, { headers: airtableHeaders });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting teacher\'s comment:', error);
+    throw error;
+  }
+};
+

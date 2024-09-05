@@ -20,6 +20,7 @@ import AddLesson from './components/AddLesson';
 import AddBehavior from './components/AddBehavior';
 import AddAttendance from './components/AddAttendance';
 import AddComment from './components/AddComment';
+import NotificationPage from './components/NotificationPage';
 
 const Stack = createStackNavigator();
 
@@ -27,7 +28,7 @@ const Navigation = () => {
   const screenOptions = ({ navigation }) => ({
     headerLeft: () => (
       <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-        <Ionicons name="arrow-back" size={24} color="black" />
+        <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
     ),
     title: '',
@@ -48,13 +49,14 @@ const Navigation = () => {
         <Stack.Screen name="TeachersComment" component={TeachersCommentScreen} options={screenOptions} />
         <Stack.Screen name="SettingsPage" component={SettingsPage} options={screenOptions} />
         <Stack.Screen name="AboutPage" component={AboutPage} options={screenOptions} />
-        <Stack.Screen name="TeachersView" component={TeachersView} options={{ headerShown: false }}/>
+        <Stack.Screen name="TeachersView" component={TeachersView} options={{ headerShown: false, headerTransparent: true, headerLeft: ()=> null, }}/>
         <Stack.Screen name="TeacherStudentDetail" component={TeacherStudentDetailScreen} options={screenOptions} />
         <Stack.Screen name="AddStudent" component={AddStudent} options={screenOptions} />
         <Stack.Screen name="AddLesson" component={AddLesson} options={screenOptions} />
         <Stack.Screen name="AddBehavior" component={AddBehavior} options={screenOptions} />
         <Stack.Screen name="AddAttendance" component={AddAttendance} options={screenOptions} />
         <Stack.Screen name="AddComment" component={AddComment} options={screenOptions} />
+        <Stack.Screen name="NotificationPage" component={NotificationPage} options={screenOptions} />
       </Stack.Navigator>
     </NavigationContainer>
   );

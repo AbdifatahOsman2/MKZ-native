@@ -20,7 +20,7 @@ const AddStudent = ({ navigation }) => {
 
         const studentData = {
             StudentName: studentName,
-            Age: age, // Convert age to integer
+            Age: age,
             class: classroom,
             schedule: schedule,
             Gender: gender
@@ -37,10 +37,23 @@ const AddStudent = ({ navigation }) => {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.label}>Student Name</Text>
-            <TextInput placeholder="Student Name" value={studentName} onChangeText={setStudentName} style={styles.input} />
+            <TextInput
+                placeholder="Student Name"
+                placeholderTextColor="#999"
+                value={studentName}
+                onChangeText={setStudentName}
+                style={styles.input}
+            />
             
             <Text style={styles.label}>Age</Text>
-            <TextInput placeholder="Age" value={age} onChangeText={setAge} style={styles.input} keyboardType="numeric" />
+            <TextInput
+                placeholder="Age"
+                placeholderTextColor="#999"
+                value={age}
+                onChangeText={setAge}
+                style={styles.input}
+                keyboardType="numeric"
+            />
 
             <Text style={styles.label}>Class</Text>
             <RNPickerSelect
@@ -51,6 +64,7 @@ const AddStudent = ({ navigation }) => {
                 ]}
                 style={pickerSelectStyles}
                 value={classroom}
+                placeholder={{ label: "Select class", value: null }}
             />
 
             <Text style={styles.label}>Schedule</Text>
@@ -62,6 +76,7 @@ const AddStudent = ({ navigation }) => {
                 ]}
                 style={pickerSelectStyles}
                 value={schedule}
+                placeholder={{ label: "Select schedule", value: null }}
             />
 
             <Text style={styles.label}>Gender</Text>
@@ -73,10 +88,13 @@ const AddStudent = ({ navigation }) => {
                 ]}
                 style={pickerSelectStyles}
                 value={gender}
+                placeholder={{ label: "Select gender", value: null }}
             />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            <Button title="Submit" onPress={handleSubmit} color="#007BFF" />
+            {error && <Text style={styles.errorText}>{error}</Text>}
+            <View style={styles.buttonContainer}>
+                <Button title="Submit" onPress={handleSubmit} color="#007BFF" />
+            </View>
 
             {showSuccessModal && (
                 <Modal
@@ -110,24 +128,26 @@ const AddStudent = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     container: {
-        paddingTop: 120,
+        flexGrow: 1,
         padding: 20,
-        backgroundColor: '#f4f4f4',
-        alignItems: 'stretch'
+        paddingTop: 125,
+        backgroundColor: '#252C30',
     },
     input: {
         height: 50,
-        backgroundColor: 'white',
-        borderColor: '#ccc',
+        backgroundColor: '#333840',
+        borderColor: '#666',
         borderWidth: 1,
         marginBottom: 20,
         paddingHorizontal: 10,
-        fontSize: 16
+        fontSize: 16,
+        color: '#FFF',
+        borderRadius: 5,
     },
     label: {
         fontSize: 16,
-        color: '#333',
-        marginBottom: 10
+        color: '#FFF',
+        marginBottom: 20
     },
     errorText: {
         fontSize: 16,
@@ -138,11 +158,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 22
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
     },
     modalView: {
         margin: 20,
-        backgroundColor: 'white',
+        backgroundColor: '#333840',
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
@@ -156,7 +176,7 @@ const styles = StyleSheet.create({
         elevation: 5
     },
     buttonClose: {
-        backgroundColor: "#2196F3",
+        backgroundColor: "#1B73E8",
         borderRadius: 20,
         padding: 10,
         elevation: 2
@@ -168,7 +188,11 @@ const styles = StyleSheet.create({
     },
     modalText: {
         marginBottom: 15,
-        textAlign: "center"
+        textAlign: "center",
+        color: '#FFF',
+    },
+    buttonContainer: {
+        marginTop: 20,
     }
 });
 
@@ -178,20 +202,22 @@ const pickerSelectStyles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 10,
         borderWidth: 1,
-        borderColor: 'gray',
+        borderColor: '#555',
         borderRadius: 4,
-        color: 'black',
+        color: '#FFF',
         paddingRight: 30, // to ensure the text is never behind the icon
+        backgroundColor: '#333840',
     },
     inputAndroid: {
         fontSize: 16,
         paddingHorizontal: 10,
         paddingVertical: 8,
-        borderWidth: 0.5,
-        borderColor: 'purple',
+        borderWidth: 1,
+        borderColor: '#555',
         borderRadius: 8,
-        color: 'black',
+        color: '#FFF',
         paddingRight: 30, // to ensure the text is never behind the icon
+        backgroundColor: '#333840',
     },
 });
 

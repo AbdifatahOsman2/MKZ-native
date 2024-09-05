@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal, Button, Alert } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
+import { deleteTeachersComment } from '../services/airtableService';
 
 const TeachersCommentScreen = ({ route, navigation }) => {
   const { TeacherID, cm } = route.params;
   
-
   // Transform string comments into objects
   const formattedComments = cm.map((comment, index) => ({
     id: index.toString(), // Create a unique ID since your data may not include it
@@ -21,16 +22,40 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     setModalVisible(true);
   };
 
+  const handleDeleteComment = (commentId) => {
+    Alert.alert("Confirm Delete", "Are you sure you want to delete this comment?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", onPress: () => {
+        deleteTeachersComment(commentId)
+          .then(() => {
+            // Refresh the list or remove the item from the local state to update the UI
+            console.log('Comment deleted successfully');
+            setComments(comments.filter(comment => comment.id !== commentId));
+          })
+          .catch(error => console.error('Error deleting comment:', error));
+      }}
+    ]);
+  };
+
+  const renderRightActions = (progress, dragX, commentId) => {
+    return (
+      <TouchableOpacity onPress={() => handleDeleteComment(commentId)} style={styles.deleteButton}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    );
+  };
 
   const renderComment = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <View style={styles.row}>
-        <Text style={styles.commentText}>Teacher comment #{item.index}</Text>
-        <TouchableOpacity style={styles.viewButton} onPress={() => openModal(item)}>
-          <Text style={styles.viewButtonText}>View</Text>
-        </TouchableOpacity>
+    <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
+      <View style={styles.itemContainer}>
+        <View style={styles.row}>
+          <Text style={styles.commentText}>Teacher comment #{item.index}</Text>
+          <TouchableOpacity style={styles.viewButton} onPress={() => openModal(item)}>
+            <Text style={styles.viewButtonText}>View</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </Swipeable>
   );
 
   const handleAddComment = () => {
@@ -73,48 +98,43 @@ const TeachersCommentScreen = ({ route, navigation }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ECECF8',
+    backgroundColor: '#252C30',
     padding: 16,
     paddingTop: 108,
   },
   itemContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#333840',
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  dateText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-  },
   commentText: {
     fontSize: 16,
-    color: '#333',
+    fontWeight: 'bold',
+    color: '#FFF',
   },
   viewButton: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#3A3B3C',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
   },
   viewButtonText: {
     fontSize: 14,
-    color: '#000',
+    color: '#FFF',
   },
   modalContainer: {
     flex: 1,
@@ -124,19 +144,30 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: 300,
-    padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#333840',
     borderRadius: 8,
+    padding: 20,
   },
   modalText: {
     fontSize: 16,
+    color: '#FFF',
     marginBottom: 20,
   },
   closeText: {
     color: 'blue',
     textAlign: 'center',
   },
+  deleteButton: {
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+    height: '100%',
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  }
 });
-
 
 export default TeachersCommentScreen;

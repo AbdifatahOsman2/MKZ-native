@@ -1,36 +1,42 @@
 import React from 'react';
-import { View, FlatList, Text, StyleSheet, Button } from 'react-native';
+import { View, FlatList, Text, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
+import { deleteBehavior } from '../services/airtableService';
 
 const BehaviorScreen = ({ route, navigation }) => {
-  const { behaviors, TeacherID } = route.params;  // Make sure TeacherID is passed as a parameter
+  const { behaviors, TeacherID } = route.params;
   const studentId = route.params.StudentID;
 
   const renderBehavior = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <View style={styles.row}>
-        <Text style={styles.dateText}>{item.Date}</Text>
-        <Text style={styles.behaviorText}>Behavior / Edeb</Text>
-        <Text style={styles.statusText}>{item.Behavior}</Text>
-        <Text style={styles.emoji}>
-          {item.Behavior.includes('Good') ? '😊' : '😢'}
-        </Text>
+    <Swipeable
+      renderRightActions={() => (
+        <TouchableOpacity style={styles.deleteButton} onPress={() => deleteBehavior(item.id)}>
+          <Text style={styles.deleteButtonText}>Delete</Text>
+        </TouchableOpacity>
+      )}
+    >
+      <View style={styles.itemContainer}>
+        <View style={styles.row}>
+          <Text style={styles.dateText}>{item.Date}</Text>
+          <Text style={styles.behaviorText}>Behavior / Edeb</Text>
+          <Text style={styles.statusText}>{item.Behavior}</Text>
+        </View>
       </View>
-    </View>
+    </Swipeable>
   );
 
   // Function to navigate to the add behavior screen
   const handleAddBehavior = () => {
-    navigation.navigate('AddBehavior',  { studentId: studentId }); // Assuming TeacherID is needed for creating behaviors
+    navigation.navigate('AddBehavior', { studentId: studentId });
   };
 
   return (
     <View style={styles.container}>
-      {/* Show add button only if TeacherID is present */}
       {TeacherID && (
         <Button
           title="Add New Behavior"
           onPress={handleAddBehavior}
-          color="#007BFF" // Customizable color
+          color="#007BFF"
         />
       )}
       <FlatList
@@ -45,20 +51,18 @@ const BehaviorScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ECECF8',
+    backgroundColor: '#252C30', // Dark background
     padding: 16,
     paddingTop: 108,
   },
   itemContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#333', // Dark item background
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around' // Add space for the delete button
   },
   row: {
     flexDirection: 'row',
@@ -68,20 +72,31 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFF', // Light text for dark mode
   },
   behaviorText: {
     fontSize: 16,
-    color: '#333',
+    color: '#FFF', // Light text for dark mode
   },
   statusText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFF', // Light text for dark mode
   },
   emoji: {
     fontSize: 20,
     marginLeft: 8,
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    padding: 10,
+    justifyContent: 'flex-end',
+    borderRadius: 8,
+    marginHorizontal: 10,
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

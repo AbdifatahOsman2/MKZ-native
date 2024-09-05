@@ -15,7 +15,7 @@ const AboutPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000000',
   },
   contentContainer: {
     flexGrow: 1,
@@ -27,13 +27,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333',
+    color: '#fff',
   },
   description: {
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24, // Enhanced readability with increased line height
-    color: '#666',  // Softened text color for better readability
+    color: '#fff',  // Softened text color for better readability
   },
 });
 

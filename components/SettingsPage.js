@@ -37,7 +37,7 @@ const SettingsPage = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000000',
   },
   section: {
     marginTop: 100,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
     paddingBottom: 8,
     paddingTop: 16,
   },
@@ -56,11 +56,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#fff',
   },
   optionText: {
     fontSize: 16,
-    color: '#333',
+    color: '#fff',
   },
 });
 

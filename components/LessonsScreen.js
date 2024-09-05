@@ -1,39 +1,46 @@
 import React from 'react';
-import { View, FlatList, Text, StyleSheet, Image, Button } from 'react-native';
+import { View, FlatList, Text, StyleSheet, Image, Button, TouchableOpacity } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import openQuran from '../assets/openQuran.png';
+import deleteLesson from '../services/airtableService';
 
 const LessonsScreen = ({ route, navigation }) => {
   const { lessons, TeacherID } = route.params;
   const studentId = route.params.StudentID;
 
-
   const renderLesson = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <View style={styles.textContainer}>
-        <Text style={styles.lessonDate}>{item.Date}</Text>
-        <Text style={styles.lessonStatus}>{item['Passed']}</Text>
+    <Swipeable
+      renderRightActions={() => (
+        <TouchableOpacity style={styles.deleteButton} onPress={() => deleteLesson(item.id)}>
+          <Text style={styles.deleteButtonText}>Delete</Text>
+        </TouchableOpacity>
+      )}
+    >
+      <View style={styles.itemContainer}>
+        <View style={styles.textContainer}>
+          <Text style={styles.lessonDate}>{item.Date}</Text>
+          <Text style={styles.lessonStatus}>{item['Passed']}</Text>
+        </View>
+        <Image
+          source={openQuran}
+          style={styles.icon}
+        />
       </View>
-      <Image
-        source={openQuran}
-        style={styles.icon}
-      />
-    </View>
+    </Swipeable>
   );
 
   // Function to navigate to the add lesson screen
   const handleAddLesson = () => {
-    // You might need to navigate with some parameters to identify the student etc.
-    navigation.navigate('AddLesson', { studentId: studentId }); // Update with actual parameters
+    navigation.navigate('AddLesson', { studentId: studentId });
   };
 
   return (
     <View style={styles.container}>
-      {/* Show add button only if TeacherID is present */}
       {TeacherID && (
         <Button
           title="Add New Lesson"
           onPress={handleAddLesson}
-          color="#007BFF" // Customizable color
+          color="#2dba4e"
         />
       )}
       <FlatList
@@ -48,37 +55,47 @@ const LessonsScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ECECF8',
+    backgroundColor: '#252C30', // Dark background
     padding: 16,
     paddingTop: 108
   },
   itemContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#333', // Dark item background
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
-    flexDirection: 'row', // Arrange items horizontally
-    alignItems: 'center', // Vertically center the items
-    justifyContent: 'space-evenly' // Space between the text and the icon
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between' // Changed to 'between' to add space for swipe button
   },
   textContainer: {
-    flexDirection: 'row', // Arrange text items horizontally
+    flexDirection: 'row',
     alignItems: 'center',
   },
   lessonDate: {
     marginRight: 20,
     fontSize: 16,
-    color: '#000',
+    color: '#FFF', // Light text for dark mode
   },
   lessonStatus: {
-    marginRight: 20,
     fontSize: 16,
-    color: '#000',
+    color: '#FFF', // Light text for dark mode
     fontWeight: 'bold',
   },
   icon: {
     width: 24,
     height: 24,
+  },
+  deleteButton: {
+    backgroundColor: 'red', // Red delete button
+    padding: 10,
+    justifyContent: 'center',
+    borderRadius: 8,
+    marginHorizontal: 10,
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

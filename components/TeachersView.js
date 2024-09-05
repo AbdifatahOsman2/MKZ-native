@@ -2,14 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudents } from '../services/airtableService';
-import maleImage from '../assets/M-1-Image.png'; 
+import maleImage from '../assets/M-1-Image.png';
 import femaleImage from '../assets/Fm1-Image.png';
 
 const TeachersView = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
   const { TeacherID } = route.params;
 
   const getStudentsData = async () => {
@@ -31,32 +30,35 @@ const TeachersView = ({ navigation, route }) => {
     setRefreshing(false);
   }, []);
 
+  // Filter students based on the search query
+  const filteredStudents = searchQuery.length > 0
+    ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
+    : students;
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-      <TouchableOpacity
-      style={styles.iconWrapper}
-      onPress={() => navigation.navigate('AddStudent')}
-      >
-      <Icon name="plus" size={24} color="#000" />
-      </TouchableOpacity>
+        <Text style={styles.headerTitle}>Home</Text>
+        <TouchableOpacity
+          style={styles.iconWrapper}
+          onPress={() => navigation.navigate('AddStudent')}
+        >
+          <Icon name="plus" size={14} color="#007BFF" />
+        </TouchableOpacity>
       </View>
-      <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-      <ScrollView>
-      <Text style={styles.headerTitle}>Home</Text>
-        
-        <TextInput
+      <TextInput
         style={styles.searchBar}
         onChangeText={setSearchQuery}
         value={searchQuery}
         placeholder="Search Students"
-        />
-        </ScrollView>
-        {students.length > 0 ? (
-          students.map(student => (
+        placeholderTextColor="#ccc"
+      />
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        {filteredStudents.length > 0 ? (
+          filteredStudents.map(student => (
             <TouchableOpacity
               key={student.id}
               onPress={() => navigation.navigate('TeacherStudentDetail', { student })}
@@ -69,18 +71,18 @@ const TeachersView = ({ navigation, route }) => {
             </TouchableOpacity>
           ))
         ) : (
-          <Text>No students available</Text>
+          <Text style={styles.noStudentsAvailable}>No students available</Text>
         )}
       </ScrollView>
       <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-          <Icon name="home" size={24} color="#000" />
+        <TouchableOpacity onPress={() => navigation.navigate('TeachersView', { TeacherID })}>
+          <Icon name="home" size={24} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('SettingsPage')}>
-          <Icon name="cog" size={24} color="#000" />
+          <Icon name="cog" size={24} color="#fafbfc" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
-          <Icon name="bell" size={24} color="#000" />
+        <TouchableOpacity onPress={() => navigation.navigate('NotificationPage')}>
+          <Icon name="bell" size={24} color="#fafbfc" />
         </TouchableOpacity>
       </View>
     </View>
@@ -90,54 +92,69 @@ const TeachersView = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#000000',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: 60,
     paddingBottom: 10,
-    backgroundColor: '#FFF',
   },
   headerTitle: {
-    fontSize: 44,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF',
   },
   searchBar: {
-    flex: 1,
-    marginLeft: 10,
     height: 40,
+    marginHorizontal: 20,
+    marginVertical: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 10,
+    backgroundColor: '#1f2428',
+    borderRadius: 20,
+    color: '#FFFFFF',
+    fontSize: 16,
   },
-  iconWrapper: {
-    padding: 0, // Adding padding to make touchable area larger
-
+iconWrapper: {
+  padding: 8, // Adjust padding to ensure icon is centered appropriately
+  backgroundColor: '#000', // Set background to black
+  borderRadius: 30, // Maintain a rounded shape
+  borderWidth: 2, // Thin border as seen in the image
+  borderColor: '#007BFF', // Blue border color
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 4,
   },
+  shadowOpacity: 0.3,
+  shadowRadius: 4.65,
+  elevation: 8,
+}
+,
   scrollContainer: {
-    paddingTop: 20,
-    paddingBottom: 70, // Adjusted to make space for the bottom navigation
+    paddingTop: 10,
+    paddingBottom: 100,
   },
   studentContainer: {
-    width: 252,
-    height: 225,
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 20,
-    backgroundColor: '#E8F1F2',
-    alignItems: 'center',
+    width: '90%',
+    minHeight: 100,
+    marginVertical: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    backgroundColor: '#1f2428',
+    alignSelf: 'center',
     justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
   },
   avatarContainer: {
+    alignItems: 'center',
     marginBottom: 10,
   },
   avatar: {
@@ -146,9 +163,16 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   studentName: {
-    fontSize: 25,
-    fontWeight: 'regular',
-    color: '#000',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  noStudentsAvailable: {
+    color: '#ccc',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
   },
   bottomNav: {
     flexDirection: 'row',
@@ -158,10 +182,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 60,
-    backgroundColor: '#FFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E8E8E8',
+    height: 80,
+    backgroundColor: '#1f2428',
   },
 });
 
