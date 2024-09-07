@@ -3,8 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { getAuth, signOut } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
 
-const SettingsPage = ({ navigation }) => {
+const SettingsPage = ({ navigation, route }) => {
   const auth = getAuth();
+  const ParentID = route.params ? route.params.ParentID : null;
+
+  console.log("Settings Parent", ParentID);
 
   const handleLogout = () => {
     signOut(auth)
@@ -16,7 +19,6 @@ const SettingsPage = ({ navigation }) => {
         Alert.alert('Logout Error', error.message);
       });
   };
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
@@ -25,8 +27,14 @@ const SettingsPage = ({ navigation }) => {
           <Text style={styles.optionText}>About</Text>
           <Ionicons name="chevron-forward-outline" size={20} color="#ccc" />
         </TouchableOpacity>
+        {ParentID && (
+          <TouchableOpacity style={styles.option} onPress={() => navigation.navigate('ParentID', { ParentID })}>
+            <Text style={styles.optionText}>ParentID</Text>
+            <Ionicons name="chevron-forward-outline" size={20} color="#ccc" />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.option} onPress={handleLogout}>
-          <Text style={styles.optionText}>Sign out</Text>
+          <Text style={styles.signOutText}>Sign out</Text>
           <Ionicons name="chevron-forward-outline" size={20} color="#ccc" />
         </TouchableOpacity>
       </View>
@@ -61,6 +69,10 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     color: '#fff',
+  },
+  signOutText: {
+    fontSize: 16,
+    color: '#ff0033',
   },
 });
 

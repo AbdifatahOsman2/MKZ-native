@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ScrollView, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
-import { createStudent } from '../services/airtableService';
+import { createStudent, fetchTeachers } from '../services/airtableService';
 import RNPickerSelect from 'react-native-picker-select';
-import { getParentIds} from '../firebaseConfig';
-// fetch teachers table and add teachers as an option
+import { getParentIds } from '../firebaseConfig';
 
 const AddStudent = ({ navigation }) => {
     const [studentName, setStudentName] = useState('');
@@ -13,25 +12,32 @@ const AddStudent = ({ navigation }) => {
     const [gender, setGender] = useState('Male');
     const [parentId, setParentId] = useState('');
     const [parentIds, setParentIds] = useState([]);
+    const [teachers, setTeachers] = useState([]);
+    const [selectedTeacherId, setSelectedTeacherId] = useState(''); // For selected teacher
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
-        async function fetchParentIds() {
+        async function loadInitialData() {
             try {
                 const ids = await getParentIds();
                 setParentIds(ids.map(id => ({ label: id, value: id })));
-                console.log('Parent IDDDs:', ids);
+
+                const fetchedTeachers = await fetchTeachers();
+                setTeachers(fetchedTeachers.map(teacher => ({
+                    label: teacher.Name,
+                    value: teacher.id
+                })));
             } catch (error) {
-                console.error('Failed to fetch parent IDs:', error);
+                console.error('Failed to fetch data:', error);
             }
         }
 
-        fetchParentIds();
+        loadInitialData();
     }, []);
 
     const handleSubmit = async () => {
-        if (!studentName || !age || !classroom || !schedule || !gender || !parentId) {
+        if (!studentName || !age || !classroom || !schedule || !gender || !parentId || !selectedTeacherId) {
             setError('Please fill in all fields.');
             return;
         }
@@ -42,7 +48,8 @@ const AddStudent = ({ navigation }) => {
             class: classroom,
             schedule: schedule,
             Gender: gender,
-            ParentID: parentId
+            ParentID: parentId,
+            Teachers: [selectedTeacherId]
         };
 
         try {
@@ -114,6 +121,16 @@ const AddStudent = ({ navigation }) => {
                 value={parentId}
                 placeholder={{ label: "Select Parent ID", value: null }}
             />
+
+            <Text style={styles.label}>Teacher</Text>
+            <RNPickerSelect
+                onValueChange={(value) => setSelectedTeacherId(value)}
+                items={teachers}
+                style={pickerSelectStyles}
+                value={selectedTeacherId}
+                placeholder={{ label: "Select Teacher", value: null }}
+            />
+
 
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
             <Button title="Submit" onPress={handleSubmit} color="#2dba4e" style= {{paddingTop: 20}} />

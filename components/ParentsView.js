@@ -10,6 +10,7 @@ const StudentListScreen = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { ParentID } = route.params;
+  console.log("ParentView", route.params.ParentID);
 
   const getStudentsData = async () => {
     try {
@@ -69,7 +70,7 @@ const StudentListScreen = ({ navigation, route }) => {
         )}
       </ScrollView>
       <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => navigation.navigate('SettingsPage')}>
+        <TouchableOpacity onPress={() => navigation.navigate('SettingsPage', { ParentID: ParentID })}>
           <Icon name="cog" size={24} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('NotificationPage')}>

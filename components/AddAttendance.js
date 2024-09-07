@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Platform, Modal } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Ensure you have this installed
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { createAttendance } from '../services/airtableService';
 
 const AddAttendance = ({ navigation, route }) => {
@@ -42,7 +42,6 @@ const AddAttendance = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add Student Attendance</Text>
-      <Text style={styles.label}>Student ID: {studentId}</Text>
       <TouchableOpacity style={styles.datePickerButton} onPress={() => setShowDatePicker(true)}>
         <Icon name="calendar-today" size={20} color="#fff" />
         <Text style={styles.datePickerText}>Pick Date</Text>
@@ -50,6 +49,7 @@ const AddAttendance = ({ navigation, route }) => {
       <Text style={styles.dateDisplay}>Date: {date.toISOString().split('T')[0]}</Text>
       <TextInput
         placeholder="Attendance Status (Present, Absent, etc.)"
+        placeholderTextColor="#ccc"
         value={attendanceStatus}
         onChangeText={text => {
           setAttendanceStatus(text);
@@ -58,7 +58,7 @@ const AddAttendance = ({ navigation, route }) => {
         style={styles.input}
       />
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      <Button title="Submit Attendance" onPress={handleSubmit} color="#5cb85c" />
+      <Button title="Submit Attendance" onPress={handleSubmit} color="#1B73E8" />
 
       {showDatePicker && (
         <DateTimePicker
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#252C30',
     justifyContent: 'center'
   },
   title: {
@@ -110,38 +110,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#333'
+    color: '#FFF'
   },
   label: {
     fontSize: 16,
-    color: '#333',
+    color: '#FFF',
     marginBottom: 10
   },
   input: {
     height: 50,
-    backgroundColor: 'white',
-    borderColor: '#ccc',
+    backgroundColor: '#333840',
+    borderColor: '#666',
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
-    fontSize: 16
+    fontSize: 16,
+    color: '#FFF'
   },
   datePickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: '#1B73E8',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     marginBottom: 10
   },
   datePickerText: {
-    color: '#fff',
+    color: '#FFF',
     marginLeft: 10
   },
   dateDisplay: {
     fontSize: 16,
-    marginBottom: 20
+    color: '#FFF',
+    paddingVertical: 10
   },
   errorText: {
     color: 'red',
@@ -155,7 +157,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#333840',
     borderRadius: 20,
     padding: 35,
     alignItems: 'center',
@@ -170,7 +172,8 @@ const styles = StyleSheet.create({
   },
   modalText: {
     marginBottom: 15,
-    textAlign: 'center'
+    textAlign: 'center',
+    color: '#FFF',
   }
 });
 

@@ -54,11 +54,6 @@ export const fetchTeachersComment = async (commentIds) => {
   return fetchTableData(TEACHERS_COMMENT_TABLE, commentIds);
 };
 
-
-
-
-
-
 // airtableService.js (modify fetchStudents)
 export const fetchStudents = async (ParentID = null) => {
   try {
@@ -233,3 +228,19 @@ export const deleteTeachersComment = async (commentId) => {
   }
 };
 
+export const fetchTeachers = async () => {
+  const tableName = 'Teachers'; // Make sure this matches exactly with the table name in Airtable
+  try {
+    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+    const response = await axios.get(url, { headers: airtableHeaders });
+    const teachers = response.data.records.map(record => ({
+      id: record.id,
+      ...record.fields,
+    }));
+    console.log('Fetched Teachers:', teachers); // Log fetched teachers to console
+    return teachers;
+  } catch (error) {
+    console.error(`Error fetching data from ${tableName}:`, error);
+    throw error;
+  }
+};

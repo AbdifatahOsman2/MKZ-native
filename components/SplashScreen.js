@@ -3,7 +3,7 @@ import { View, Image, StyleSheet, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import bg from '../assets/BG1.png';
+import bg from '../assets/BG3.png';
 
 const SplashScreen = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -75,3 +75,7 @@ const styles = StyleSheet.create({
 });
 
 export default SplashScreen;
+
+// #24292e	
+// #2b3137
+// #2dba4e

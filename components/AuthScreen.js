@@ -6,7 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { app, auth } from '../firebaseConfig'; 
 import Logo from '../assets/Logo.png';
 
-
 const db = getFirestore(app);
 
 const AuthScreen = ({ navigation }) => {
@@ -15,50 +14,43 @@ const AuthScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Parent'); // Default role is Parent
 
+  const handleAuth = async () => {
+    try {
+      let userCredential;
+      if (isLogin) {
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Additional logic for setting up a new user
+        const userDocRef = doc(db, 'users', userCredential.user.uid);
+        await setDoc(userDocRef, {
+          role: role,
+          [`${role}ID`]: userCredential.user.uid,
+        });
+      }
+      // Store user token for session persistence
+      const token = await userCredential.user.getIdToken();
+      await AsyncStorage.setItem('userToken', token);
 
-const handleAuth = async () => {
-  try {
-    let userCredential;
-    if (isLogin) {
-      userCredential = await signInWithEmailAndPassword(auth, email, password);
-    } else {
-      userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // Additional logic for setting up a new user
-      const userDocRef = doc(db, 'users', userCredential.user.uid);
-      await setDoc(userDocRef, {
-        role: role,
-        [`${role}ID`]: userCredential.user.uid,
-      });
+      // Navigation based on user role
+      const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
+      if (userData.data().role === 'Parent') {
+        navigation.navigate('StudentList', { ParentID: userCredential.user.uid, });
+      } else {
+        navigation.navigate('TeachersView', { TeacherID: userCredential.user.uid,});
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Authentication Failed", error.message);
     }
-    // Store user token for session persistence
-    const token = await userCredential.user.getIdToken();
-    await AsyncStorage.setItem('userToken', token);
-
-    // Navigation based on user role
-    const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
-    if (userData.data().role === 'Parent') {
-      navigation.navigate('StudentList', { ParentID: userCredential.user.uid });
-    } else {
-      navigation.navigate('TeachersView', { TeacherID: userCredential.user.uid });
-    }
-  } catch (error) {
-    console.error(error);
-    Alert.alert("Authentication Failed", error.message);
-  }
-};
-
+  };
 
   return (
     <View style={styles.container}>
-      {/* Logo */}
       <View style={styles.logoContainer}>
         <Image source={Logo} style={styles.logo} />
       </View>
-
-      {/* Title */}
       <Text style={styles.title}>Markaz Al-Najaax</Text>
-
-      {/* Toggle between Login and Register */}
       <View style={styles.toggleContainer}>
         <TouchableOpacity
           style={[styles.toggleButton, isLogin ? styles.activeButton : styles.inactiveButton]}
@@ -73,8 +65,6 @@ const handleAuth = async () => {
           <Text style={!isLogin ? styles.activeText : styles.inactiveText}>Register</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Input fields */}
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Your email"
@@ -92,22 +82,17 @@ const handleAuth = async () => {
         {!isLogin && (
           <View style={styles.roleContainer}>
             <Text style={styles.roleLabel}>Register as:</Text>
-            <TouchableOpacity onPress={() => setRole('Parent')}>
-              <Text style={role === 'Parent' ? styles.activeText : styles.inactiveText}>Parent</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setRole('Teacher')}>
-              <Text style={role === 'Teacher' ? styles.activeText : styles.inactiveText}>Teacher</Text>
-            </TouchableOpacity>
+            <View style={styles.roleButtonContainer}>
+              <TouchableOpacity style={styles.roleButton} onPress={() => setRole('Parent')}>
+                <Text style={role === 'Parent' ? styles.roleActiveText : styles.roleInactiveText}>Parent</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.roleButton} onPress={() => setRole('Teacher')}>
+                <Text style={role === 'Teacher' ? styles.roleActiveText : styles.roleInactiveText}>Teacher</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
-        {isLogin ? (
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>Forgot password?</Text>
-          </TouchableOpacity>
-        ) : null}
       </View>
-
-      {/* Submit Button */}
       <TouchableOpacity style={styles.submitButton} onPress={handleAuth}>
         <Text style={styles.submitButtonText}>{isLogin ? 'Log In' : 'Register'}</Text>
       </TouchableOpacity>
@@ -115,12 +100,11 @@ const handleAuth = async () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#ECECF8',
+    backgroundColor: '#24292e',
     paddingTop: 80,
   },
   logoContainer: {
@@ -134,7 +118,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFF',
     marginBottom: 20,
   },
   toggleContainer: {
@@ -143,8 +127,7 @@ const styles = StyleSheet.create({
     width: '80%',
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#F0F0F0',
-    justifyContent: 'center',
+    backgroundColor: '#2b3137',
   },
   toggleButton: {
     flex: 1,
@@ -152,20 +135,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeButton: {
-    backgroundColor: '#FFF',
-    borderColor: '#000',
-    borderBottomWidth: 2,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: '#007BFF',
   },
   inactiveButton: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#2b3137',
   },
   activeText: {
-    color: '#000',
+    color: '#FFF',
     fontWeight: 'bold',
   },
   inactiveText: {
@@ -184,16 +160,36 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     backgroundColor: '#FFF',
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    color: '#000',
-    fontWeight: '600',
-    marginTop: 10,
+  roleContainer: {
+    flexDirection: 'column',
+    width: '100%',
+    alignItems: 'center',
+  },
+  roleLabel: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  roleButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  roleButton: {
+    padding: 10,
+    borderRadius: 5,
+  },
+  roleActiveText: {
+    color: '#007BFF',
+    fontWeight: 'bold',
+  },
+  roleInactiveText: {
+    color: '#888',
   },
   submitButton: {
     width: '80%',
     height: 50,
-    backgroundColor: '#000',
+    backgroundColor: '#007BFF',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -203,32 +199,6 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  orText: {
-    marginBottom: 10,
-    color: '#888',
-
-  },
-  socialIconsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  socialIcon: {
-    marginHorizontal: 15,
-    padding: 10,
-    borderRadius: 30,
-    backgroundColor: '#FFF',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 3 },
-  },
-  orContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginTop: 120,
-    gap: 10,
   },
 });
 

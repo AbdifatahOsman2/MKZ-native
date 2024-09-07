@@ -15,6 +15,7 @@ import commentIcon from '../assets/Commentbtn.png';
 const TeacherStudentDetailScreen = ({ route }) => {
   const navigation = useNavigation();
   const { student } = route.params;
+  console.log("Student:", student);
 
   useLayoutEffect(() => {
     navigation.setOptions({

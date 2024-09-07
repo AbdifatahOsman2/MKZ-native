@@ -5,13 +5,13 @@ import { deleteTeachersComment } from '../services/airtableService';
 
 const TeachersCommentScreen = ({ route, navigation }) => {
   const { TeacherID, cm } = route.params;
-  
   // Transform string comments into objects
-  const formattedComments = cm.map((comment, index) => ({
-    id: index.toString(), // Create a unique ID since your data may not include it
+  // Check if cm exists and is an array, if not set it to an empty array
+  const formattedComments = Array.isArray(cm) ? cm.map((comment, index) => ({
+    id: index, // Create a unique ID since your data may not include it
     comment: comment,
-    index: index + 1 
-  }));
+    index: index
+  })) : [];
 
   const [comments, setComments] = useState(formattedComments);
   const [modalVisible, setModalVisible] = useState(false);
@@ -76,7 +76,6 @@ const TeachersCommentScreen = ({ route, navigation }) => {
         renderItem={renderComment}
         keyExtractor={(item) => item.id}
       />
-
       {selectedComment && (
         <Modal
           visible={modalVisible}

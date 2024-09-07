@@ -32,7 +32,7 @@ const AddBehavior = ({ navigation, route }) => {
 
     try {
       await createBehavior(behaviorData);
-      setShowConfirmationModal(true); // Show confirmation modal on success
+      setShowConfirmationModal(true);
     } catch (error) {
       console.error('Failed to create behavior:', error);
       setError('Failed to submit behavior. Please try again.');
@@ -42,7 +42,6 @@ const AddBehavior = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add Student Behavior</Text>
-      <Text style={styles.label}>Student ID: {studentId}</Text>
       <TouchableOpacity style={styles.datePickerButton} onPress={() => setShowDatePicker(true)}>
         <Icon name="calendar-today" size={20} color="#fff" />
         <Text style={styles.datePickerText}>Pick Date</Text>
@@ -50,6 +49,7 @@ const AddBehavior = ({ navigation, route }) => {
       <Text style={styles.dateDisplay}>Date: {date.toISOString().split('T')[0]}</Text>
       <TextInput
         placeholder="Behavior description"
+        placeholderTextColor="#ccc"
         value={behaviorDescription}
         onChangeText={text => {
           setBehaviorDescription(text);
@@ -58,7 +58,7 @@ const AddBehavior = ({ navigation, route }) => {
         style={styles.input}
       />
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      <Button title="Submit Behavior" onPress={handleSubmit} color="#5cb85c" />
+      <Button title="Submit Behavior" onPress={handleSubmit} color="#1B73E8" />
 
       {showDatePicker && (
         <DateTimePicker
@@ -78,19 +78,21 @@ const AddBehavior = ({ navigation, route }) => {
           visible={showConfirmationModal}
           onRequestClose={() => {
             setShowConfirmationModal(false);
-            navigation.goBack(); // Optionally navigate back
+            navigation.goBack();
           }}
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>Behavior added successfully!</Text>
-              <Button
-                title="OK"
+              <TouchableOpacity
+                style={styles.buttonClose}
                 onPress={() => {
                   setShowConfirmationModal(false);
-                  navigation.goBack(); // Navigate back after confirming
+                  navigation.goBack();
                 }}
-              />
+              >
+                <Text style={styles.textStyle}>OK</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -103,7 +105,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#252C30',
     justifyContent: 'center'
   },
   title: {
@@ -111,37 +113,35 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#333'
+    color: '#FFF'
   },
-  label: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 10
-  },
+
   input: {
     height: 50,
-    backgroundColor: 'white',
-    borderColor: '#ccc',
+    backgroundColor: '#333840',
+    borderColor: '#666',
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
-    fontSize: 16
+    fontSize: 16,
+    color: '#FFF'
   },
   datePickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: '#1B73E8',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     marginBottom: 10
   },
   datePickerText: {
-    color: '#fff',
+    color: '#FFF',
     marginLeft: 10
   },
   dateDisplay: {
     fontSize: 16,
+    color: '#FFF',
     marginBottom: 20
   },
   errorText: {
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#333840',
     borderRadius: 20,
     padding: 35,
     alignItems: 'center',
@@ -171,7 +171,19 @@ const styles = StyleSheet.create({
   },
   modalText: {
     marginBottom: 15,
-    textAlign: 'center'
+    textAlign: 'center',
+    color: '#FFF',
+  },
+  buttonClose: {
+    backgroundColor: "#1B73E8",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
   }
 });
 

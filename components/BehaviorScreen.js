@@ -18,7 +18,7 @@ const BehaviorScreen = ({ route, navigation }) => {
       <View style={styles.itemContainer}>
         <View style={styles.row}>
           <Text style={styles.dateText}>{item.Date}</Text>
-          <Text style={styles.behaviorText}>Behavior / Edeb</Text>
+          <Text style={styles.behaviorText}>Behavior:</Text>
           <Text style={styles.statusText}>{item.Behavior}</Text>
         </View>
       </View>
@@ -60,28 +60,28 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around' // Add space for the delete button
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   dateText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFF', // Light text for dark mode
+    color: '#FFF', 
+    paddingVertical: 10
   },
   behaviorText: {
     fontSize: 16,
-    color: '#FFF', // Light text for dark mode
+    color: '#FFF', 
+    paddingHorizontal: 4,
   },
   statusText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFF', // Light text for dark mode
+    color: '#FFF', 
+    paddingHorizontal: 4,
   },
   emoji: {
     fontSize: 20,

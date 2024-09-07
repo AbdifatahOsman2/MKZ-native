@@ -21,6 +21,7 @@ import AddBehavior from './components/AddBehavior';
 import AddAttendance from './components/AddAttendance';
 import AddComment from './components/AddComment';
 import NotificationPage from './components/NotificationPage';
+import ParentID from './components/ParentID';
 
 const Stack = createStackNavigator();
 
@@ -57,6 +58,7 @@ const Navigation = () => {
         <Stack.Screen name="AddAttendance" component={AddAttendance} options={screenOptions} />
         <Stack.Screen name="AddComment" component={AddComment} options={screenOptions} />
         <Stack.Screen name="NotificationPage" component={NotificationPage} options={screenOptions} />
+        <Stack.Screen name="ParentID" component={ParentID} options={screenOptions} />
       </Stack.Navigator>
     </NavigationContainer>
   );

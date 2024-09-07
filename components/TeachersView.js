@@ -10,6 +10,7 @@ const TeachersView = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { TeacherID } = route.params;
+  const {ParentID} = route.params;
 
   const getStudentsData = async () => {
     try {
@@ -78,7 +79,7 @@ const TeachersView = ({ navigation, route }) => {
         <TouchableOpacity onPress={() => navigation.navigate('TeachersView', { TeacherID })}>
           <Icon name="home" size={24} color="#fafbfc" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('SettingsPage')}>
+        <TouchableOpacity onPress={() => navigation.navigate('SettingsPage', )}>
           <Icon name="cog" size={24} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('NotificationPage')}>
