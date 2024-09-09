@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Platform, Modal } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker'; // New Date Picker
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { createTeachersComment } from '../services/airtableService';
 
@@ -8,14 +8,24 @@ const AddTeachersComment = ({ navigation, route }) => {
   const { studentId } = route.params;
   const [date, setDate] = useState(new Date());
   const [comment, setComment] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  const onDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShowDatePicker(Platform.OS === 'ios'); // Keep date picker on screen for iOS
-    setDate(currentDate);
+  // Show Date Picker
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  // Hide Date Picker
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  // Handle Date Confirm
+  const handleConfirm = (selectedDate) => {
+    setDate(selectedDate);
+    hideDatePicker();
   };
 
   const handleSubmit = async () => {
@@ -42,11 +52,28 @@ const AddTeachersComment = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add Teacher's Comment</Text>
-      <TouchableOpacity style={styles.datePickerButton} onPress={() => setShowDatePicker(true)}>
+
+      {/* Date Picker Button */}
+      <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
         <Icon name="calendar-today" size={20} color="#fff" />
         <Text style={styles.datePickerText}>Pick Date</Text>
       </TouchableOpacity>
+
+      {/* Display selected date */}
       <Text style={styles.dateDisplay}>Date: {date.toISOString().split('T')[0]}</Text>
+
+      {/* Date Picker Modal */}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+        display={Platform.OS === 'ios' ? 'inline' : 'default'}
+        themeVariant="light" // Set light theme for DateTimePicker
+        textColor="#000" // Ensure text is visible for light theme
+      />
+
+      {/* Comment Input */}
       <TextInput
         placeholder="Teacher's comment"
         placeholderTextColor="#ccc"
@@ -57,19 +84,16 @@ const AddTeachersComment = ({ navigation, route }) => {
         }}
         style={styles.input}
       />
+
+      {/* Error Message */}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      <Button title="Submit Comment" onPress={handleSubmit} color="#1B73E8" />
 
-      {showDatePicker && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date}
-          mode="date"
-          display="spinner"
-          onChange={onDateChange}
-        />
-      )}
+      {/* Submit Button */}
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Submit Comment</Text>
+      </TouchableOpacity>
 
+      {/* Success Modal */}
       {showConfirmationModal && (
         <Modal
           animationType="slide"
@@ -83,13 +107,15 @@ const AddTeachersComment = ({ navigation, route }) => {
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>Comment added successfully!</Text>
-              <Button
-                title="OK"
+              <TouchableOpacity
+                style={styles.buttonClose}
                 onPress={() => {
                   setShowConfirmationModal(false);
                   navigation.goBack();
                 }}
-              />
+              >
+                <Text style={styles.textStyle}>OK</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -112,11 +138,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#FFF'
   },
-  label: {
-    fontSize: 16,
-    color: '#FFF',
-    marginBottom: 10
-  },
   input: {
     height: 50,
     backgroundColor: '#333840',
@@ -125,7 +146,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 10,
     fontSize: 16,
-    color: '#FFF'
+    color: '#FFF',
+    borderRadius: 5,
   },
   datePickerButton: {
     flexDirection: 'row',
@@ -141,13 +163,25 @@ const styles = StyleSheet.create({
     marginLeft: 10
   },
   dateDisplay: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#FFF',
     paddingVertical: 10
   },
   errorText: {
     color: 'red',
     marginBottom: 10
+  },
+  submitButton: {
+    backgroundColor: "#1B73E8",
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  submitButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   centeredView: {
     flex: 1,
@@ -174,6 +208,17 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
     color: '#FFF',
+  },
+  buttonClose: {
+    backgroundColor: "#1B73E8",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
   }
 });
 

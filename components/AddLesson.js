@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Platform, Modal } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker'; // New Date Picker
 import { createLesson } from '../services/airtableService';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import RNPickerSelect from 'react-native-picker-select';
@@ -9,14 +9,24 @@ const AddLesson = ({ navigation, route }) => {
   const { studentId } = route.params;
   const [date, setDate] = useState(new Date());
   const [passed, setPassed] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  const onDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShowDatePicker(Platform.OS === 'ios');
-    setDate(currentDate);
+  // Show Date Picker
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  // Hide Date Picker
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  // Handle Date Confirm
+  const handleConfirm = (selectedDate) => {
+    setDate(selectedDate);
+    hideDatePicker();
   };
 
   const handleSubmit = async () => {
@@ -43,11 +53,29 @@ const AddLesson = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add New Lesson</Text>
-      <TouchableOpacity style={styles.datePickerButton} onPress={() => setShowDatePicker(true)}>
+
+      {/* Date Picker Button */}
+      <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
         <Icon name="calendar-today" size={20} color="#fff" />
         <Text style={styles.datePickerText}>Pick Date</Text>
       </TouchableOpacity>
+
+      {/* Display selected date */}
       <Text style={styles.dateDisplay}>Date: {date.toISOString().split('T')[0]}</Text>
+
+      {/* Date Picker Modal */}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+        display={Platform.OS === 'ios' ? 'inline' : 'default'}
+        // Custom style for dark theme
+        themeVariant="light" // Use dark theme on iOS and Android
+        textColor="#fff"  // Ensure the text is visible on the dark background
+      />
+
+      {/* Picker for 'Passed' status */}
       <RNPickerSelect
         onValueChange={value => setPassed(value)}
         items={[
@@ -58,20 +86,16 @@ const AddLesson = ({ navigation, route }) => {
         style={pickerSelectStyles}
         value={passed}
       />
+
+      {/* Error message */}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      <Button style={styles.button} title="Submit Lesson" onPress={handleSubmit} color="#1B73E8" />
 
-      {showDatePicker && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date}
-          mode="date"
-          display={Platform.OS === 'ios' ? "spinner" : "default"}
-          onChange={onDateChange}
-          is24Hour={true}
-        />
-      )}
+      {/* Submit Button */}
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Submit Lesson</Text>
+      </TouchableOpacity>
 
+      {/* Success Modal */}
       {showConfirmationModal && (
         <Modal
           animationType="slide"
@@ -116,7 +140,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#FFF'
   },
-
   datePickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -138,6 +161,18 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     marginBottom: 10
+  },
+  submitButton: {
+    backgroundColor: "#1B73E8",
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  submitButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   centeredView: {
     flex: 1,
@@ -176,7 +211,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: '#FFF',
   },
-
 });
 
 const pickerSelectStyles = {

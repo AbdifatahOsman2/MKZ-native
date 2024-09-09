@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudents } from '../services/airtableService';
 import maleImage from '../assets/M-1-Image.png';
@@ -9,15 +9,19 @@ const TeachersView = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true); // New state to track loading
   const { TeacherID } = route.params;
-  const {ParentID} = route.params;
+  const { ParentID } = route.params;
 
   const getStudentsData = async () => {
     try {
+      setLoading(true); // Start loading
       const studentsData = await fetchStudents(null, TeacherID);
       setStudents(studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);
+    } finally {
+      setLoading(false); // stop loading
     }
   };
 
@@ -31,7 +35,6 @@ const TeachersView = ({ navigation, route }) => {
     setRefreshing(false);
   }, []);
 
-  // Filter students based on the search query
   const filteredStudents = searchQuery.length > 0
     ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
     : students;
@@ -54,35 +57,41 @@ const TeachersView = ({ navigation, route }) => {
         placeholder="Search Students"
         placeholderTextColor="#ccc"
       />
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        {filteredStudents.length > 0 ? (
-          filteredStudents.map(student => (
-            <TouchableOpacity
-              key={student.id}
-              onPress={() => navigation.navigate('TeacherStudentDetail', { student })}
-              style={styles.studentContainer}
-            >
-              <View style={styles.avatarContainer}>
-                <Image source={student.Gender === 'Male' ? maleImage : femaleImage} style={styles.avatar} />
-              </View>
-              <Text style={styles.studentName}>{student.StudentName}</Text>
-            </TouchableOpacity>
-          ))
-        ) : (
-          <Text style={styles.noStudentsAvailable}>No students available</Text>
-        )}
-      </ScrollView>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007BFF" />
+        </View>
+      ) : (
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          {filteredStudents.length > 0 ? (
+            filteredStudents.map(student => (
+              <TouchableOpacity
+                key={student.id}
+                onPress={() => navigation.navigate('TeacherStudentDetail', { student })}
+                style={styles.studentContainer}
+              >
+                <View style={styles.avatarContainer}>
+                  <Image source={student.Gender === 'Male' ? maleImage : femaleImage} style={styles.avatar} />
+                </View>
+                <Text style={styles.studentName}>{student.StudentName}</Text>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={styles.noStudentsAvailable}>No students available</Text>
+          )}
+        </ScrollView>
+      )}
       <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => navigation.navigate('TeachersView', { TeacherID })}>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('TeachersView', { TeacherID })}>
           <Icon name="home" size={24} color="#fafbfc" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('SettingsPage', )}>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage')}>
           <Icon name="cog" size={24} color="#fafbfc" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('NotificationPage')}>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('NotificationPage')}>
           <Icon name="bell" size={24} color="#fafbfc" />
         </TouchableOpacity>
       </View>
@@ -118,22 +127,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
   },
-iconWrapper: {
-  padding: 8, // Adjust padding to ensure icon is centered appropriately
-  backgroundColor: '#000', // Set background to black
-  borderRadius: 30, // Maintain a rounded shape
-  borderWidth: 2, // Thin border as seen in the image
-  borderColor: '#007BFF', // Blue border color
-  shadowColor: "#000",
-  shadowOffset: {
-    width: 0,
-    height: 4,
+  iconWrapper: {
+    padding: 8,
+    backgroundColor: '#000',
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: '#007BFF',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
-  shadowOpacity: 0.3,
-  shadowRadius: 4.65,
-  elevation: 8,
-}
-,
   scrollContainer: {
     paddingTop: 10,
     paddingBottom: 100,
@@ -175,6 +180,11 @@ iconWrapper: {
     textAlign: 'center',
     marginTop: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -183,8 +193,11 @@ iconWrapper: {
     bottom: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: 100,
     backgroundColor: '#1f2428',
+  },
+  bottomNavIcon: {
+    marginBottom: 10,
   },
 });
 

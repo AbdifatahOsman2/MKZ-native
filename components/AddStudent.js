@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import { createStudent, fetchTeachers } from '../services/airtableService';
 import RNPickerSelect from 'react-native-picker-select';
 import { getParentIds } from '../firebaseConfig';
@@ -61,8 +61,15 @@ const AddStudent = ({ navigation }) => {
         }
     };
 
+    const handleModalClose = () => {
+        // Close the modal and navigate back to TeachersView, passing 'reload' as true
+        setShowSuccessModal(false);
+        navigation.replace('TeachersView', { reload: true });
+    };
+
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.container}>
+            <Text style={styles.sectionHeader}>Add Student</Text>
             <Text style={styles.label}>Student Name</Text>
             <TextInput
                 placeholder="Student Name"
@@ -131,9 +138,10 @@ const AddStudent = ({ navigation }) => {
                 placeholder={{ label: "Select Teacher", value: null }}
             />
 
-
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            <Button title="Submit" onPress={handleSubmit} color="#2dba4e" style= {{paddingTop: 20}} />
+            <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+                <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
 
             {showSuccessModal && (
                 <Modal
@@ -142,7 +150,6 @@ const AddStudent = ({ navigation }) => {
                     visible={showSuccessModal}
                     onRequestClose={() => {
                         setShowSuccessModal(false);
-                        navigation.goBack();
                     }}
                 >
                     <View style={styles.centeredView}>
@@ -150,10 +157,7 @@ const AddStudent = ({ navigation }) => {
                             <Text style={styles.modalText}>Student added successfully!</Text>
                             <TouchableOpacity
                                 style={styles.buttonClose}
-                                onPress={() => {
-                                    setShowSuccessModal(false);
-                                    navigation.goBack();
-                                }}
+                                onPress={handleModalClose} // Navigate back and reload TeachersView
                             >
                                 <Text style={styles.textStyle}>OK</Text>
                             </TouchableOpacity>
@@ -161,16 +165,24 @@ const AddStudent = ({ navigation }) => {
                     </View>
                 </Modal>
             )}
-        </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1,
+        flex: 1,
         padding: 20,
         paddingTop: 125,
         backgroundColor: '#252C30',
+        justifyContent: 'flex-start', // Ensure layout starts from the top
+    },
+    sectionHeader: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#FFF',
+        marginBottom: 20,
+        textAlign: 'center',
     },
     input: {
         height: 50,
@@ -181,17 +193,34 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         fontSize: 16,
         color: '#FFF',
-        borderRadius: 5,
+        borderRadius: 10, // Updated for a modern feel
+        shadowColor: "#000", // Added shadow for better visual
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     label: {
         fontSize: 16,
         color: '#FFF',
-        marginBottom: 20
+        marginBottom: 10
     },
     errorText: {
         fontSize: 16,
         color: 'red',
         marginBottom: 20
+    },
+    submitButton: {
+        backgroundColor: "#2dba4e",
+        borderRadius: 10,
+        padding: 15,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    submitButtonText: {
+        color: '#FFF',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
     centeredView: {
         flex: 1,
@@ -207,8 +236,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         shadowColor: "#000",
         shadowOffset: {
-            width: 0,
-            height: 2
+            width: 0, height: 2
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -230,9 +258,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: '#FFF',
     },
-    buttonContainer: {
-        marginTop: 20,
-    }
 });
 
 const pickerSelectStyles = StyleSheet.create({
@@ -242,9 +267,9 @@ const pickerSelectStyles = StyleSheet.create({
         paddingHorizontal: 10,
         borderWidth: 1,
         borderColor: '#555',
-        borderRadius: 4,
+        borderRadius: 10, // Updated for consistency
         color: '#FFF',
-        paddingRight: 30, // to ensure the text is never behind the icon
+        paddingRight: 30,
         backgroundColor: '#333840',
     },
     inputAndroid: {
@@ -253,9 +278,9 @@ const pickerSelectStyles = StyleSheet.create({
         paddingVertical: 8,
         borderWidth: 1,
         borderColor: '#555',
-        borderRadius: 8,
+        borderRadius: 10, // Updated for consistency
         color: '#FFF',
-        paddingRight: 30, // to ensure the text is never behind the icon
+        paddingRight: 30,
         backgroundColor: '#333840',
     },
 });

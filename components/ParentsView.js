@@ -10,7 +10,8 @@ const StudentListScreen = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { ParentID } = route.params;
-  console.log("ParentView", route.params.ParentID);
+
+  
 
   const getStudentsData = async () => {
     try {
@@ -70,10 +71,13 @@ const StudentListScreen = ({ navigation, route }) => {
         )}
       </ScrollView>
       <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => navigation.navigate('SettingsPage', { ParentID: ParentID })}>
+      <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID: ParentID })} >
+      <Icon name="home" size={24} color="#fafbfc" />
+    </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage', { ParentID: ParentID })}>
           <Icon name="cog" size={24} color="#fafbfc" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('NotificationPage')}>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('NotificationPage')}>
           <Icon name="bell" size={24} color="#fafbfc" />
         </TouchableOpacity>
       </View>
@@ -149,9 +153,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: 100,
     backgroundColor: '#1f2428',
   },
+  bottomNavIcon: {
+    marginBottom: 10,
+  },
+  
 });
 
 export default StudentListScreen;

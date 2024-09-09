@@ -4,7 +4,6 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native';
 const ParentID = ({route}) => {
 
     const ParentID = route.params.ParentID;
-    console.log("de", route.params.ParentID);
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.description}>

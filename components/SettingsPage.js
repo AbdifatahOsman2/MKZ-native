@@ -7,8 +7,6 @@ const SettingsPage = ({ navigation, route }) => {
   const auth = getAuth();
   const ParentID = route.params ? route.params.ParentID : null;
 
-  console.log("Settings Parent", ParentID);
-
   const handleLogout = () => {
     signOut(auth)
       .then(() => {

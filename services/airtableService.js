@@ -237,7 +237,7 @@ export const fetchTeachers = async () => {
       id: record.id,
       ...record.fields,
     }));
-    console.log('Fetched Teachers:', teachers); // Log fetched teachers to console
+
     return teachers;
   } catch (error) {
     console.error(`Error fetching data from ${tableName}:`, error);

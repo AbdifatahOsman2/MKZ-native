@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -15,7 +15,6 @@ import commentIcon from '../assets/Commentbtn.png';
 const TeacherStudentDetailScreen = ({ route }) => {
   const navigation = useNavigation();
   const { student } = route.params;
-  console.log("Student:", student);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -47,7 +46,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Image
           source={student.Gender === 'Male' ? maleImage : femaleImage}
@@ -95,77 +94,77 @@ const TeacherStudentDetailScreen = ({ route }) => {
           <Text style={styles.buttonText}>Teacher Comments</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 16,
-      backgroundColor: '#252C30',
-    },
-    textContainer: {
-      alignItems: 'center',
-      marginTop: 20,
-    },
-    studentInfo: {
-      fontSize: 16,
-      color: '#FFF',
-      marginTop: 5,
-    },
-    studentInfoText: {
-      fontWeight: 'bold',
-      color: '#FFF',
-    },
-    header: {
-      alignItems: 'center',
-      marginBottom: 40,
-    },
-    profileImage: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      marginBottom: 10,
-    },
-    studentName: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      color: '#FFF',
-    },
-    buttonContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      marginTop: 40,
-    },
-    button: {
-      backgroundColor: '#333840',
-      padding: 15,
-      margin: 10,
-      borderRadius: 10,
-      width: 150,
-      height: 130,
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
-    },
-    buttonIcon: {
-      width: 40,
-      height: 40,
-      marginBottom: 5,
-    },
-    buttonText: {
-      fontSize: 14,
-      color: '#FFF',
-      textAlign: 'center',
-    },
+  container: {
+    flex: 1, // Ensures the view takes up the full screen
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#252C30',
+  },
+  textContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  studentInfo: {
+    fontSize: 16,
+    color: '#FFF',
+    marginTop: 5,
+  },
+  studentInfoText: {
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  studentName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 40,
+  },
+  button: {
+    backgroundColor: '#333840',
+    padding: 15,
+    margin: 10,
+    borderRadius: 10,
+    width: 150,
+    height: 130,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  buttonIcon: {
+    width: 40,
+    height: 40,
+    marginBottom: 5,
+  },
+  buttonText: {
+    fontSize: 14,
+    color: '#FFF',
+    textAlign: 'center',
+  },
 });
 
 export default TeacherStudentDetailScreen;
