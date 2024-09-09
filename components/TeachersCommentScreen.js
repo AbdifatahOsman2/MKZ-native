@@ -5,12 +5,12 @@ import { deleteTeachersComment } from '../services/airtableService';
 
 const TeachersCommentScreen = ({ route, navigation }) => {
   const { TeacherID, cm } = route.params;
-  // Transform string comments into objects
-  // Check if cm exists and is an array, if not set it to an empty array
+
+  // Use real Airtable record IDs
   const formattedComments = Array.isArray(cm) ? cm.map((comment, index) => ({
-    id: index, // Create a unique ID since your data may not include it
-    comment: comment,
-    index: index
+    id: comment.id,  // Assuming the actual record ID exists here
+    comment: comment.comment,  // Assuming this is the comment text
+    index: index, // This is only used for display purposes
   })) : [];
 
   const [comments, setComments] = useState(formattedComments);
@@ -22,34 +22,43 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     setModalVisible(true);
   };
 
-  const handleDeleteComment = (commentId) => {
-    Alert.alert("Confirm Delete", "Are you sure you want to delete this comment?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", onPress: () => {
-        deleteTeachersComment(commentId)
-          .then(() => {
-            // Refresh the list or remove the item from the local state to update the UI
-            console.log('Comment deleted successfully');
-            setComments(comments.filter(comment => comment.id !== commentId));
-          })
-          .catch(error => console.error('Error deleting comment:', error));
-      }}
-    ]);
+  const handleDeleteComment = async (commentId) => {
+    Alert.alert(
+      'Delete Comment',
+      'Are you sure you want to delete this comment?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteTeachersComment([commentId]); // Pass as an array to match the function's requirement
+              setComments((prevComments) => prevComments.filter((comment) => comment.id !== commentId));
+              Alert.alert('Success', 'Comment deleted successfully');
+            } catch (error) {
+              console.error('Error deleting comment:', error);
+              Alert.alert('Error', 'Failed to delete comment. Please try again.');
+            }
+          }
+        }
+      ]
+    );
   };
 
-  const renderRightActions = (progress, dragX, commentId) => {
-    return (
+  const renderRightActions = (progress, dragX, commentId) => (
+    TeacherID ? (
       <TouchableOpacity onPress={() => handleDeleteComment(commentId)} style={styles.deleteButton}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
-    );
-  };
+    ) : null
+  );
 
   const renderComment = ({ item }) => (
     <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
       <View style={styles.itemContainer}>
         <View style={styles.row}>
-          <Text style={styles.commentText}>Teacher comment #{item.index}</Text>
+          <Text style={styles.commentText}>Teacher comment #{item.index + 1}</Text>
           <TouchableOpacity style={styles.viewButton} onPress={() => openModal(item)}>
             <Text style={styles.viewButtonText}>View</Text>
           </TouchableOpacity>
@@ -74,7 +83,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
       <FlatList
         data={comments}
         renderItem={renderComment}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()} // Fallback to index if id is undefined
       />
       {selectedComment && (
         <Modal
@@ -85,7 +94,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalText}>{selectedComment ? selectedComment.comment : "No comment available"}</Text>
+              <Text style={styles.modalText}>{selectedComment ? selectedComment.comment : 'No comment available'}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Text style={styles.closeText}>Close</Text>
               </TouchableOpacity>
@@ -98,6 +107,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  // Your styles remain the same
   container: {
     flex: 1,
     backgroundColor: '#252C30',
@@ -109,7 +119,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,

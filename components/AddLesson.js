@@ -60,9 +60,6 @@ const AddLesson = ({ navigation, route }) => {
         <Text style={styles.datePickerText}>Pick Date</Text>
       </TouchableOpacity>
 
-      {/* Display selected date */}
-      <Text style={styles.dateDisplay}>Date: {date.toISOString().split('T')[0]}</Text>
-
       {/* Date Picker Modal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}

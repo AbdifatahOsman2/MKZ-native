@@ -1,7 +1,8 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { getStudentsData } from '../services/airtableService';
 
 // Images
 import maleImage from '../assets/M-1-Image.png'; 
@@ -15,6 +16,12 @@ import commentIcon from '../assets/Commentbtn.png';
 const TeacherStudentDetailScreen = ({ route }) => {
   const navigation = useNavigation();
   const { student } = route.params;
+
+    useEffect(() => {
+    if (route.params?.reload) {
+      getStudentsData(); // Reload the data when navigated back from AddStudent
+    }
+  }, [route.params?.reload]);
 
   useLayoutEffect(() => {
     navigation.setOptions({

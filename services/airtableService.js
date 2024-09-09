@@ -184,10 +184,24 @@ export const createTeachersComment = async (commentData) => {
 };
 
 // New delete functions for Lessons, Behavior, Attendance, and TeachersComment
-export const deleteLesson = async (lessonId) => {
-  const url = `https://api.airtable.com/v0/${baseId}/${LESSONS_TABLE}/${lessonId}`;
+// Helper to prepare records for deletion in the correct format
+const prepareDeleteParams = (recordIds) => {
+  const params = new URLSearchParams();
+  recordIds.forEach(id => {
+    params.append('records[]', id);
+  });
+  return params;
+};
+
+// Function to delete lessons
+export const deleteLesson = async (lessonIds) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${LESSONS_TABLE}`;
+  const params = prepareDeleteParams(lessonIds);
   try {
-    const response = await axios.delete(url, { headers: airtableHeaders });
+    const response = await axios.delete(url, {
+      headers: airtableHeaders,
+      params: params,
+    });
     return response.data;
   } catch (error) {
     console.error('Error deleting lesson:', error);
@@ -195,10 +209,15 @@ export const deleteLesson = async (lessonId) => {
   }
 };
 
-export const deleteBehavior = async (behaviorId) => {
-  const url = `https://api.airtable.com/v0/${baseId}/${BEHAVIOR_TABLE}/${behaviorId}`;
+// Function to delete behaviors
+export const deleteBehavior = async (behaviorIds) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${BEHAVIOR_TABLE}`;
+  const params = prepareDeleteParams(behaviorIds);
   try {
-    const response = await axios.delete(url, { headers: airtableHeaders });
+    const response = await axios.delete(url, {
+      headers: airtableHeaders,
+      params: params,
+    });
     return response.data;
   } catch (error) {
     console.error('Error deleting behavior:', error);
@@ -206,10 +225,15 @@ export const deleteBehavior = async (behaviorId) => {
   }
 };
 
-export const deleteAttendance = async (attendanceId) => {
-  const url = `https://api.airtable.com/v0/${baseId}/${ATTENDANCE_TABLE}/${attendanceId}`;
+// Function to delete attendance
+export const deleteAttendance = async (attendanceIds) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${ATTENDANCE_TABLE}`;
+  const params = prepareDeleteParams(attendanceIds);
   try {
-    const response = await axios.delete(url, { headers: airtableHeaders });
+    const response = await axios.delete(url, {
+      headers: airtableHeaders,
+      params: params,
+    });
     return response.data;
   } catch (error) {
     console.error('Error deleting attendance:', error);
@@ -217,16 +241,23 @@ export const deleteAttendance = async (attendanceId) => {
   }
 };
 
-export const deleteTeachersComment = async (commentId) => {
-  const url = `https://api.airtable.com/v0/${baseId}/${TEACHERS_COMMENT_TABLE}/${commentId}`;
+
+// Function to delete teacher's comments
+export const deleteTeachersComment = async (commentIds) => {
+  const url = `https://api.airtable.com/v0/${baseId}/${TEACHERS_COMMENT_TABLE}`;
+  const params = prepareDeleteParams(commentIds);
   try {
-    const response = await axios.delete(url, { headers: airtableHeaders });
+    const response = await axios.delete(url, {
+      headers: airtableHeaders,
+      params: params,
+    });
     return response.data;
   } catch (error) {
-    console.error('Error deleting teacher\'s comment:', error);
+    console.error('Error deleting teacher\'s comment:', error.response?.data || error.message);
     throw error;
   }
 };
+
 
 export const fetchTeachers = async () => {
   const tableName = 'Teachers'; // Make sure this matches exactly with the table name in Airtable

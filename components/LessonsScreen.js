@@ -1,17 +1,48 @@
-import React from 'react';
-import { View, FlatList, Text, StyleSheet, Image, Button, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, FlatList, Text, StyleSheet, Image, Button, TouchableOpacity, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import openQuran from '../assets/openQuran.png';
-import deleteLesson from '../services/airtableService';
+import { deleteLesson } from '../services/airtableService';
 
 const LessonsScreen = ({ route, navigation }) => {
-  const { lessons, TeacherID } = route.params;
+  const { lessons: initialLessons, TeacherID } = route.params;
   const studentId = route.params.StudentID;
+  const [lessons, setLessons] = useState(initialLessons); // Track lessons in state
+
+  // Handle lesson deletion with proper promise handling
+  const handleDeleteLesson = async (lessonId) => {
+    try {
+      // Confirm deletion with the user
+      Alert.alert(
+        'Delete Lesson',
+        'Are you sure you want to delete this lesson?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Delete', 
+            style: 'destructive', 
+            onPress: async () => {
+              await deleteLesson([lessonId]); // Send as an array, as per the updated function
+              
+              // Filter out the deleted lesson from the local state
+              setLessons((prevLessons) => prevLessons.filter((lesson) => lesson.id !== lessonId));
+
+              // Notify the user
+              Alert.alert('Success', 'Lesson deleted successfully');
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      Alert.alert('Error', 'Failed to delete the lesson. Please try again.');
+    }
+  };
 
   const renderLesson = ({ item }) => (
     <Swipeable
       renderRightActions={() => (
-        <TouchableOpacity style={styles.deleteButton} onPress={() => deleteLesson(item.id)}>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteLesson(item.id)}>
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       )}

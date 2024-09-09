@@ -1,37 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, FlatList, Text, StyleSheet, Button, TouchableOpacity, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { deleteAttendance } from '../services/airtableService';
 
 const AttendanceScreen = ({ route, navigation }) => {
-  const { attendances, TeacherID } = route.params;
+  const { attendances: initialAttendances, TeacherID } = route.params;
   const studentId = route.params.StudentID;
+  const [attendances, setAttendances] = useState(initialAttendances); // Manage attendances in state
 
-  const handleDeleteAttendance = (attendanceId) => {
-    Alert.confirm("Confirm Delete", "Are you sure you want to delete this attendance record?", [
-      {
-        text: "Cancel",
-        onPress: () => console.log("Cancel Pressed"),
-        style: "cancel"
-      },
-      { text: "Delete", onPress: () => {
-        deleteAttendance(attendanceId)
-          .then(() => {
-            // Refresh the list or remove the item from the local state to update the UI
-            console.log('Attendance deleted successfully');
-          })
-          .catch(error => console.error('Error deleting attendance:', error));
-      }}
-    ]);
+  // Handle attendance deletion with proper confirmation and state update
+  const handleDeleteAttendance = async (attendanceId) => {
+    Alert.alert(
+      'Delete Attendance',
+      'Are you sure you want to delete this attendance record?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteAttendance([attendanceId]); // Send as array based on Airtable API requirements
+              setAttendances((prevAttendances) => prevAttendances.filter((item) => item.id !== attendanceId));
+              Alert.alert('Success', 'Attendance deleted successfully');
+            } catch (error) {
+              console.error('Error deleting attendance:', error);
+              Alert.alert('Error', 'Failed to delete attendance. Please try again.');
+            }
+          } 
+        },
+      ]
+    );
   };
 
-  const renderRightActions = (progress, dragX, attendanceId) => {
-    return (
+  const renderRightActions = (progress, dragX, attendanceId) => (
+    TeacherID ? (
       <TouchableOpacity onPress={() => handleDeleteAttendance(attendanceId)} style={styles.deleteButton}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
-    );
-  };
+    ) : null // Only render the delete button if TeacherID is available
+  );
 
   const renderAttendance = ({ item }) => (
     <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
@@ -45,7 +53,7 @@ const AttendanceScreen = ({ route, navigation }) => {
   );
 
   const handleAddAttendance = () => {
-    navigation.navigate('AddAttendance', { studentId: studentId });
+    navigation.navigate('AddAttendance', { studentId });
   };
 
   return (
