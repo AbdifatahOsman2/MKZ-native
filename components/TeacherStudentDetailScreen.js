@@ -17,7 +17,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
   const navigation = useNavigation();
   const { student } = route.params;
 
-    useEffect(() => {
+  useEffect(() => {
     if (route.params?.reload) {
       getStudentsData(); // Reload the data when navigated back from AddStudent
     }
@@ -51,6 +51,12 @@ const TeacherStudentDetailScreen = ({ route }) => {
       ]
     );
   };
+
+  // Combine Comments and their respective IDs
+  const combinedComments = student.Comment.map((comment, index) => ({
+    id: student.TeachersComment[index],  // Corresponding ID from TeachersComment array
+    comment: comment                     // The actual comment from the Comment array
+  }));
 
   return (
     <View style={styles.container}>
@@ -95,7 +101,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('TeachersComment', { comments: student.TeachersComment, TeacherID: student.TeacherID, StudentID: student.id, cm : student.Comment })}
+          onPress={() => navigation.navigate('TeachersComment', { comments: combinedComments, TeacherID: student.TeacherID, StudentID: student.id })}
         >
           <Image source={commentIcon} style={styles.buttonIcon} />
           <Text style={styles.buttonText}>Teacher Comments</Text>

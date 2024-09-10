@@ -4,36 +4,45 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { deleteTeachersComment } from '../services/airtableService';
 
 const TeachersCommentScreen = ({ route, navigation }) => {
-  const { TeacherID, cm } = route.params;
+  const { TeacherID, comments } = route.params;
+  console.log(comments);
 
-  // Use real Airtable record IDs
-  const formattedComments = Array.isArray(cm) ? cm.map((comment, index) => ({
-    id: comment.id,  // Assuming the actual record ID exists here
-    comment: comment.comment,  // Assuming this is the comment text
-    index: index, // This is only used for display purposes
+  // Combine comments and IDs (this comes from the previous screen)
+  const formattedComments = Array.isArray(comments) ? comments.map((comment, index) => ({
+    id: comment.id,  // Airtable record ID
+    comment: comment.comment,  // Comment text
+    index: index, // For display purposes
   })) : [];
 
-  const [comments, setComments] = useState(formattedComments);
+  const [comment, setComments] = useState(formattedComments);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComment, setSelectedComment] = useState(null);
 
+  // Open modal to view comment details
   const openModal = (comment) => {
     setSelectedComment(comment);
     setModalVisible(true);
   };
 
+  // Handle comment deletion
   const handleDeleteComment = async (commentId) => {
     Alert.alert(
       'Delete Comment',
       'Are you sure you want to delete this comment?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
+        {
+          text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            if (!commentId) {
+              Alert.alert('Error', 'Invalid comment ID');
+              return;
+            }
+
             try {
-              await deleteTeachersComment([commentId]); // Pass as an array to match the function's requirement
+              console.log('Deleting comment ID:', commentId);
+              await deleteTeachersComment([commentId]); // Pass ID in an array
               setComments((prevComments) => prevComments.filter((comment) => comment.id !== commentId));
               Alert.alert('Success', 'Comment deleted successfully');
             } catch (error) {
@@ -46,6 +55,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     );
   };
 
+  // Render the swipeable right action to delete a comment
   const renderRightActions = (progress, dragX, commentId) => (
     TeacherID ? (
       <TouchableOpacity onPress={() => handleDeleteComment(commentId)} style={styles.deleteButton}>
@@ -54,6 +64,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     ) : null
   );
 
+  // Render each comment item
   const renderComment = ({ item }) => (
     <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
       <View style={styles.itemContainer}>
@@ -67,6 +78,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     </Swipeable>
   );
 
+  // Handle navigation to add new comment screen
   const handleAddComment = () => {
     navigation.navigate('AddComment', { studentId: route.params.StudentID });
   };
@@ -81,9 +93,9 @@ const TeachersCommentScreen = ({ route, navigation }) => {
         />
       )}
       <FlatList
-        data={comments}
+        data={comment}
         renderItem={renderComment}
-        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()} // Fallback to index if id is undefined
+        keyExtractor={(item) => item.id ? item.id.toString() : item.index.toString()} // Use ID or index if no ID
       />
       {selectedComment && (
         <Modal
@@ -107,7 +119,6 @@ const TeachersCommentScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  // Your styles remain the same
   container: {
     flex: 1,
     backgroundColor: '#252C30',
