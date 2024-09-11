@@ -27,6 +27,10 @@ const AddLesson = ({ navigation, route }) => {
     hideDatePicker();
   };
 
+  const formatDate = (date) => {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  };
+
   const handleSubmit = async () => {
     if (!passed.trim()) {
       setError('Please specify if passed or not.');
@@ -55,12 +59,15 @@ const AddLesson = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Add New Lesson</Text>
 
+      
       {/* Date Picker Button */}
       <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
-        <Icon name="calendar-today" size={20} color="#fff" />
-        <Text style={styles.datePickerText}>Pick Date</Text>
+      <Icon name="calendar-today" size={20} color="#fff" />
+      <Text style={styles.datePickerText}>Pick Date</Text>
       </TouchableOpacity>
-
+      
+      <Text style={styles.dateDisplay}>Date: {formatDate(date)}</Text>
+      
       {/* Date Picker Modal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}

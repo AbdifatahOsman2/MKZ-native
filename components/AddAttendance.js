@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker'; 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import RNPickerSelect from 'react-native-picker-select'; // Import RNPickerSelect
 import { createAttendance } from '../services/airtableService';
 
 const AddAttendance = ({ navigation, route }) => {
@@ -34,7 +35,7 @@ const AddAttendance = ({ navigation, route }) => {
 
   const handleSubmit = async () => {
     if (!attendanceStatus.trim()) {
-      setError('Please enter an attendance status.');
+      setError('Please select an attendance status.');
       return;
     }
 
@@ -75,15 +76,26 @@ const AddAttendance = ({ navigation, route }) => {
       />
 
       {/* Attendance Status Input */}
-      <TextInput
-        placeholder="Attendance Status (Present, Absent, etc.)"
-        placeholderTextColor="#ccc"
-        value={attendanceStatus}
-        onChangeText={text => {
-          setAttendanceStatus(text);
-          setError(''); // Clear error when user starts typing
+      <RNPickerSelect
+        placeholder={{
+          label: 'Select Attendance Status...',
+          value: null,
+          color: '#ccc',
         }}
-        style={styles.input}
+        onValueChange={(value) => {
+          setAttendanceStatus(value);
+          setError(''); // Clear error when the user selects an option
+        }}
+        items={[
+          { label: 'Present', value: 'Present' },
+          { label: 'Not Present', value: 'Not Present' },
+        ]}
+        style={{
+          inputIOS: styles.input,
+          inputAndroid: styles.input,
+          placeholder: { color: '#ccc' },
+        }}
+        value={attendanceStatus} // Set the selected value
       />
 
       {/* Error Message */}
@@ -124,7 +136,6 @@ const AddAttendance = ({ navigation, route }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

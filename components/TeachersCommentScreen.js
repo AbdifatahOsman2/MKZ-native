@@ -5,8 +5,6 @@ import { deleteTeachersComment } from '../services/airtableService';
 
 const TeachersCommentScreen = ({ route, navigation }) => {
   const { TeacherID, comments } = route.params;
-  console.log("TeacherID: ", route.params);
-  console.log("comments: ", comments);
 
   // Combine comments and IDs (this comes from the previous screen)
   const formattedComments = Array.isArray(comments) ? comments.map((comment, index) => ({

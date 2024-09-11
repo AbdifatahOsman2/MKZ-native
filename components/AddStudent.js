@@ -102,8 +102,8 @@ const AddStudent = ({ navigation }) => {
             <RNPickerSelect
                 onValueChange={(value) => setSchedule(value)}
                 items={[
-                    { label: 'Sat-Sun', value: 'Sat-Sun' },
-                    { label: 'Mon-Fri', value: 'Mon-Fri' },
+                    { label: 'Sat-Sun, Wed', value: 'Sat-Sun, Wed' },
+                    { label: 'Sat-Sun, Fri', value: 'Sat-Sun, Fri' },
                 ]}
                 style={pickerSelectStyles}
                 value={schedule}

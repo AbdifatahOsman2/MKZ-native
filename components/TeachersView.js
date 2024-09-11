@@ -96,7 +96,7 @@ const TeachersView = ({ navigation, route }) => {
                     <Image source={studentImage} style={styles.avatar} />
                     <Text style={styles.optionText}>{student.StudentName}</Text>
                   </View>
-                  <Icon name="chevron-right" size={20} color="#ccc" />
+                  <Icon name="chevron-right" size={20} color="#1B73E8" />
                 </TouchableOpacity>
               );
             })
