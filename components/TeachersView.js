@@ -41,6 +41,7 @@ const TeachersView = ({ navigation, route }) => {
     const maleImages = [maleImage, maleImage2];
     const femaleImages = [femaleImage, femaleImage2];
 
+    // Return a random image from the male or female images array
     if (gender === 'Male') {
       return maleImages[Math.floor(Math.random() * maleImages.length)];
     } else if (gender === 'Female') {
@@ -57,7 +58,13 @@ const TeachersView = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Students</Text>
+        <Text style={styles.headerTitle}>Home</Text>
+        <TouchableOpacity
+          style={styles.iconWrapper}
+          onPress={() => navigation.navigate('AddStudent')}
+        >
+          <Icon name="plus" size={16} color="#1B73E8" />
+        </TouchableOpacity>
       </View>
       <TextInput
         style={styles.searchBar}
@@ -144,6 +151,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     color: '#FFFFFF',
     fontSize: 16,
+  },
+  iconWrapper: {
+    padding: 8,
+    backgroundColor: '#000',
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: '#1B73E8',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   scrollContainer: {
     paddingBottom: 100,
