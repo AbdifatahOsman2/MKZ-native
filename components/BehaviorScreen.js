@@ -38,13 +38,17 @@ const BehaviorScreen = ({ route, navigation }) => {
     }
   };
 
+  const renderRightActions = (progress, dragX, behaviorId) => (
+    TeacherID ? (
+      <TouchableOpacity onPress={() => handleDeleteBehavior(behaviorId)} style={styles.deleteButton}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    ) : null // Only render the delete button if TeacherID is available
+  );
+
   const renderBehavior = ({ item }) => (
     <Swipeable
-      renderRightActions={() => (
-        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteBehavior(item.id)}>
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
-      )}
+      renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}
     >
       <View style={styles.itemContainer}>
         <View style={styles.row}>
@@ -55,7 +59,6 @@ const BehaviorScreen = ({ route, navigation }) => {
       </View>
     </Swipeable>
   );
-
   // Function to navigate to the add behavior screen
   const handleAddBehavior = () => {
     navigation.navigate('AddBehavior', { studentId: studentId });
@@ -78,7 +81,6 @@ const BehaviorScreen = ({ route, navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

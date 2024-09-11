@@ -1,12 +1,13 @@
-import React, { useLayoutEffect, useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { getStudentsData } from '../services/airtableService';
 
 // Images
 import maleImage from '../assets/M-1-Image.png'; 
 import femaleImage from '../assets/Fm1-Image.png';
+import maleImage2 from '../assets/M-2-Image.png'; 
+import femaleImage2 from '../assets/Fm-2-Image.png';
 import { deleteStudent } from '../services/airtableService';
 import lessonIcon from '../assets/Lessonbtn.png';  
 import behaviorIcon from '../assets/Behaviorbtn.png';
@@ -15,13 +16,7 @@ import commentIcon from '../assets/Commentbtn.png';
 
 const TeacherStudentDetailScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { student } = route.params;
-
-  useEffect(() => {
-    if (route.params?.reload) {
-      getStudentsData(); // Reload the data when navigated back from AddStudent
-    }
-  }, [route.params?.reload]);
+  const { student, studentImage } = route.params; // Use the passed studentImage
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -52,17 +47,20 @@ const TeacherStudentDetailScreen = ({ route }) => {
     );
   };
 
+  const commentsArray = student.Comment || [];
+  const teachersCommentArray = student.TeachersComment || [];
+
   // Combine Comments and their respective IDs
-  const combinedComments = student.Comment.map((comment, index) => ({
-    id: student.TeachersComment[index],  // Corresponding ID from TeachersComment array
-    comment: comment                     // The actual comment from the Comment array
+  const combinedComments = commentsArray.map((comment, index) => ({
+    id: teachersCommentArray[index], 
+    comment: comment    
   }));
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Image
-          source={student.Gender === 'Male' ? maleImage : femaleImage}
+          source={studentImage || (student.Gender === 'Male' ? maleImage : femaleImage)} // Use the passed image or fallback to default
           style={styles.profileImage}
         />
         <View style={styles.textContainer}>
@@ -113,7 +111,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Ensures the view takes up the full screen
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,

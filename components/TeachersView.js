@@ -4,24 +4,25 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudents } from '../services/airtableService';
 import maleImage from '../assets/M-1-Image.png';
 import femaleImage from '../assets/Fm1-Image.png';
+import maleImage2 from '../assets/M-2-Image.png';
+import femaleImage2 from '../assets/Fm-2-Image.png';
 
 const TeachersView = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true); // New state to track loading
+  const [loading, setLoading] = useState(true);
   const { TeacherID } = route.params;
-  const { ParentID } = route.params;
 
   const getStudentsData = async () => {
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
       const studentsData = await fetchStudents(null, TeacherID);
       setStudents(studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);
     } finally {
-      setLoading(false); // stop loading
+      setLoading(false);
     }
   };
 
@@ -34,6 +35,21 @@ const TeachersView = ({ navigation, route }) => {
     await getStudentsData();
     setRefreshing(false);
   }, []);
+
+  // Function to randomly pick an image based on gender
+  const getRandomImage = (gender) => {
+    const maleImages = [maleImage, maleImage2];
+    const femaleImages = [femaleImage, femaleImage2];
+
+    // Return a random image from the male or female images array
+    if (gender === 'Male') {
+      return maleImages[Math.floor(Math.random() * maleImages.length)];
+    } else if (gender === 'Female') {
+      return femaleImages[Math.floor(Math.random() * femaleImages.length)];
+    } else {
+      return null; // Fallback if no gender is specified
+    }
+  };
 
   const filteredStudents = searchQuery.length > 0
     ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -67,18 +83,23 @@ const TeachersView = ({ navigation, route }) => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {filteredStudents.length > 0 ? (
-            filteredStudents.map(student => (
-              <TouchableOpacity
-                key={student.id}
-                onPress={() => navigation.navigate('TeacherStudentDetail', { student })}
-                style={styles.studentContainer}
-              >
-                <View style={styles.avatarContainer}>
-                  <Image source={student.Gender === 'Male' ? maleImage : femaleImage} style={styles.avatar} />
-                </View>
-                <Text style={styles.studentName}>{student.StudentName}</Text>
-              </TouchableOpacity>
-            ))
+            filteredStudents.map(student => {
+              const studentImage = getRandomImage(student.Gender); // Get random image for the student
+              
+              return (
+                <TouchableOpacity
+                  key={student.id}
+                  onPress={() => navigation.navigate('TeacherStudentDetail', { student, studentImage })} // Pass the image along with student data
+                  style={styles.option}
+                >
+                  <View style={styles.optionContent}>
+                    <Image source={studentImage} style={styles.avatar} />
+                    <Text style={styles.optionText}>{student.StudentName}</Text>
+                  </View>
+                  <Icon name="chevron-right" size={20} color="#ccc" />
+                </TouchableOpacity>
+              );
+            })
           ) : (
             <Text style={styles.noStudentsAvailable}>No students available</Text>
           )}
@@ -98,7 +119,6 @@ const TeachersView = ({ navigation, route }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -140,39 +160,31 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   scrollContainer: {
-    paddingTop: 10,
     paddingBottom: 100,
   },
-  studentContainer: {
-    width: '90%',
-    minHeight: 100,
-    marginVertical: 10,
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    backgroundColor: '#1f2428',
-    alignSelf: 'center',
-    justifyContent: 'center',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  avatarContainer: {
+  option: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#fff',
+    marginHorizontal: 20,
+  },
+  optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   avatar: {
-    width: 75,
-    height: 83,
+    width: 50, // Smaller avatar size
+    height: 55,
     borderRadius: 25,
+    marginRight: 15, // Spacing between image and text
   },
-  studentName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
+  optionText: {
+    fontSize: 16,
+    color: '#fff',
   },
   noStudentsAvailable: {
     color: '#ccc',

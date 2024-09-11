@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal,Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker'; // New Date Picker
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { createBehavior } from '../services/airtableService';
@@ -12,20 +12,21 @@ const AddBehavior = ({ navigation, route }) => {
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  // Show Date Picker
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
 
-  // Hide Date Picker
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
 
-  // Handle Date Confirm
   const handleConfirm = (selectedDate) => {
     setDate(selectedDate);
     hideDatePicker();
+  };
+
+  const formatDate = (date) => {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
   };
 
   const handleSubmit = async () => {
@@ -36,7 +37,7 @@ const AddBehavior = ({ navigation, route }) => {
 
     const behaviorData = {
       Students: [studentId],
-      Date: date.toISOString().split('T')[0], // Format date to YYYY-MM-DD
+      Date: formatDate(date), 
       Behavior: behaviorDescription
     };
 
@@ -53,27 +54,23 @@ const AddBehavior = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Add Student Behavior</Text>
 
-      {/* Date Picker Button */}
       <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
         <Icon name="calendar-today" size={20} color="#fff" />
         <Text style={styles.datePickerText}>Pick Date</Text>
       </TouchableOpacity>
 
-      {/* Display selected date */}
-      <Text style={styles.dateDisplay}>Date: {date.toISOString().split('T')[0]}</Text>
+      <Text style={styles.dateDisplay}>Date: {formatDate(date)}</Text>
 
-      {/* Date Picker Modal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
         display={Platform.OS === 'ios' ? 'inline' : 'default'}
-        themeVariant="light" // Set light theme for DateTimePicker
-        textColor="#000" // Ensure text is visible for light theme
+        themeVariant="light"
+        textColor="#000" 
       />
 
-      {/* Behavior Description Input */}
       <TextInput
         placeholder="Behavior description"
         placeholderTextColor="#ccc"
@@ -85,15 +82,13 @@ const AddBehavior = ({ navigation, route }) => {
         style={styles.input}
       />
 
-      {/* Error Message */}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      {/* Submit Button */}
+
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit Behavior</Text>
       </TouchableOpacity>
 
-      {/* Success Modal */}
       {showConfirmationModal && (
         <Modal
           animationType="slide"

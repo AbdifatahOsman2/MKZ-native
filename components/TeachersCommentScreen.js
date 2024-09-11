@@ -5,7 +5,8 @@ import { deleteTeachersComment } from '../services/airtableService';
 
 const TeachersCommentScreen = ({ route, navigation }) => {
   const { TeacherID, comments } = route.params;
-  console.log(comments);
+  console.log("TeacherID: ", route.params);
+  console.log("comments: ", comments);
 
   // Combine comments and IDs (this comes from the previous screen)
   const formattedComments = Array.isArray(comments) ? comments.map((comment, index) => ({
@@ -24,8 +25,10 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     setModalVisible(true);
   };
 
-  // Handle comment deletion
+  // Handle comment deletion (only if TeacherID exists)
   const handleDeleteComment = async (commentId) => {
+    if (!TeacherID) return; // Prevent deletion if not a teacher
+
     Alert.alert(
       'Delete Comment',
       'Are you sure you want to delete this comment?',
@@ -55,8 +58,8 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     );
   };
 
-  // Render the swipeable right action to delete a comment
-  const renderRightActions = (progress, dragX, commentId) => (
+  // Render the swipeable right action to delete a comment (only for teachers)
+  const renderRightActions = (commentId) => (
     TeacherID ? (
       <TouchableOpacity onPress={() => handleDeleteComment(commentId)} style={styles.deleteButton}>
         <Text style={styles.deleteButtonText}>Delete</Text>
@@ -66,7 +69,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
 
   // Render each comment item
   const renderComment = ({ item }) => (
-    <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
+    <Swipeable renderRightActions={() => renderRightActions(item.id)}>
       <View style={styles.itemContainer}>
         <View style={styles.row}>
           <Text style={styles.commentText}>Teacher comment #{item.index + 1}</Text>
@@ -78,9 +81,11 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     </Swipeable>
   );
 
-  // Handle navigation to add new comment screen
+  // Handle navigation to add new comment screen (only for teachers)
   const handleAddComment = () => {
-    navigation.navigate('AddComment', { studentId: route.params.StudentID });
+    if (TeacherID) {
+      navigation.navigate('AddComment', { studentId: route.params.StudentID });
+    }
   };
 
   return (
@@ -117,7 +122,6 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

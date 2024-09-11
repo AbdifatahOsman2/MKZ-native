@@ -12,20 +12,24 @@ const AddTeachersComment = ({ navigation, route }) => {
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  // Show Date Picker
+ 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
 
-  // Hide Date Picker
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
 
-  // Handle Date Confirm
+
   const handleConfirm = (selectedDate) => {
     setDate(selectedDate);
     hideDatePicker();
+  };
+
+
+  const formatDate = (date) => {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
   };
 
   const handleSubmit = async () => {
@@ -36,13 +40,13 @@ const AddTeachersComment = ({ navigation, route }) => {
 
     const commentData = {
       Student: [studentId],
-      Date: date.toISOString().split('T')[0],
-      Comment: comment
+      Date: formatDate(date), 
+      Comment: `${comment} | ${formatDate(date)}` 
     };
 
     try {
       await createTeachersComment(commentData);
-      setShowConfirmationModal(true); // Show confirmation modal on success
+      setShowConfirmationModal(true);
     } catch (error) {
       console.error('Failed to create teacher\'s comment:', error);
       setError('Failed to submit comment. Please try again.');
@@ -53,47 +57,41 @@ const AddTeachersComment = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Add Teacher's Comment</Text>
 
-      {/* Date Picker Button */}
       <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
         <Icon name="calendar-today" size={20} color="#fff" />
         <Text style={styles.datePickerText}>Pick Date</Text>
       </TouchableOpacity>
+      
+      <Text style={styles.dateDisplay}>Date: {formatDate(date)}</Text>
 
-      {/* Display selected date */}
-      <Text style={styles.dateDisplay}>Date: {date.toISOString().split('T')[0]}</Text>
-
-      {/* Date Picker Modal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
         display={Platform.OS === 'ios' ? 'inline' : 'default'}
-        themeVariant="light" // Set light theme for DateTimePicker
-        textColor="#000" // Ensure text is visible for light theme
+        themeVariant="light" 
+        textColor="#000" 
       />
 
-      {/* Comment Input */}
       <TextInput
         placeholder="Teacher's comment"
         placeholderTextColor="#ccc"
         value={comment}
         onChangeText={text => {
           setComment(text);
-          setError(''); // Clear error when user starts typing
+          setError(''); 
         }}
         style={styles.input}
       />
 
-      {/* Error Message */}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      {/* Submit Button */}
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit Comment</Text>
       </TouchableOpacity>
 
-      {/* Success Modal */}
+
       {showConfirmationModal && (
         <Modal
           animationType="slide"

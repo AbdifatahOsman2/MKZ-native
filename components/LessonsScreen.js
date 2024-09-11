@@ -39,13 +39,17 @@ const LessonsScreen = ({ route, navigation }) => {
     }
   };
 
+  const renderRightActions = (progress, dragX, lessonId) => (
+    TeacherID ? (
+      <TouchableOpacity onPress={() => handleDeleteLesson(lessonId)} style={styles.deleteButton}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    ) : null // Only render the delete button if TeacherID is available
+  );
+
   const renderLesson = ({ item }) => (
     <Swipeable
-      renderRightActions={() => (
-        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteLesson(item.id)}>
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
-      )}
+      renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}
     >
       <View style={styles.itemContainer}>
         <View style={styles.textContainer}>

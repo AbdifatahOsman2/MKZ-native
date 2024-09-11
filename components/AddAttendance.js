@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
-import DateTimePickerModal from 'react-native-modal-datetime-picker'; // New Date Picker
+import DateTimePickerModal from 'react-native-modal-datetime-picker'; 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { createAttendance } from '../services/airtableService';
 
@@ -12,7 +12,6 @@ const AddAttendance = ({ navigation, route }) => {
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  // Show Date Picker
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -28,6 +27,11 @@ const AddAttendance = ({ navigation, route }) => {
     hideDatePicker();
   };
 
+  // Format date in local time zone to prevent the date from incrementing
+  const formatDate = (date) => {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  };
+
   const handleSubmit = async () => {
     if (!attendanceStatus.trim()) {
       setError('Please enter an attendance status.');
@@ -36,13 +40,13 @@ const AddAttendance = ({ navigation, route }) => {
 
     const attendanceData = {
       Students: [studentId],
-      Date: date.toISOString().split('T')[0], // Format date to YYYY-MM-DD
+      Date: formatDate(date),
       Attendance: attendanceStatus
     };
 
     try {
       await createAttendance(attendanceData);
-      setShowConfirmationModal(true); // Show confirmation modal on successful submission
+      setShowConfirmationModal(true);
     } catch (error) {
       console.error('Failed to create attendance:', error);
       setError('Failed to submit attendance. Please try again.');
@@ -53,16 +57,13 @@ const AddAttendance = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Add Student Attendance</Text>
 
-      {/* Date Picker Button */}
       <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
         <Icon name="calendar-today" size={20} color="#fff" />
         <Text style={styles.datePickerText}>Pick Date</Text>
       </TouchableOpacity>
 
-      {/* Display selected date */}
-      <Text style={styles.dateDisplay}>Date: {date.toISOString().split('T')[0]}</Text>
+      <Text style={styles.dateDisplay}>Date: {formatDate(date)}</Text>
 
-      {/* Date Picker Modal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"

@@ -1,24 +1,28 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudents } from '../services/airtableService';
 import maleImage from '../assets/M-1-Image.png';
 import femaleImage from '../assets/Fm1-Image.png';
+import maleImage2 from '../assets/M-2-Image.png';
+import femaleImage2 from '../assets/Fm-2-Image.png';
 
 const StudentListScreen = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
   const { ParentID } = route.params;
-
-  
 
   const getStudentsData = async () => {
     try {
+      setLoading(true);
       const studentsData = await fetchStudents(ParentID);
       setStudents(studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,6 +36,21 @@ const StudentListScreen = ({ navigation, route }) => {
     setRefreshing(false);
   }, []);
 
+  // Function to randomly pick an image based on gender
+  const getRandomImage = (gender) => {
+    const maleImages = [maleImage, maleImage2];
+    const femaleImages = [femaleImage, femaleImage2];
+
+    // Return a random image from the male or female images array
+    if (gender === 'Male') {
+      return maleImages[Math.floor(Math.random() * maleImages.length)];
+    } else if (gender === 'Female') {
+      return femaleImages[Math.floor(Math.random() * femaleImages.length)];
+    } else {
+      return null; // Fallback if no gender is specified
+    }
+  };
+
   const filteredStudents = searchQuery.length > 0
     ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
     : students;
@@ -40,7 +59,6 @@ const StudentListScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Students</Text>
-
       </View>
       <TextInput
         style={styles.searchBar}
@@ -49,32 +67,43 @@ const StudentListScreen = ({ navigation, route }) => {
         placeholder="Search Students"
         placeholderTextColor="#ccc"
       />
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        {filteredStudents.length > 0 ? (
-          filteredStudents.map(student => (
-            <TouchableOpacity
-              key={student.id}
-              onPress={() => navigation.navigate('StudentDetail', { student })}
-              style={styles.studentContainer}
-            >
-              <View style={styles.avatarContainer}>
-                <Image source={student.Gender === 'Male' ? maleImage : femaleImage} style={styles.avatar} />
-              </View>
-              <Text style={styles.studentName}>{student.StudentName}</Text>
-            </TouchableOpacity>
-          ))
-        ) : (
-          <Text style={styles.noStudentsAvailable}>No students available</Text>
-        )}
-      </ScrollView>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007BFF" />
+        </View>
+      ) : (
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          {filteredStudents.length > 0 ? (
+            filteredStudents.map(student => {
+              const studentImage = getRandomImage(student.Gender); // Get random image for the student
+              
+              return (
+                <TouchableOpacity
+                  key={student.id}
+                  onPress={() => navigation.navigate('StudentDetail', { student, studentImage })} // Pass the image along with student data
+                  style={styles.option}
+                >
+                  <View style={styles.optionContent}>
+                    <Image source={studentImage} style={styles.avatar} />
+                    <Text style={styles.optionText}>{student.StudentName}</Text>
+                  </View>
+                  <Icon name="chevron-right" size={20} color="#ccc" />
+                </TouchableOpacity>
+              );
+            })
+          ) : (
+            <Text style={styles.noStudentsAvailable}>No students available</Text>
+          )}
+        </ScrollView>
+      )}
       <View style={styles.bottomNav}>
-      <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID: ParentID })} >
-      <Icon name="home" size={24} color="#fafbfc" />
-    </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage', { ParentID: ParentID })}>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID })}>
+          <Icon name="home" size={24} color="#fafbfc" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage', { ParentID })}>
           <Icon name="cog" size={24} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('NotificationPage')}>
@@ -114,36 +143,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   scrollContainer: {
-    paddingTop: 10,
     paddingBottom: 100,
   },
-  studentContainer: {
-    backgroundColor: '#1f2428',
-    borderRadius: 10,
-    padding: 20,
+  option: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#fff',
     marginHorizontal: 20,
-    marginBottom: 10,
+  },
+  optionContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatarContainer: {
-    marginRight: 15,
-  },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 50, // Smaller avatar size
+    height: 55,
     borderRadius: 25,
+    marginRight: 15, // Spacing between image and text
   },
-  studentName: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+  optionText: {
+    fontSize: 16,
+    color: '#fff',
   },
   noStudentsAvailable: {
     color: '#ccc',
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   bottomNav: {
     flexDirection: 'row',
@@ -159,7 +194,6 @@ const styles = StyleSheet.create({
   bottomNavIcon: {
     marginBottom: 10,
   },
-  
 });
 
 export default StudentListScreen;

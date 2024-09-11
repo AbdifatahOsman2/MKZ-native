@@ -10,13 +10,19 @@ import attendanceIcon from '../assets/Attendancebtn.png';
 import commentIcon from '../assets/Commentbtn.png';
 
 const StudentDetailScreen = ({ route, navigation }) => {
-  const { student } = route.params;
+  const { student, studentImage } = route.params;  // Retrieve studentImage from route params
+
+  // Combine Comments and their respective IDs
+  const combinedComments = student.Comment.map((comment, index) => ({
+    id: student.TeachersComment[index],  // Corresponding ID from TeachersComment array
+    comment: comment                     // The actual comment from the Comment array
+  }));
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Image
-          source={student.Gender === 'Male' ? maleImage : femaleImage}
+          source={studentImage || (student.Gender === 'Male' ? maleImage : femaleImage)} // Use passed studentImage or fallback
           style={styles.profileImage}
         />
         <View style={styles.textContainer}>
@@ -48,6 +54,7 @@ const StudentDetailScreen = ({ route, navigation }) => {
             <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
           </TouchableOpacity>
         )}
+
         {student.AttendanceData && (
           <TouchableOpacity
             style={styles.button}
@@ -58,10 +65,10 @@ const StudentDetailScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         )}
 
-        {student.CommentData && (
+        {combinedComments.length > 0 && (
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('TeachersComment', { comments: student.CommentData, cm : student.Comment })}
+            onPress={() => navigation.navigate('TeachersComment', { comments: combinedComments, StudentID: student.id })}
           >
             <Image source={commentIcon} style={styles.buttonIcon} />
             <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>
@@ -71,7 +78,6 @@ const StudentDetailScreen = ({ route, navigation }) => {
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,

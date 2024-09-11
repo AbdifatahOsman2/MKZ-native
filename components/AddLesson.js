@@ -18,12 +18,10 @@ const AddLesson = ({ navigation, route }) => {
     setDatePickerVisibility(true);
   };
 
-  // Hide Date Picker
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
 
-  // Handle Date Confirm
   const handleConfirm = (selectedDate) => {
     setDate(selectedDate);
     hideDatePicker();
@@ -34,13 +32,15 @@ const AddLesson = ({ navigation, route }) => {
       setError('Please specify if passed or not.');
       return;
     }
-
+  
+    const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  
     const lessonData = {
       Students: [studentId],
-      Date: date.toISOString().split('T')[0],
+      Date: formattedDate,
       Passed: passed
     };
-
+  
     try {
       await createLesson(lessonData);
       setShowConfirmationModal(true);
@@ -49,6 +49,7 @@ const AddLesson = ({ navigation, route }) => {
       setError('Failed to submit lesson. Please try again.');
     }
   };
+  
 
   return (
     <View style={styles.container}>
