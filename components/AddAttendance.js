@@ -8,7 +8,7 @@ import { createAttendance } from '../services/airtableService';
 const AddAttendance = ({ navigation, route }) => {
   const { studentId } = route.params;
   const [date, setDate] = useState(new Date());
-  const [attendanceStatus, setAttendanceStatus] = useState('');
+  const [attendanceStatus, setAttendanceStatus] = useState('Present');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);

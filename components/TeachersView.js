@@ -41,7 +41,6 @@ const TeachersView = ({ navigation, route }) => {
     const maleImages = [maleImage, maleImage2];
     const femaleImages = [femaleImage, femaleImage2];
 
-    // Return a random image from the male or female images array
     if (gender === 'Male') {
       return maleImages[Math.floor(Math.random() * maleImages.length)];
     } else if (gender === 'Female') {
@@ -58,13 +57,7 @@ const TeachersView = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Home</Text>
-        <TouchableOpacity
-          style={styles.iconWrapper}
-          onPress={() => navigation.navigate('AddStudent')}
-        >
-          <Icon name="plus" size={10} color="#007BFF" />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Students</Text>
       </View>
       <TextInput
         style={styles.searchBar}
@@ -75,7 +68,7 @@ const TeachersView = ({ navigation, route }) => {
       />
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007BFF" />
+          <ActivityIndicator size="large" color="#1B73E8" />
         </View>
       ) : (
         <ScrollView
@@ -87,17 +80,21 @@ const TeachersView = ({ navigation, route }) => {
               const studentImage = getRandomImage(student.Gender); // Get random image for the student
               
               return (
-                <TouchableOpacity
-                  key={student.id}
-                  onPress={() => navigation.navigate('TeacherStudentDetail', { student, studentImage })} // Pass the image along with student data
-                  style={styles.option}
-                >
-                  <View style={styles.optionContent}>
-                    <Image source={studentImage} style={styles.avatar} />
-                    <Text style={styles.optionText}>{student.StudentName}</Text>
-                  </View>
-                  <Icon name="chevron-right" size={20} color="#1B73E8" />
-                </TouchableOpacity>
+                <View key={student.id} style={styles.card}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('TeacherStudentDetail', { student, studentImage })} // Pass the image along with student data
+                  >
+                    <View style={styles.cardContent}>
+                      <Image source={studentImage} style={styles.avatar} />
+                      <View style={styles.textContent}>
+                        <Text style={styles.cardTitle}>{student.StudentName}</Text>
+                        <Text style={styles.cardText}>Age: {student.Age}</Text>
+                        <Text style={styles.cardText}>Class: {student.class}</Text>
+                      </View>
+                      <Icon name="chevron-right" size={20} color="#1B73E8" />
+                    </View>
+                  </TouchableOpacity>
+                </View>
               );
             })
           ) : (
@@ -119,6 +116,7 @@ const TeachersView = ({ navigation, route }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -147,44 +145,44 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
   },
-  iconWrapper: {
-    padding: 8,
-    backgroundColor: '#000',
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: '#007BFF',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-  },
   scrollContainer: {
     paddingBottom: 100,
   },
-  option: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#fff',
+  card: {
+    marginTop: 20, 
     marginHorizontal: 20,
+    padding: 15,
+    backgroundColor: '#1f2428',
+    borderRadius: 10,
+    shadowColor: '#fafbfc',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  optionContent: {
+  cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   avatar: {
-    width: 50, // Smaller avatar size
-    height: 55,
-    borderRadius: 25,
-    marginRight: 15, // Spacing between image and text
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 15,
   },
-  optionText: {
-    fontSize: 16,
-    color: '#fff',
+  textContent: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fafbfc',
+    marginBottom: 3,
+  },
+  cardText: {
+    fontSize: 14,
+    color: '#cccccc',
   },
   noStudentsAvailable: {
     color: '#ccc',
@@ -205,7 +203,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 100,
+    height: 80,
     backgroundColor: '#1f2428',
   },
   bottomNavIcon: {
