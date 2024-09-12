@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { getAuth, signOut } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,13 +10,17 @@ const SettingsPage = ({ navigation, route }) => {
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        // Redirect to login screen after successful logout
-        navigation.replace('AuthScreen');
+        // Reset navigation stack and redirect to login screen after successful logout
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'AuthScreen' }],
+        });
       })
       .catch((error) => {
         Alert.alert('Logout Error', error.message);
       });
   };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
