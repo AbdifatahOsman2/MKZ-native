@@ -2,17 +2,14 @@ import React, { useLayoutEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-
+import Icon from 'react-native-vector-icons/FontAwesome6';
 // Images
 import maleImage from '../assets/M-1-Image.png'; 
 import femaleImage from '../assets/Fm1-Image.png';
 import maleImage2 from '../assets/M-2-Image.png'; 
 import femaleImage2 from '../assets/Fm-2-Image.png';
 import { deleteStudent } from '../services/airtableService';
-import lessonIcon from '../assets/Lessonbtn.png';  
-import behaviorIcon from '../assets/Behaviorbtn.png';
-import attendanceIcon from '../assets/Attendancebtn.png';
-import commentIcon from '../assets/Commentbtn.png';
+
 
 const TeacherStudentDetailScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -77,7 +74,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
           style={styles.button}
           onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData, TeacherID: student.TeacherID, StudentID: student.id })}
         >
-          <Image source={lessonIcon} style={styles.buttonIcon} />
+        <Icon name="book-quran" size={45} style={{paddingVertical: 10}} color="#0D1321" />
           <Text style={styles.buttonText}>Lessons</Text>
         </TouchableOpacity>
 
@@ -85,7 +82,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
           style={styles.button}
           onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData, TeacherID: student.TeacherID, StudentID: student.id })}
         >
-          <Image source={behaviorIcon} style={styles.buttonIcon} />
+        <Icon name="face-meh-blank" size={50} style={{paddingVertical: 10}} color="#788AA3" />
           <Text style={styles.buttonText}>Behavior</Text>
         </TouchableOpacity>
 
@@ -93,7 +90,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
           style={styles.button}
           onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData, TeacherID: student.TeacherID, StudentID: student.id })}
         >
-          <Image source={attendanceIcon} style={styles.buttonIcon} />
+        <Icon name="calendar-days" size={50} style={{paddingVertical: 10}} color="#91AB3B" />
           <Text style={styles.buttonText}>Attendance</Text>
         </TouchableOpacity>
 
@@ -101,7 +98,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
           style={styles.button}
           onPress={() => navigation.navigate('TeachersComment', { comments: combinedComments, TeacherID: student.TeacherID, StudentID: student.id })}
         >
-          <Image source={commentIcon} style={styles.buttonIcon} />
+        <Icon name="pen-clip" size={45} style={{paddingVertical: 10}} color="#502977" />
           <Text style={styles.buttonText}>Teacher Comments</Text>
         </TouchableOpacity>
       </View>
@@ -173,6 +170,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 14,
+    fontWeight: 'heavy',
     color: '#FFF',
     textAlign: 'center',
   },

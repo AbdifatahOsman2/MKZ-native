@@ -1,17 +1,38 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, Button, TouchableOpacity, Alert } from 'react-native';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { deleteBehavior } from '../services/airtableService';
+import Icon from 'react-native-vector-icons/FontAwesome6'; // Import FontAwesome6 for icons
+import { Ionicons } from '@expo/vector-icons'; // For the plus icon
+import { useNavigation } from '@react-navigation/native';
 
-const BehaviorScreen = ({ route, navigation }) => {
+const BehaviorScreen = ({ route }) => {
+  const navigation = useNavigation();
   const { behaviors: initialBehaviors, TeacherID } = route.params;
   const studentId = route.params.StudentID;
-  const [behaviors, setBehaviors] = useState(initialBehaviors); // Track behaviors in state
+  const [behaviors, setBehaviors] = useState(initialBehaviors);
+
+  // Set header with back button and plus icon
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 10 }}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+      ),
+      headerRight: TeacherID
+        ? () => (
+            <TouchableOpacity onPress={handleAddBehavior} style={{ paddingRight: 10 }}>
+              <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          )
+        : null,
+    });
+  }, [navigation, TeacherID]);
 
   // Handle behavior deletion with proper promise handling
   const handleDeleteBehavior = async (behaviorId) => {
     try {
-      // Confirm deletion with the user
       Alert.alert(
         'Delete Behavior',
         'Are you sure you want to delete this behavior?',
@@ -21,12 +42,8 @@ const BehaviorScreen = ({ route, navigation }) => {
             text: 'Delete', 
             style: 'destructive', 
             onPress: async () => {
-              await deleteBehavior([behaviorId]); // Send as an array, as per the deleteBehavior function
-              
-              // Filter out the deleted behavior from the local state
+              await deleteBehavior([behaviorId]); 
               setBehaviors((prevBehaviors) => prevBehaviors.filter((behavior) => behavior.id !== behaviorId));
-
-              // Notify the user
               Alert.alert('Success', 'Behavior deleted successfully');
             }
           }
@@ -38,12 +55,25 @@ const BehaviorScreen = ({ route, navigation }) => {
     }
   };
 
+  // Function to conditionally render the icon based on behavior text
+  const getBehaviorIcon = (behaviorText) => {
+    if (behaviorText.toLowerCase().includes('good')) {
+      return <Icon name="face-laugh" size={30} color="#4CAF50" />;
+    }else if (behaviorText.toLowerCase().includes('excellent')) {
+      return <Icon name="face-grin-stars" size={30} color="#F1E0A4" />;
+    } else if (behaviorText.toLowerCase().includes('bad')) {
+      return <Icon name="face-frown-open" size={30} color="#F1A4A4" />;
+    } else {
+      return <Icon name="face-meh" size={30} color="#A4CFF1" />; // Default neutral icon
+    }
+  };
+
   const renderRightActions = (progress, dragX, behaviorId) => (
     TeacherID ? (
       <TouchableOpacity onPress={() => handleDeleteBehavior(behaviorId)} style={styles.deleteButton}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
-    ) : null // Only render the delete button if TeacherID is available
+    ) : null
   );
 
   const renderBehavior = ({ item }) => (
@@ -53,12 +83,15 @@ const BehaviorScreen = ({ route, navigation }) => {
       <View style={styles.itemContainer}>
         <View style={styles.row}>
           <Text style={styles.dateText}>{item.Date}</Text>
-          <Text style={styles.behaviorText}>Behavior:</Text>
+          <Text style={styles.behaviorText}>Behavior</Text>
           <Text style={styles.statusText}>{item.Behavior}</Text>
+          {/* Render the appropriate icon based on behavior text */}
+          {getBehaviorIcon(item.Behavior)}
         </View>
       </View>
     </Swipeable>
   );
+
   // Function to navigate to the add behavior screen
   const handleAddBehavior = () => {
     navigation.navigate('AddBehavior', { studentId: studentId });
@@ -66,13 +99,6 @@ const BehaviorScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {TeacherID && (
-        <Button
-          title="Add New Behavior"
-          onPress={handleAddBehavior}
-          color="#007BFF"
-        />
-      )}
       <FlatList
         data={behaviors}
         renderItem={renderBehavior}
@@ -81,6 +107,7 @@ const BehaviorScreen = ({ route, navigation }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -94,26 +121,28 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center', // Center contents horizontally
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-around', // Space items evenly
+    width: '100%', // Ensure items take full width
   },
   dateText: {
     fontSize: 16,
-    color: '#FFF', 
+    color: '#FFF',
     paddingVertical: 10
   },
   behaviorText: {
     fontSize: 16,
-    color: '#FFF', 
-    paddingHorizontal: 4,
+    color: '#FFF',
+    paddingHorizontal: 8,
   },
   statusText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFF', 
+    color: '#FFF',
     paddingHorizontal: 4,
   },
   deleteButton: {

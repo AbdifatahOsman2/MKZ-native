@@ -1,10 +1,22 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Alert } from 'react-native';
 
 const NotificationPage = ({ navigation }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [comment, setComment] = useState('');
 
-  const handleCustomizePress = () => {
-    Alert.alert("notif");
+  const handleInput = () => {
+    setModalVisible(true); // Show the modal when the button is pressed
+  };
+
+  const handleSubmit = () => {
+    if (comment.trim() === '') {
+      Alert.alert('Error', 'Please enter a comment.');
+    } else {
+      Alert.alert('Comment Submitted', comment);
+      setComment(''); // Clear the input field after submission
+      setModalVisible(false); // Close the modal after submission
+    }
   };
 
   return (
@@ -17,10 +29,42 @@ const NotificationPage = ({ navigation }) => {
         <Text style={styles.cardText}>
           Set up push notifications, schedules, and customize swipe options.
         </Text>
-        <TouchableOpacity style={styles.button} onPress={handleCustomizePress}>
+        <TouchableOpacity style={styles.button} onPress={handleInput}>
           <Text style={styles.buttonText}>Customize your experience</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal for Input */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false); // Close modal if the user clicks outside
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Enter your comment:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Write a comment..."
+              placeholderTextColor="#ccc"
+              value={comment}
+              onChangeText={setComment}
+            />
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -74,6 +118,62 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fafbfc',
+    textAlign: 'center',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    backgroundColor: '#1f2428',
+    borderRadius: 8,
+    padding: 20,
+    width: '80%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    color: '#fff',
+    fontSize: 18,
+    marginBottom: 15,
+  },
+  input: {
+    backgroundColor: '#1f2428',
+    color: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    width: '100%',
+    marginBottom: 20,
+    padding: 10,
+  },
+  submitButton: {
+    backgroundColor: '#1B73E8',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#ff0033',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 16,
     textAlign: 'center',
   },
 });

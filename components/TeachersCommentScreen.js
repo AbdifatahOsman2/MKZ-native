@@ -1,21 +1,44 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal, Button, Alert } from 'react-native';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { deleteTeachersComment } from '../services/airtableService';
+import { Ionicons } from '@expo/vector-icons'; // For the plus and back icons
+import { useNavigation } from '@react-navigation/native';
 
-const TeachersCommentScreen = ({ route, navigation }) => {
+const TeachersCommentScreen = ({ route }) => {
+  const navigation = useNavigation();
   const { TeacherID, comments } = route.params;
 
   // Combine comments and IDs (this comes from the previous screen)
-  const formattedComments = Array.isArray(comments) ? comments.map((comment, index) => ({
-    id: comment.id,  // Airtable record ID
-    comment: comment.comment,  // Comment text
-    index: index, // For display purposes
-  })) : [];
+  const formattedComments = Array.isArray(comments)
+    ? comments.map((comment, index) => ({
+        id: comment.id,  // Airtable record ID
+        comment: comment.comment,  // Comment text
+        index: index, // For display purposes
+      }))
+    : [];
 
   const [comment, setComments] = useState(formattedComments);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComment, setSelectedComment] = useState(null);
+
+  // Set header with back button and plus icon
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 10 }}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+      ),
+      headerRight: TeacherID
+        ? () => (
+            <TouchableOpacity onPress={handleAddComment} style={{ paddingRight: 10 }}>
+              <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          )
+        : null,
+    });
+  }, [navigation, TeacherID]);
 
   // Open modal to view comment details
   const openModal = (comment) => {
@@ -50,8 +73,8 @@ const TeachersCommentScreen = ({ route, navigation }) => {
               console.error('Error deleting comment:', error);
               Alert.alert('Error', 'Failed to delete comment. Please try again.');
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -88,13 +111,6 @@ const TeachersCommentScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {TeacherID && (
-        <Button
-          title="Add New Comment"
-          onPress={handleAddComment}
-          color="#007BFF"
-        />
-      )}
       <FlatList
         data={comment}
         renderItem={renderComment}
@@ -120,6 +136,7 @@ const TeachersCommentScreen = ({ route, navigation }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -144,7 +161,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   commentText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#FFF',
   },
@@ -189,7 +206,7 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: 'white',
     fontWeight: 'bold',
-  }
+  },
 });
 
 export default TeachersCommentScreen;

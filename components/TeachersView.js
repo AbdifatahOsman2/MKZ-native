@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import { fetchStudents } from '../services/airtableService';
 import maleImage from '../assets/M-1-Image.png';
 import femaleImage from '../assets/Fm1-Image.png';
@@ -63,7 +63,7 @@ const TeachersView = ({ navigation, route }) => {
           style={styles.iconWrapper}
           onPress={() => navigation.navigate('AddStudent')}
         >
-          <Icon name="plus" size={16} color="#1B73E8" />
+          <Icon name="plus" size={23} color="#1B73E8" />
         </TouchableOpacity>
       </View>
       <TextInput
@@ -153,16 +153,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   iconWrapper: {
-    padding: 8,
-    backgroundColor: '#000',
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: '#1B73E8',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    paddingHorizontal: 18,
+
   },
   scrollContainer: {
     paddingBottom: 100,

@@ -1,13 +1,34 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, Image, Button, TouchableOpacity, Alert } from 'react-native';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import openQuran from '../assets/openQuran.png';
 import { deleteLesson } from '../services/airtableService';
+import Icon from 'react-native-vector-icons/FontAwesome6'; // Using FontAwesome6
+import { Ionicons } from '@expo/vector-icons'; // For the plus icon
+import { useNavigation } from '@react-navigation/native';
 
-const LessonsScreen = ({ route, navigation }) => {
+const LessonsScreen = ({ route }) => {
+  const navigation = useNavigation();
   const { lessons: initialLessons, TeacherID } = route.params;
   const studentId = route.params.StudentID;
   const [lessons, setLessons] = useState(initialLessons); // Track lessons in state
+
+  // Set header with back button and plus icon
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 10 }}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+      ),
+      headerRight: TeacherID
+        ? () => (
+            <TouchableOpacity onPress={handleAddLesson} style={{ paddingRight: 10 }}>
+              <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          )
+        : null,
+    });
+  }, [navigation, TeacherID]);
 
   // Handle lesson deletion with proper promise handling
   const handleDeleteLesson = async (lessonId) => {
@@ -39,6 +60,19 @@ const LessonsScreen = ({ route, navigation }) => {
     }
   };
 
+  // Function to conditionally render the appropriate icon
+  const getLessonIcon = (status) => {
+    switch (status) {
+      case 'Passed Full':
+        return <Icon name="book-open" size={30} color="#A4F1D5" />;
+      case 'Passed Half':
+        return <Icon name="book-open-reader" size={30} color="#A4CFF1" />;
+      case 'Passed None':
+      default:
+        return <Icon name="book-quran" size={30} color="#F1A4A4" />;
+    }
+  };
+
   const renderRightActions = (progress, dragX, lessonId) => (
     TeacherID ? (
       <TouchableOpacity onPress={() => handleDeleteLesson(lessonId)} style={styles.deleteButton}>
@@ -56,10 +90,8 @@ const LessonsScreen = ({ route, navigation }) => {
           <Text style={styles.lessonDate}>{item.Date}</Text>
           <Text style={styles.lessonStatus}>{item['Passed']}</Text>
         </View>
-        <Image
-          source={openQuran}
-          style={styles.icon}
-        />
+        {/* Render icon based on lesson status */}
+        {getLessonIcon(item['Passed'])}
       </View>
     </Swipeable>
   );
@@ -71,13 +103,6 @@ const LessonsScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {TeacherID && (
-        <Button
-          title="Add New Lesson"
-          onPress={handleAddLesson}
-          color="#2dba4e"
-        />
-      )}
       <FlatList
         data={lessons}
         renderItem={renderLesson}
@@ -101,11 +126,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between' // Changed to 'between' to add space for swipe button
+    justifyContent: 'space-around', // Changed to 'around' to add space for swipe button
   },
   textContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   lessonDate: {
     marginRight: 20,
@@ -118,8 +144,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   icon: {
-    width: 24,
-    height: 24,
+    width: 27,
+    height: 27,
   },
   deleteButton: {
     backgroundColor: 'red', // Red delete button

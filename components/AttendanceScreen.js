@@ -1,12 +1,33 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, Button, TouchableOpacity, Alert } from 'react-native';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { deleteAttendance } from '../services/airtableService';
+import { Ionicons } from '@expo/vector-icons'; // For the plus and back icons
+import { useNavigation } from '@react-navigation/native';
 
-const AttendanceScreen = ({ route, navigation }) => {
+const AttendanceScreen = ({ route }) => {
+  const navigation = useNavigation();
   const { attendances: initialAttendances, TeacherID } = route.params;
   const studentId = route.params.StudentID;
   const [attendances, setAttendances] = useState(initialAttendances); // Manage attendances in state
+
+  // Set header with back button and plus icon
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 10 }}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+      ),
+      headerRight: TeacherID
+        ? () => (
+            <TouchableOpacity onPress={handleAddAttendance} style={{ paddingRight: 10 }}>
+              <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          )
+        : null,
+    });
+  }, [navigation, TeacherID]);
 
   // Handle attendance deletion with proper confirmation and state update
   const handleDeleteAttendance = async (attendanceId) => {
@@ -58,13 +79,6 @@ const AttendanceScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {TeacherID && (
-        <Button
-          title="Add New Attendance"
-          onPress={handleAddAttendance}
-          color="#007BFF"
-        />
-      )}
       <FlatList
         data={attendances}
         renderItem={renderAttendance}

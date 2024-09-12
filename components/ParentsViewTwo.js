@@ -3,12 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'rea
 // img
 import maleImage from '../assets/M-1-Image.png'; 
 import femaleImage from '../assets/Fm1-Image.png';
-
-import lessonIcon from '../assets/Lessonbtn.png';  
-import behaviorIcon from '../assets/Behaviorbtn.png';
-import attendanceIcon from '../assets/Attendancebtn.png';
-import commentIcon from '../assets/Commentbtn.png';
-
+import Icon from 'react-native-vector-icons/FontAwesome6';
 const StudentDetailScreen = ({ route, navigation }) => {
   const { student, studentImage } = route.params;  // Retrieve studentImage from route params
 
@@ -40,7 +35,7 @@ const StudentDetailScreen = ({ route, navigation }) => {
             style={styles.button}
             onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData })}
           >
-            <Image source={lessonIcon} style={styles.buttonIcon} />
+          <Icon name="book-quran" size={45} style={{paddingVertical: 10}} color="#0D1321" />
             <Text style={styles.buttonText}>Lesson / Cashar</Text>
           </TouchableOpacity>
         )}
@@ -50,8 +45,8 @@ const StudentDetailScreen = ({ route, navigation }) => {
             style={styles.button}
             onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData })}
           >
-            <Image source={behaviorIcon} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>Behavior / dhaaqanka ardayga</Text>
+          <Icon name="face-meh-blank" size={50} style={{paddingVertical: 10}} color="#788AA3" />
+            <Text style={styles.buttonText}>Behavior</Text>
           </TouchableOpacity>
         )}
 
@@ -60,8 +55,8 @@ const StudentDetailScreen = ({ route, navigation }) => {
             style={styles.button}
             onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData })}
           >
-            <Image source={attendanceIcon} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>Attendance / imaanaha</Text>
+          <Icon name="calendar-days" size={50} style={{paddingVertical: 10}} color="#91AB3B" />
+            <Text style={styles.buttonText}>Attendance</Text>
           </TouchableOpacity>
         )}
 
@@ -70,8 +65,8 @@ const StudentDetailScreen = ({ route, navigation }) => {
             style={styles.button}
             onPress={() => navigation.navigate('TeachersComment', { comments: combinedComments, StudentID: student.id })}
           >
-            <Image source={commentIcon} style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>Teacher Comment / Faallo Macallinka</Text>
+          <Icon name="pen-clip" size={45} style={{paddingVertical: 10}} color="#502977" />
+            <Text style={styles.buttonText}>Teacher Comment</Text>
           </TouchableOpacity>
         )}
       </View>
