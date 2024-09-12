@@ -18,21 +18,21 @@ const NotificationPage = ({ navigation }) => {
       setModalVisible(false); // Close the modal after submission
     }
   };
-
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notifications</Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Customize your notification experience</Text>
-        <Text style={styles.cardText}>
-          Set up push notifications, schedules, and customize swipe options.
-        </Text>
-        <TouchableOpacity style={styles.button} onPress={handleInput}>
-          <Text style={styles.buttonText}>Customize your experience</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.header}>
+    <Text style={styles.headerTitle}>Send Us Your Feedback</Text>
+  </View>
+  <View style={styles.card}>
+    <Text style={styles.cardTitle}>Help Improve Our App</Text>
+    <Text style={styles.cardText}>
+      We value your feedback! Share your thoughts and suggestions to help us enhance your experience.
+    </Text>
+    <TouchableOpacity style={styles.button} onPress={handleInput}>
+      <Text style={styles.buttonText}>Submit Feedback</Text>
+    </TouchableOpacity>
+  </View>
+  
 
       {/* Modal for Input */}
       <Modal

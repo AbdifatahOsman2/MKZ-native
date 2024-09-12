@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { deleteAttendance } from '../services/airtableService';
+import { deleteAttendance, fetchAttendance } from '../services/airtableService'; // Assuming fetchAttendance exists
 import { Ionicons } from '@expo/vector-icons'; // For the plus and back icons
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const AttendanceScreen = ({ route }) => {
   const navigation = useNavigation();
   const { attendances: initialAttendances, TeacherID } = route.params;
   const studentId = route.params.StudentID;
   const [attendances, setAttendances] = useState(initialAttendances); // Manage attendances in state
+  const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
 
   // Set header with back button and plus icon
   React.useLayoutEffect(() => {
@@ -62,20 +63,47 @@ const AttendanceScreen = ({ route }) => {
     ) : null // Only render the delete button if TeacherID is available
   );
 
-  const renderAttendance = ({ item }) => (
-    <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
-      <View style={styles.itemContainer}>
-        <View style={styles.row}>
-          <Text style={styles.dateText}>{item.Date}</Text>
-          <Text style={styles.statusText}>{item.Attendance}</Text>
+  const renderAttendance = ({ item }) => {
+    // Determine the color based on attendance status
+    const statusColor = item.Attendance === 'Present' ? styles.presentStatus : styles.notPresentStatus;
+
+    return (
+      <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
+        <View style={styles.itemContainer}>
+          <View style={styles.row}>
+            <Text style={styles.dateText}>{item.Date}</Text>
+            <Text style={[styles.statusText, statusColor]}>{item.Attendance}</Text>
+          </View>
         </View>
-      </View>
-    </Swipeable>
-  );
+      </Swipeable>
+    );
+  };
 
   const handleAddAttendance = () => {
     navigation.navigate('AddAttendance', { studentId });
   };
+
+  // Function to handle refresh action
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Fetch new data for attendances (replace with your data fetching logic)
+      const updatedAttendances = await fetchAttendance(studentId);
+      setAttendances(updatedAttendances);
+    } catch (error) {
+      console.error('Error refreshing attendances:', error);
+      Alert.alert('Error', 'Failed to refresh attendances.');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [studentId]);
+
+  // Refresh attendances when returning from AddAttendance screen
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh(); // Automatically refresh the screen when navigating back
+    }, [onRefresh])
+  );
 
   return (
     <View style={styles.container}>
@@ -83,6 +111,9 @@ const AttendanceScreen = ({ route }) => {
         data={attendances}
         renderItem={renderAttendance}
         keyExtractor={(item) => item.id.toString()}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </View>
   );
@@ -120,7 +151,13 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFF',
+  },
+  // Styling for Present and Not Present statuses
+  presentStatus: {
+    color: '#A4CFF1', // Light blue for Present
+  },
+  notPresentStatus: {
+    color: '#F1A4A4', // Light red for Not Present
   },
   deleteButton: {
     backgroundColor: 'red',

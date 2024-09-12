@@ -1,6 +1,5 @@
 import React, { useLayoutEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 // Images
@@ -19,7 +18,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity onPress={handleDelete} style={{ paddingRight: 10 }}>
-          <Ionicons name="trash-outline" size={24} color="white" />
+          <Icon name="trash-can" size={24} style={{ paddingHorizontal: 10 }} color="#f1a4a4" />
         </TouchableOpacity>
       ),
     });

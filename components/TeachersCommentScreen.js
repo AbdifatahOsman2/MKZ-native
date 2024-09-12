@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Modal, Alert, RefreshControl } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { deleteTeachersComment } from '../services/airtableService';
 import { Ionicons } from '@expo/vector-icons'; // For the plus and back icons
@@ -21,6 +21,7 @@ const TeachersCommentScreen = ({ route }) => {
   const [comment, setComments] = useState(formattedComments);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComment, setSelectedComment] = useState(null);
+  const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
 
   // Set header with back button and plus icon
   React.useLayoutEffect(() => {
@@ -109,12 +110,25 @@ const TeachersCommentScreen = ({ route }) => {
     }
   };
 
+  // Function to handle refresh action
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Simulate a network request to refresh the data
+    setTimeout(() => {
+      setComments(formattedComments); // Replace with actual data fetching logic
+      setRefreshing(false);
+    }, 2000); // Simulating a 2-second network request
+  }, [formattedComments]);
+
   return (
     <View style={styles.container}>
       <FlatList
         data={comment}
         renderItem={renderComment}
         keyExtractor={(item) => item.id ? item.id.toString() : item.index.toString()} // Use ID or index if no ID
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
       {selectedComment && (
         <Modal

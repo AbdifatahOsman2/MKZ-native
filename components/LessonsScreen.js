@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { deleteLesson } from '../services/airtableService';
+import { deleteLesson, fetchLessons } from '../services/airtableService'; // Assuming fetchLessons exists
 import Icon from 'react-native-vector-icons/FontAwesome6'; // Using FontAwesome6
 import { Ionicons } from '@expo/vector-icons'; // For the plus icon
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const LessonsScreen = ({ route }) => {
   const navigation = useNavigation();
   const { lessons: initialLessons, TeacherID } = route.params;
   const studentId = route.params.StudentID;
   const [lessons, setLessons] = useState(initialLessons); // Track lessons in state
+  const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
 
   // Set header with back button and plus icon
   React.useLayoutEffect(() => {
@@ -98,8 +99,30 @@ const LessonsScreen = ({ route }) => {
 
   // Function to navigate to the add lesson screen
   const handleAddLesson = () => {
-    navigation.navigate('AddLesson', { studentId: studentId });
+    navigation.navigate('AddLesson', { studentId });
   };
+
+  // Function to handle refresh action
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Fetch new data for lessons (replace with your data fetching logic)
+      const updatedLessons = await fetchLessons(studentId); 
+      setLessons(updatedLessons);
+    } catch (error) {
+      console.error('Error refreshing lessons:', error);
+      Alert.alert('Error', 'Failed to refresh lessons.');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [studentId]);
+
+  // Refresh lessons when returning from AddLesson screen
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh(); // Automatically refresh the screen when navigating back
+    }, [onRefresh])
+  );
 
   return (
     <View style={styles.container}>
@@ -107,6 +130,9 @@ const LessonsScreen = ({ route }) => {
         data={lessons}
         renderItem={renderLesson}
         keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </View>
   );
@@ -117,7 +143,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#252C30', // Dark background
     padding: 16,
-    paddingTop: 108
+    paddingTop: 108,
   },
   itemContainer: {
     backgroundColor: '#333', // Dark item background

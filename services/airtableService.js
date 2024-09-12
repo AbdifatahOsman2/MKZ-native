@@ -50,6 +50,7 @@ export const fetchAttendance = async (attendanceIds) => {
 };
 
 
+
 export const fetchTeachersComment = async (commentIds) => {
   return fetchTableData(TEACHERS_COMMENT_TABLE, commentIds);
 };

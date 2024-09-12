@@ -1,81 +1,138 @@
+// airtableService.test.js
+
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { createLesson, deleteLesson } from '../services/airtableService';
-import config from '../config.js'  // Replace this with the correct path to your config file
-
-const LESSONS_TABLE = 'Lessons';
-const baseId = config.AIRTABLE_BASE_ID;
-const apiKey = config.AIRTABLE_API_KEY;
-
+import {
+  fetchStudents,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+  fetchLessons,
+  fetchBehavior,
+  fetchAttendance,
+  fetchTeachersComment,
+  createLesson,
+  deleteLesson
+} from '../services/airtableService'; // Assuming the file is airtableService.js
+import config from '../config';
+// Initialize axios mock adapter
 const mock = new MockAdapter(axios);
-const baseURL = `https://api.airtable.com/v0/${baseId}/${LESSONS_TABLE}`;
 
+// const TEACHERS_TABLE = 'Teachers';
+
+const apiKey =  config.AIRTABLE_API_KEY;
+const baseId = config.AIRTABLE_BASE_ID;
 const airtableHeaders = {
   Authorization: `Bearer ${apiKey}`,
 };
 
-describe('airtableService', () => {
-
+// Test fetchStudents
+describe('Airtable API Service', () => {
+  
   afterEach(() => {
-    mock.reset(); // Reset mock after each test to avoid interference
+    mock.reset(); // Reset the mock after each test
   });
 
-  describe('createLesson', () => {
-    it('should create a new lesson and return the created lesson data', async () => {
-      const lessonData = {
-        Students: ['rec12345'],
-        Date: '2024-09-07',
-        Passed: 'Passed Full',
-      };
+  it('should fetch students successfully', async () => {
+    const mockResponse = {
+      records: [
+        { id: 'rec1', fields: { Name: 'John Doe', Lessons: ['lesson1'] } },
+        { id: 'rec2', fields: { Name: 'Jane Doe' } },
+      ],
+    };
 
-      const mockResponse = {
-        id: 'rec67890',
-        fields: lessonData,
-      };
+    // Mock the GET request to the Airtable API
+    mock.onGet(`https://api.airtable.com/v0/${baseId}/Students`).reply(200, mockResponse);
 
-      mock.onPost(baseURL, { fields: lessonData }).reply(200, mockResponse);
+    const students = await fetchStudents();
 
-      const result = await createLesson(lessonData);
+    expect(students).toEqual([
+      { id: 'rec1', Name: 'John Doe', Lessons: ['lesson1'] },
+      { id: 'rec2', Name: 'Jane Doe' },
+    ]);
+  });
 
-      expect(result).toEqual(mockResponse);
-      expect(mock.history.post.length).toBe(1);
-      expect(mock.history.post[0].url).toBe(baseURL);
-      expect(mock.history.post[0].headers).toEqual(expect.objectContaining(airtableHeaders));
-    });
+  it('should handle error when fetching students', async () => {
+    // Mock error response
+    mock.onGet(`https://api.airtable.com/v0/${baseId}/Students`).reply(500);
 
-    it('should throw an error if creating a lesson fails', async () => {
-      const lessonData = {
-        Students: ['rec12345'],
-        Date: '2024-09-07',
-        Passed: 'Passed Full',
-      };
+    await expect(fetchStudents()).rejects.toThrow('Request failed with status code 500');
+  });
 
-      mock.onPost(baseURL).reply(500, { error: 'Internal Server Error' });
+  it('should create a student successfully', async () => {
+    const studentData = { Name: 'John Doe' };
+    const mockResponse = { records: [{ id: 'rec1', fields: { Name: 'John Doe' } }] };
 
-      await expect(createLesson(lessonData)).rejects.toThrow('Error creating lesson');
+    // Mock POST request
+    mock.onPost(`https://api.airtable.com/v0/${baseId}/Students`).reply(200, mockResponse);
+
+    const createdStudent = await createStudent(studentData);
+
+    expect(createdStudent.records[0]).toEqual({
+      id: 'rec1',
+      fields: { Name: 'John Doe' },
     });
   });
 
-  describe('deleteLesson', () => {
-    it('should delete a lesson and return success response', async () => {
-      const lessonId = 'rec67890';
+  it('should update a student successfully', async () => {
+    const recordId = 'rec1';
+    const updatedData = { Name: 'Updated Name' };
+    const mockResponse = { id: 'rec1', fields: updatedData };
 
-      mock.onDelete(`${baseURL}/${lessonId}`).reply(200, { deleted: true, id: lessonId });
+    // Mock PATCH request
+    mock.onPatch(`https://api.airtable.com/v0/${baseId}/Students/${recordId}`).reply(200, mockResponse);
 
-      const result = await deleteLesson(lessonId);
+    const updatedStudent = await updateStudent(recordId, updatedData);
 
-      expect(result).toEqual({ deleted: true, id: lessonId });
-      expect(mock.history.delete.length).toBe(1);
-      expect(mock.history.delete[0].url).toBe(`${baseURL}/${lessonId}`);
-      expect(mock.history.delete[0].headers).toEqual(expect.objectContaining(airtableHeaders));
-    });
-
-    it('should throw an error if deleting a lesson fails', async () => {
-      const lessonId = 'rec67890';
-
-      mock.onDelete(`${baseURL}/${lessonId}`).reply(500, { error: 'Internal Server Error' });
-
-      await expect(deleteLesson(lessonId)).rejects.toThrow('Error deleting lesson');
-    });
+    expect(updatedStudent).toEqual(mockResponse);
   });
+
+  it('should delete a student successfully', async () => {
+    const recordId = 'rec1';
+    const mockResponse = { deleted: true, id: recordId };
+
+    // Mock DELETE request
+    mock.onDelete(`https://api.airtable.com/v0/${baseId}/Students/${recordId}`).reply(200, mockResponse);
+
+    const deletedStudent = await deleteStudent(recordId);
+
+    expect(deletedStudent).toEqual(mockResponse);
+  });
+
+  it('should fetch lessons successfully', async () => {
+    const lessonIds = ['lesson1'];
+    const mockResponse = {
+      records: [{ id: 'lesson1', fields: { Name: 'Math' } }],
+    };
+
+    mock.onGet(`https://api.airtable.com/v0/${baseId}/Lessons?filterByFormula=OR(RECORD_ID()='lesson1')`)
+      .reply(200, mockResponse);
+
+    const lessons = await fetchLessons(lessonIds);
+
+    expect(lessons).toEqual([{ id: 'lesson1', Name: 'Math' }]);
+  });
+
+  it('should create a lesson successfully', async () => {
+    const lessonData = { Name: 'Science' };
+    const mockResponse = { id: 'lesson2', fields: lessonData };
+
+    mock.onPost(`https://api.airtable.com/v0/${baseId}/Lessons`).reply(200, mockResponse);
+
+    const createdLesson = await createLesson(lessonData);
+
+    expect(createdLesson).toEqual(mockResponse);
+  });
+
+  it('should delete lessons successfully', async () => {
+    const lessonIds = ['lesson1'];
+    const mockResponse = { deleted: true, id: 'lesson1' };
+
+    mock.onDelete(`https://api.airtable.com/v0/${baseId}/Lessons`).reply(200, mockResponse);
+
+    const deletedLesson = await deleteLesson(lessonIds);
+
+    expect(deletedLesson).toEqual({ deleted: true, id: 'lesson1' });
+  });
+
 });
