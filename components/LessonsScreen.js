@@ -1,10 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { deleteLesson, fetchLessons } from '../services/airtableService'; // Assuming fetchLessons exists
+import { deleteLesson } from '../services/airtableService';
 import Icon from 'react-native-vector-icons/FontAwesome6'; // Using FontAwesome6
 import { Ionicons } from '@expo/vector-icons'; // For the plus icon
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const LessonsScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -103,26 +103,15 @@ const LessonsScreen = ({ route }) => {
   };
 
   // Function to handle refresh action
-  const onRefresh = useCallback(async () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    try {
-      // Fetch new data for lessons (replace with your data fetching logic)
-      const updatedLessons = await fetchLessons(studentId); 
-      setLessons(updatedLessons);
-    } catch (error) {
-      console.error('Error refreshing lessons:', error);
-      Alert.alert('Error', 'Failed to refresh lessons.');
-    } finally {
+    // Simulating network call to refresh the data
+    setTimeout(() => {
+      // Here you can re-fetch or refresh your lessons data
+      setLessons(initialLessons); // Replace with actual data fetching logic
       setRefreshing(false);
-    }
-  }, [studentId]);
-
-  // Refresh lessons when returning from AddLesson screen
-  useFocusEffect(
-    useCallback(() => {
-      onRefresh(); // Automatically refresh the screen when navigating back
-    }, [onRefresh])
-  );
+    }, 2000); // Simulating a 2-second network request
+  }, [initialLessons]);
 
   return (
     <View style={styles.container}>
@@ -143,7 +132,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#252C30', // Dark background
     padding: 16,
-    paddingTop: 108,
+    paddingTop: 108
   },
   itemContainer: {
     backgroundColor: '#333', // Dark item background

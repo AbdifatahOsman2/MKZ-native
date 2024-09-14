@@ -4,11 +4,11 @@ const LESSONS_TABLE = 'Lessons';
 const BEHAVIOR_TABLE = 'Behavior';
 const ATTENDANCE_TABLE = 'Attendance';
 const TEACHERS_COMMENT_TABLE = 'TeachersComment';
-import config from '../config';
+
 // const TEACHERS_TABLE = 'Teachers';
 
-const apiKey =  config.AIRTABLE_API_KEY;
-const baseId = config.AIRTABLE_BASE_ID;
+const apiKey =  process.env.EXPO_PUBLIC_AIRTABLE_API_KEY;
+const baseId = process.env.EXPO_PUBLIC_AIRTABLE_BASE_ID;
 
 const airtableHeaders = {
   Authorization: `Bearer ${apiKey}`,

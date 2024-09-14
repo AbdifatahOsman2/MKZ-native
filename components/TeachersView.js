@@ -1,11 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';  
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; 
 import { fetchStudents } from '../services/airtableService';
-import maleImage from '../assets/M-1-Image.png';
-import femaleImage from '../assets/Fm1-Image.png';
-import maleImage2 from '../assets/M-2-Image.png';
-import femaleImage2 from '../assets/Fm-2-Image.png';
 
 const TeachersView = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
@@ -13,6 +10,8 @@ const TeachersView = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const { TeacherID } = route.params;
+
+  const iconColors = ['#A4CFF1', '#F1A4A4']; // Colors to be randomly assigned to icons
 
   const getStudentsData = async () => {
     try {
@@ -35,21 +34,6 @@ const TeachersView = ({ navigation, route }) => {
     await getStudentsData();
     setRefreshing(false);
   }, []);
-
-  // Function to randomly pick an image based on gender
-  const getRandomImage = (gender) => {
-    const maleImages = [maleImage, maleImage2];
-    const femaleImages = [femaleImage, femaleImage2];
-
-    // Return a random image from the male or female images array
-    if (gender === 'Male') {
-      return maleImages[Math.floor(Math.random() * maleImages.length)];
-    } else if (gender === 'Female') {
-      return femaleImages[Math.floor(Math.random() * femaleImages.length)];
-    } else {
-      return null; // Fallback if no gender is specified
-    }
-  };
 
   const filteredStudents = searchQuery.length > 0
     ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -84,24 +68,25 @@ const TeachersView = ({ navigation, route }) => {
         >
           {filteredStudents.length > 0 ? (
             filteredStudents.map(student => {
-              const studentImage = getRandomImage(student.Gender); // Get random image for the student
-              
+              const iconName = student.Gender === 'Male' ? 'human' : 'human-female';
+              const iconColor = iconColors[Math.floor(Math.random() * iconColors.length)];
+
               return (
-                <View key={student.id} style={styles.card}>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate('TeacherStudentDetail', { student, studentImage })} // Pass the image along with student data
-                  >
-                    <View style={styles.cardContent}>
-                      <Image source={studentImage} style={styles.avatar} />
-                      <View style={styles.textContent}>
-                        <Text style={styles.cardTitle}>{student.StudentName}</Text>
-                        <Text style={styles.cardText}>Age: {student.Age}</Text>
-                        <Text style={styles.cardText}>Class: {student.class}</Text>
-                      </View>
-                      <Icon name="chevron-right" size={20} color="#1B73E8" />
+                <TouchableOpacity
+                  key={student.id}
+                  style={styles.card}
+                  onPress={() => navigation.navigate('TeacherStudentDetail', { student })} // Pass the student data
+                >
+                  <View style={styles.cardContent}>
+                    <MaterialCommunityIcons name={iconName} size={40} color={iconColor} style={styles.avatar} />
+                    <View style={styles.textContent}>
+                      <Text style={styles.cardTitle}>{student.StudentName}</Text>
+                      <Text style={styles.cardText}>Age: {student.Age}</Text>
+                      <Text style={styles.cardText}>Class: {student.class}</Text>
                     </View>
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                  <Icon name="chevron-right" size={20} color="#ccc" />
+                </TouchableOpacity>
               );
             })
           ) : (
@@ -154,46 +139,37 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     paddingHorizontal: 18,
-
   },
   scrollContainer: {
     paddingBottom: 100,
   },
   card: {
-    marginTop: 20, 
-    marginHorizontal: 20,
-    padding: 15,
-    backgroundColor: '#1f2428',
-    borderRadius: 10,
-    shadowColor: '#fafbfc',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#fff',
   },
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
     marginRight: 15,
   },
   textContent: {
     flex: 1,
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fafbfc',
+    fontSize: 16,
+    color: '#fff',
     marginBottom: 3,
   },
   cardText: {
     fontSize: 14,
-    color: '#cccccc',
+    color: '#ccc',
   },
   noStudentsAvailable: {
     color: '#ccc',

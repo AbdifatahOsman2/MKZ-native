@@ -1,17 +1,16 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState } from 'react';
+import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { deleteBehavior, fetchBehavior } from '../services/airtableService'; // Assuming you have a fetchBehavior service
+import { deleteBehavior } from '../services/airtableService';
 import Icon from 'react-native-vector-icons/FontAwesome6'; // Import FontAwesome6 for icons
 import { Ionicons } from '@expo/vector-icons'; // For the plus icon
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const BehaviorScreen = ({ route }) => {
   const navigation = useNavigation();
   const { behaviors: initialBehaviors, TeacherID } = route.params;
   const studentId = route.params.StudentID;
   const [behaviors, setBehaviors] = useState(initialBehaviors);
-  const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
 
   // Set header with back button and plus icon
   React.useLayoutEffect(() => {
@@ -30,26 +29,6 @@ const BehaviorScreen = ({ route }) => {
         : null,
     });
   }, [navigation, TeacherID]);
-
-  // Fetch updated behaviors when user returns from AddBehavior
-  useFocusEffect(
-    useCallback(() => {
-      refreshBehaviors();
-    }, [])
-  );
-
-  // Function to fetch and update behaviors
-  const refreshBehaviors = async () => {
-    setRefreshing(true);
-    try {
-      const updatedBehaviors = await fetchBehavior(studentId); // Fetch behaviors from Airtable
-      setBehaviors(updatedBehaviors);
-    } catch (error) {
-      console.error('Error fetching behaviors:', error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
 
   // Handle behavior deletion with proper promise handling
   const handleDeleteBehavior = async (behaviorId) => {
@@ -118,20 +97,12 @@ const BehaviorScreen = ({ route }) => {
     navigation.navigate('AddBehavior', { studentId: studentId });
   };
 
-  // Handle pull-to-refresh
-  const onRefresh = useCallback(() => {
-    refreshBehaviors();
-  }, []);
-
   return (
     <View style={styles.container}>
       <FlatList
         data={behaviors}
         renderItem={renderBehavior}
         keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
       />
     </View>
   );

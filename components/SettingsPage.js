@@ -77,5 +77,4 @@ const styles = StyleSheet.create({
     color: '#ff0033',
   },
 });
-
 export default SettingsPage;

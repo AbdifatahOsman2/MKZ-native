@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
-// img
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import maleImage from '../assets/M-1-Image.png'; 
 import femaleImage from '../assets/Fm1-Image.png';
 import Icon from 'react-native-vector-icons/FontAwesome6';
@@ -45,7 +46,12 @@ const StudentDetailScreen = ({ route, navigation }) => {
             style={styles.button}
             onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData })}
           >
-          <Icon name="face-meh-blank" size={50} style={{paddingVertical: 10}} color="#788AA3" />
+          <MaterialCommunityIcons
+            name="head-cog-outline"
+            size={50}
+            style={{ paddingVertical: 10 }}
+            color="#788AA3"
+          />
             <Text style={styles.buttonText}>Behavior</Text>
           </TouchableOpacity>
         )}

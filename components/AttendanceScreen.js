@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { deleteAttendance, fetchAttendance } from '../services/airtableService'; // Assuming fetchAttendance exists
+import { deleteAttendance } from '../services/airtableService';
 import { Ionicons } from '@expo/vector-icons'; // For the plus and back icons
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const AttendanceScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -84,26 +84,15 @@ const AttendanceScreen = ({ route }) => {
   };
 
   // Function to handle refresh action
-  const onRefresh = useCallback(async () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    try {
-      // Fetch new data for attendances (replace with your data fetching logic)
-      const updatedAttendances = await fetchAttendance(studentId);
-      setAttendances(updatedAttendances);
-    } catch (error) {
-      console.error('Error refreshing attendances:', error);
-      Alert.alert('Error', 'Failed to refresh attendances.');
-    } finally {
+    // Simulating network call to refresh the data
+    setTimeout(() => {
+      // Here you can re-fetch or refresh your attendances data
+      setAttendances(initialAttendances); // Replace with actual data fetching logic
       setRefreshing(false);
-    }
-  }, [studentId]);
-
-  // Refresh attendances when returning from AddAttendance screen
-  useFocusEffect(
-    useCallback(() => {
-      onRefresh(); // Automatically refresh the screen when navigating back
-    }, [onRefresh])
-  );
+    }, 2000); // Simulating a 2-second network request
+  }, [initialAttendances]);
 
   return (
     <View style={styles.container}>
