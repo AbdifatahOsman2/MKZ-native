@@ -4,7 +4,6 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'fire
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { app, auth, db } from '../firebaseConfig'; // Import Firestore from config
-import Logo from '../assets/Logo.png';
 
 const AuthScreen = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -99,7 +98,8 @@ const AuthScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <Image source={Logo} style={styles.logo} />
+      <Image source={require('../assets/Logo.png')} style={styles.logo} />
+
       </View>
       <Text style={styles.title}>Markaz Al-Najaax</Text>
       <View style={styles.toggleContainer}>

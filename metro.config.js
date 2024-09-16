@@ -1,8 +1,14 @@
 // metro.config.js
-module.exports = {
-    server: {
-      // Automatically use tunnels without requiring user input
-      useGlobalNgrok: true,
-    },
+const { getDefaultConfig } = require('expo/metro-config');
+
+module.exports = (() => {
+  const config = getDefaultConfig(__dirname);
+
+  // Custom server configuration
+  config.server = {
+    ...config.server,
+    useGlobalNgrok: true,
   };
-  
+
+  return config;
+})();

@@ -10,6 +10,10 @@
     },
     "plugins": [
       "expo-font"
+    ],
+    "assetBundlePatterns": [
+      "assets/*"
     ]
+
   }
 }

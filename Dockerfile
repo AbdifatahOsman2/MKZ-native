@@ -13,6 +13,8 @@ RUN npm install
 # Install expo-cli and @expo/ngrok globally
 RUN npm install -g expo-cli @expo/ngrok
 
+COPY ./assets ./assets
+
 # Copy the rest of the project files
 COPY . .
 

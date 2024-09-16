@@ -2,10 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudents } from '../services/airtableService';
-import maleImage from '../assets/M-1-Image.png';
-import femaleImage from '../assets/Fm1-Image.png';
-import maleImage2 from '../assets/M-2-Image.png';
-import femaleImage2 from '../assets/Fm-2-Image.png';
+
 
 const StudentListScreen = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
@@ -38,17 +35,21 @@ const StudentListScreen = ({ navigation, route }) => {
 
   // Function to randomly pick an image based on gender
   const getRandomImage = (gender) => {
-    const maleImages = [maleImage, maleImage2];
-    const femaleImages = [femaleImage, femaleImage2];
-
-    // Return a random image from the male or female images array
+    const maleImages = [
+      require('../assets/M-1-Image.png'), 
+      require('../assets/M-2-Image.png')
+    ];
+    const femaleImages = [
+      require('../assets/Fm1-Image.png'), 
+      require('../assets/Fm-2-Image.png')
+    ];
+  
     if (gender === 'Male') {
       return maleImages[Math.floor(Math.random() * maleImages.length)];
     } else if (gender === 'Female') {
       return femaleImages[Math.floor(Math.random() * femaleImages.length)];
-    } else {
-      return null; // Fallback if no gender is specified
     }
+    return null;
   };
 
   const filteredStudents = searchQuery.length > 0
