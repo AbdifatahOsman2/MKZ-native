@@ -189,12 +189,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#333840',
         borderColor: '#666',
         borderWidth: 1,
-        marginBottom: 20,
+        marginBottom: 0,
         paddingHorizontal: 10,
         fontSize: 16,
         color: '#FFF',
-        borderRadius: 10, // Updated for a modern feel
-        shadowColor: "#000", // Added shadow for better visual
+        borderRadius: 10, 
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         color: '#FFF',
-        marginBottom: 10
+        marginVertical: 10
     },
     errorText: {
         fontSize: 16,

@@ -1,38 +1,48 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Alert } from 'react-native';
+import { addUserFeedback } from '../firebaseConfig'; // Import the updated feedback function
 
-const NotificationPage = ({ navigation }) => {
+const FeedbackScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [name, setName] = useState(''); // State for name input
   const [comment, setComment] = useState('');
 
   const handleInput = () => {
     setModalVisible(true); // Show the modal when the button is pressed
   };
 
-  const handleSubmit = () => {
-    if (comment.trim() === '') {
-      Alert.alert('Error', 'Please enter a comment.');
+  const handleSubmit = async () => {
+    if (name.trim() === '' || comment.trim() === '') {
+      Alert.alert('Error', 'Please enter both name and comment.');
     } else {
-      Alert.alert('Comment Submitted', comment);
-      setComment(''); // Clear the input field after submission
-      setModalVisible(false); // Close the modal after submission
+      try {
+        // Call the addUserFeedback function and pass the name and comment
+        await addUserFeedback(name, comment);
+        Alert.alert('Feedback Submitted', 'Thank you for your feedback!');
+        setName(''); // Clear name input
+        setComment(''); // Clear the input field after submission
+        setModalVisible(false); // Close the modal after submission
+      } catch (error) {
+        Alert.alert('Error', 'There was an issue submitting your feedback. Please try again.');
+        console.error(error);
+      }
     }
   };
+
   return (
     <ScrollView style={styles.container}>
-    <View style={styles.header}>
-    <Text style={styles.headerTitle}>Send Us Your Feedback</Text>
-  </View>
-  <View style={styles.card}>
-    <Text style={styles.cardTitle}>Help Improve Our App</Text>
-    <Text style={styles.cardText}>
-      We value your feedback! Share your thoughts and suggestions to help us enhance your experience.
-    </Text>
-    <TouchableOpacity style={styles.button} onPress={handleInput}>
-      <Text style={styles.buttonText}>Submit Feedback</Text>
-    </TouchableOpacity>
-  </View>
-  
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Send Us Your Feedback</Text>
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Help Improve Our App</Text>
+        <Text style={styles.cardText}>
+          We value your feedback! Share your thoughts and suggestions to help us enhance your experience.
+        </Text>
+        <TouchableOpacity style={styles.button} onPress={handleInput}>
+          <Text style={styles.buttonText}>Submit Feedback</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Modal for Input */}
       <Modal
@@ -44,10 +54,24 @@ const NotificationPage = ({ navigation }) => {
         }}
       >
         <View style={styles.centeredView}>
+        
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Enter your comment:</Text>
+            <Text style={styles.modalText}>Enter your name:</Text>
             <TextInput
               style={styles.input}
+              placeholder="Your Name"
+              placeholderTextColor="#ccc"
+              value={name}
+              onChangeText={setName}
+            />
+
+            <Text style={styles.modalText}>Enter your comment:</Text>
+            <TextInput
+              editable
+              multiline
+              numberOfLines={4}
+              maxLength={40}
+              style={styles.inputComment}
               placeholder="Write a comment..."
               placeholderTextColor="#ccc"
               value={comment}
@@ -86,7 +110,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   card: {
-    marginTop: 25, // Added more vertical space above the card
+    marginTop: 25,
     marginHorizontal: 20,
     padding: 20,
     backgroundColor: '#1f2428',
@@ -152,6 +176,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 10,
   },
+  inputComment: {
+    backgroundColor: '#1f2428',
+    color: '#fff',
+    width: '100%',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 30,
+  },
   submitButton: {
     backgroundColor: '#1B73E8',
     paddingVertical: 10,
@@ -178,4 +211,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NotificationPage;
+export default FeedbackScreen;

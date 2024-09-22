@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudents } from '../services/airtableService';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 
 const StudentListScreen = ({ navigation, route }) => {
@@ -106,13 +107,13 @@ const StudentListScreen = ({ navigation, route }) => {
       )}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID })}>
-          <Icon name="home" size={24} color="#fafbfc" />
+          <Icon name="home" size={28} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage', { ParentID })}>
-          <Icon name="cog" size={24} color="#fafbfc" />
+          <Icon name="cog" size={28} color="#fafbfc" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('NotificationPage')}>
-          <Icon name="bell" size={24} color="#fafbfc" />
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('FeedbackScreen')}>
+        <MaterialIcons name="feedback" size={28} color="#fafbfc" />
         </TouchableOpacity>
       </View>
     </View>

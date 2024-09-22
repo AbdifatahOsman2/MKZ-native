@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; 
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { fetchStudents } from '../services/airtableService';
 
 const TeachersView = ({ navigation, route }) => {
@@ -47,7 +48,7 @@ const TeachersView = ({ navigation, route }) => {
           style={styles.iconWrapper}
           onPress={() => navigation.navigate('AddStudent')}
         >
-          <Icon name="plus" size={23} color="#1B73E8" />
+          <MaterialCommunityIcons name="account-plus" size={32} style={{ marginHorizontal: 5 }} color="#fff" />
         </TouchableOpacity>
       </View>
       <TextInput
@@ -96,13 +97,13 @@ const TeachersView = ({ navigation, route }) => {
       )}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('TeachersView', { TeacherID })}>
-          <Icon name="home" size={24} color="#fafbfc" />
+          <Icon name="home" size={28} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage')}>
-          <Icon name="cog" size={24} color="#fafbfc" />
+          <Icon name="cog" size={28} color="#fafbfc" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('NotificationPage')}>
-          <Icon name="bell" size={24} color="#fafbfc" />
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('FeedbackScreen')}>
+          <MaterialIcons name="feedback" size={28} color="#fafbfc" />
         </TouchableOpacity>
       </View>
     </View>
