@@ -31,7 +31,7 @@ const SettingsPage = ({ navigation, route }) => {
         </TouchableOpacity>
         {ParentID && (
           <TouchableOpacity style={styles.option} onPress={() => navigation.navigate('ParentID', { ParentID })}>
-            <Text style={styles.optionText}>ParentID</Text>
+            <Text style={styles.optionText}>Parent Code</Text>
             <Ionicons name="chevron-forward-outline" size={20} color="#ccc" />
           </TouchableOpacity>
         )}

@@ -1,28 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPhoneNumber } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { app, auth, db } from '../firebaseConfig'; // Import Firestore from config
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'; // Import Firebase Recaptcha Modal
+import { app, auth, db } from '../firebaseConfig'; // Import Firebase configuration
 
 const AuthScreen = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Parent');
-  const [invitationCode, setInvitationCode] = useState(''); // New state for the invitation code
+  const [invitationCode, setInvitationCode] = useState(''); // For Teacher Invitation Code
+  const [phoneNumber, setPhoneNumber] = useState(''); // State for phone number
+  const [verificationCode, setVerificationCode] = useState(''); // State for OTP
+  const [verificationId, setVerificationId] = useState(null); // Store verificationId from Firebase
 
-  // Fetch and validate the invitation code for teacher registration
-  const validateInvitationCode = async () => {
-    const codeDocRef = doc(db, 'invitationCodes', invitationCode);
-    const codeDocSnap = await getDoc(codeDocRef);
+  const recaptchaVerifier = useRef(null); // Ref for RecaptchaVerifier
 
-    if (!codeDocSnap.exists || codeDocSnap.data().used) {
-      throw new Error('Invalid or already used invitation code.');
+  // Function to validate phone number format (E.164)
+  const validatePhoneNumber = (number) => {
+    const phoneRegex = /^\+1[2-9]\d{9}$/; // E.164 format validation for US numbers
+    return phoneRegex.test(number);
+  };
+
+  // Ensure the phone number starts with +1 for the US, and perform login/signup
+  const handlePhoneLogin = async () => {
+    let formattedPhoneNumber = phoneNumber;
+    if (!phoneNumber.startsWith('+1')) {
+      formattedPhoneNumber = `+1${phoneNumber}`;
+      setPhoneNumber(formattedPhoneNumber);
+    }
+
+    if (!validatePhoneNumber(formattedPhoneNumber)) {
+      Alert.alert('Invalid Phone Number', 'Please enter a valid US phone number.');
+      return;
+    }
+
+    try {
+      if (!verificationId) {
+        const phoneProvider = new signInWithPhoneNumber(auth, formattedPhoneNumber, recaptchaVerifier.current);
+        const confirmationResult = await phoneProvider;
+        setVerificationId(confirmationResult.verificationId);
+        Alert.alert('Verification Code Sent', 'Please check your phone for the verification code.');
+      } else {
+        // Verify the OTP
+        const credential = await auth.PhoneAuthProvider.credential(verificationId, verificationCode);
+        const userCredential = await auth.signInWithCredential(credential);
+
+        // Persist user token in AsyncStorage
+        const token = await userCredential.user.getIdToken();
+        await AsyncStorage.setItem('userToken', token);
+
+        // Fetch user data and navigate accordingly
+        const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
+        if (userData.data().role === 'Parent') {
+          navigation.replace('StudentList', { ParentID: userCredential.user.uid });
+        } else {
+          navigation.replace('TeachersView', { TeacherID: userCredential.user.uid });
+        }
+      }
+    } catch (error) {
+      console.error('Phone Login Error: ', error);
+      Alert.alert('Authentication Error', 'Failed to login with phone number.');
     }
   };
 
-  const handleAuth = async () => {
+  const handleEmailLogin = async () => {
     try {
       let userCredential;
 
@@ -32,7 +76,12 @@ const AuthScreen = ({ navigation }) => {
       } else {
         // Validate invitation code if role is Teacher
         if (role === 'Teacher') {
-          await validateInvitationCode();
+          const codeDocRef = doc(db, 'invitationCodes', invitationCode);
+          const codeDocSnap = await getDoc(codeDocRef);
+
+          if (!codeDocSnap.exists || codeDocSnap.data().used) {
+            throw new Error('Invalid or already used invitation code.');
+          }
         }
 
         // Register the new user and set additional data
@@ -50,21 +99,27 @@ const AuthScreen = ({ navigation }) => {
 
       // Fetch user data to determine the next screen
       const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
-      
-      // Use replace to transition to the appropriate screen based on the role
+
       if (userData.data().role === 'Parent') {
         navigation.replace('StudentList', { ParentID: userCredential.user.uid });
       } else {
         navigation.replace('TeachersView', { TeacherID: userCredential.user.uid });
       }
-      
+
     } catch (error) {
       console.error(error);
       handleAuthError(error);
     }
   };
 
-  // Function to handle authentication errors and show specific error messages
+  const handleAuth = () => {
+    if (phoneNumber) {
+      handlePhoneLogin();
+    } else {
+      handleEmailLogin();
+    }
+  };
+
   const handleAuthError = (error) => {
     let errorMessage;
 
@@ -92,16 +147,22 @@ const AuthScreen = ({ navigation }) => {
         break;
     }
 
-    Alert.alert("Authentication Error", errorMessage);
+    Alert.alert('Authentication Error', errorMessage);
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-      <Image source={require('../assets/Logo.png')} style={styles.logo} />
+      <FirebaseRecaptchaVerifierModal
+        ref={recaptchaVerifier}
+        firebaseConfig={app.options} // Pass Firebase config here
+        attemptInvisibleVerification={true} // Enable invisible verification
+      />
 
+      <View style={styles.logoContainer}>
+        <Image source={require('../assets/Logo.png')} style={styles.logo} />
       </View>
       <Text style={styles.title}>Markaz Al-Najaax</Text>
+
       <View style={styles.toggleContainer}>
         <TouchableOpacity
           style={[styles.toggleButton, isLogin ? styles.activeButton : styles.inactiveButton]}
@@ -116,21 +177,42 @@ const AuthScreen = ({ navigation }) => {
           <Text style={!isLogin ? styles.activeText : styles.inactiveText}>Register</Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.inputContainer}>
         <TextInput
-          placeholder="Your email"
+          placeholder="Your email or phone"
           style={styles.input}
-          value={email}
-          onChangeText={setEmail}
+          value={phoneNumber || email}
+          onChangeText={(text) => {
+            if (text.includes('@')) {
+              setEmail(text);
+              setPhoneNumber('');
+            } else {
+              setPhoneNumber(text);
+              setEmail('');
+            }
+          }}
         />
-        <TextInput
-          placeholder="Password"
-          style={styles.input}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        {!isLogin && (
+        {!phoneNumber && (
+          <TextInput
+            placeholder="Password"
+            style={styles.input}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+        )}
+
+        {phoneNumber && verificationId && (
+          <TextInput
+            placeholder="Verification Code"
+            style={styles.input}
+            value={verificationCode}
+            onChangeText={setVerificationCode}
+          />
+        )}
+
+        {!isLogin && !phoneNumber && (
           <View>
             <View style={styles.roleContainer}>
               <Text style={styles.roleLabel}>Register as:</Text>
@@ -143,7 +225,6 @@ const AuthScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
-            {/* Show invitation code input only when registering as a teacher */}
             {role === 'Teacher' && (
               <TextInput
                 placeholder="Invitation Code"
@@ -155,9 +236,12 @@ const AuthScreen = ({ navigation }) => {
           </View>
         )}
       </View>
+
       <TouchableOpacity style={styles.submitButton} onPress={handleAuth}>
         <Text style={styles.submitButtonText}>{isLogin ? 'Log In' : 'Register'}</Text>
       </TouchableOpacity>
+
+      <View id="recaptcha-container" />
     </View>
   );
 };
