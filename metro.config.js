@@ -7,7 +7,7 @@ module.exports = (() => {
   // Custom server configuration
   config.server = {
     ...config.server,
-    useGlobalNgrok: true,
+    // useGlobalNgrok: false,
   };
 
   return config;

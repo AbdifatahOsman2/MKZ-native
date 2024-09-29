@@ -11,6 +11,7 @@ const StudentListScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const { ParentID } = route.params;
+  console.log(route.params);
 
   const getStudentsData = async () => {
     try {

@@ -1,10 +1,8 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, addDoc} from "firebase/firestore";
+import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  // edit these to include environment variables
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
   projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
@@ -32,10 +30,23 @@ export async function getParentIds() {
   return parentIds;
 }
 
-// Function to add feedback to the Firestore feedback collection
+// Function to get Parents' phone numbers
+export async function ParentsPhoneNumber() {
+  const usersCollectionRef = collection(db, "users");
+  const querySnapshot = await getDocs(usersCollectionRef);
+  const phoneNumbers = [];
+
+  querySnapshot.forEach((doc) => {
+    if (doc.data().role === "Parent" && doc.data().phoneNumber) {
+      phoneNumbers.push(doc.data().phoneNumber);
+    }
+  });
+
+  return phoneNumbers;
+}
+
 export async function addUserFeedback(name, comment) {
   try {
-    // Add a new document with the name and comment to the feedback collection
     await addDoc(collection(db, "feedback"), {
       name: name,
       comment: comment,
@@ -44,11 +55,9 @@ export async function addUserFeedback(name, comment) {
     console.log("Feedback successfully added.");
   } catch (error) {
     console.error("Error adding feedback: ", error);
-    throw error; // rethrow the error to be caught in the calling function
+    throw error;
   }
 }
-
-
 
 // function generateCode(length = 5) { 
 //   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -59,13 +68,11 @@ export async function addUserFeedback(name, comment) {
 //   return result;
 // }
 
-
 // export async function createInvitationCodes(numberOfCodes) {
 //   const codes = [];
 //   for (let i = 0; i < numberOfCodes; i++) {
 //     let newCode = generateCode();
 //     const codeRef = doc(db, "invitationCodes", newCode);
-
 
 //     const docSnap = await getDoc(codeRef);
 //     if (!docSnap.exists()) {

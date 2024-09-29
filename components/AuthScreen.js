@@ -5,6 +5,7 @@ import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'; // Import Firebase Recaptcha Modal
 import { app, auth, db } from '../firebaseConfig'; // Import Firebase configuration
+import { PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
 
 const AuthScreen = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,6 +16,9 @@ const AuthScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState(''); // State for phone number
   const [verificationCode, setVerificationCode] = useState(''); // State for OTP
   const [verificationId, setVerificationId] = useState(null); // Store verificationId from Firebase
+  const [attempts, setAttempts] = useState(0);
+  const [isThrottled, setIsThrottled] = useState(false);
+
 
   const recaptchaVerifier = useRef(null); // Ref for RecaptchaVerifier
 
@@ -26,45 +30,71 @@ const AuthScreen = ({ navigation }) => {
 
   // Ensure the phone number starts with +1 for the US, and perform login/signup
   const handlePhoneLogin = async () => {
+    if (isThrottled) {
+      Alert.alert('Too Many Attempts', 'Please wait before trying again.');
+      return;
+    }
+  
     let formattedPhoneNumber = phoneNumber;
     if (!phoneNumber.startsWith('+1')) {
       formattedPhoneNumber = `+1${phoneNumber}`;
       setPhoneNumber(formattedPhoneNumber);
     }
-
+  
     if (!validatePhoneNumber(formattedPhoneNumber)) {
       Alert.alert('Invalid Phone Number', 'Please enter a valid US phone number.');
       return;
     }
-
+  
     try {
       if (!verificationId) {
-        const phoneProvider = new signInWithPhoneNumber(auth, formattedPhoneNumber, recaptchaVerifier.current);
-        const confirmationResult = await phoneProvider;
+        const confirmationResult = await signInWithPhoneNumber(
+          auth,
+          formattedPhoneNumber,
+          recaptchaVerifier.current
+        );
         setVerificationId(confirmationResult.verificationId);
         Alert.alert('Verification Code Sent', 'Please check your phone for the verification code.');
+  
+        // Increase the attempts count
+        setAttempts((prev) => prev + 1);
+  
+        if (attempts >= 3) {
+          setIsThrottled(true);
+          setTimeout(() => {
+            setIsThrottled(false);
+            setAttempts(0); // Reset attempts after throttling period
+          }, 60000); // Throttle for 60 seconds
+        }
       } else {
-        // Verify the OTP
-        const credential = await auth.PhoneAuthProvider.credential(verificationId, verificationCode);
-        const userCredential = await auth.signInWithCredential(credential);
-
-        // Persist user token in AsyncStorage
+        const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
+        const userCredential = await signInWithCredential(auth, credential);
+  
+        const userRef = doc(db, 'users', userCredential.user.uid);
+        const userSnapshot = await getDoc(userRef);
+  
+        if (!userSnapshot.exists()) {
+          // If the user document does not exist, create it and assign a default role
+          await setDoc(userRef, {
+            role: role, // Assign role based on form input (Parent or Teacher)
+            phoneNumber: formattedPhoneNumber,
+          });
+        }
+  
         const token = await userCredential.user.getIdToken();
         await AsyncStorage.setItem('userToken', token);
-
-        // Fetch user data and navigate accordingly
-        const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
-        if (userData.data().role === 'Parent') {
-          navigation.replace('StudentList', { ParentID: userCredential.user.uid });
-        } else {
-          navigation.replace('TeachersView', { TeacherID: userCredential.user.uid });
-        }
       }
     } catch (error) {
       console.error('Phone Login Error: ', error);
-      Alert.alert('Authentication Error', 'Failed to login with phone number.');
+  
+      if (error.code === 'auth/too-many-requests') {
+        Alert.alert('Too Many Requests', 'You have made too many requests. Please try again later.');
+      } else {
+        Alert.alert('Authentication Error', 'Failed to login with phone number.');
+      }
     }
   };
+  
 
   const handleEmailLogin = async () => {
     try {
@@ -101,11 +131,10 @@ const AuthScreen = ({ navigation }) => {
       const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
 
       if (userData.data().role === 'Parent') {
-        navigation.replace('StudentList', { ParentID: userCredential.user.uid });
+        navigation.replace('StudentList', { ParentID: userCredential.user.uid, phoneNumber: phoneNumber });
       } else {
         navigation.replace('TeachersView', { TeacherID: userCredential.user.uid });
       }
-
     } catch (error) {
       console.error(error);
       handleAuthError(error);
@@ -159,7 +188,7 @@ const AuthScreen = ({ navigation }) => {
       />
 
       <View style={styles.logoContainer}>
-        <Image source={require('../assets/Logo.png')} style={styles.logo} />
+        <Image source={require('../assets/MKZlogo.png')} style={styles.logo} />
       </View>
       <Text style={styles.title}>Markaz Al-Najaax</Text>
 
@@ -258,8 +287,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 150,
+    height: 150,
+    paddingHorizontal: 10,
+    resizeMode: 'contain',
   },
   title: {
     fontSize: 26,
@@ -273,7 +304,7 @@ const styles = StyleSheet.create({
     width: '80%',
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#2b3137',
+    backgroundColor: '#107E4D',
   },
   toggleButton: {
     flex: 1,
@@ -281,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#107E4D',
   },
   inactiveButton: {
     backgroundColor: '#2b3137',
@@ -326,7 +357,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   roleActiveText: {
-    color: '#007BFF',
+    color: '#E2A12F',
     fontWeight: 'bold',
   },
   roleInactiveText: {
@@ -335,7 +366,7 @@ const styles = StyleSheet.create({
   submitButton: {
     width: '80%',
     height: 50,
-    backgroundColor: '#007BFF',
+    backgroundColor: '#107E4D',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
