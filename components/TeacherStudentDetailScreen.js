@@ -46,11 +46,10 @@ const TeacherStudentDetailScreen = ({ route }) => {
   const teachersCommentArray = student.TeachersComment || [];
 
   // Combine Comments and their respective IDs
-  const combinedComments = commentsArray.map((comment, index) => ({
-    id: teachersCommentArray[index],
-    comment: comment,
+  const combinedComments = (student.Comment || []).map((comment, index) => ({
+    id: student.TeachersComment ? student.TeachersComment[index] : null,  // Use null if TeachersComment is undefined
+    comment: comment
   }));
-
   // Determine the gender icon
   const genderIconName = student.Gender === 'Male' ? 'human' : 'human-female';
 
@@ -78,6 +77,10 @@ const TeacherStudentDetailScreen = ({ route }) => {
             <Text style={styles.infoLabel}>Teacher:</Text>
             <Text style={styles.infoValue}>{student.teacherName}</Text>
           </View>
+          <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Parent:</Text>
+          <Text style={styles.infoValue}>{student.PhoneNumber}</Text>
+        </View>
         </View>
       </View>
 

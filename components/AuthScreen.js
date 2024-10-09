@@ -48,6 +48,7 @@ const AuthScreen = ({ navigation }) => {
   
     try {
       if (!verificationId) {
+        // If no verification ID, send the verification code
         const confirmationResult = await signInWithPhoneNumber(
           auth,
           formattedPhoneNumber,
@@ -56,33 +57,46 @@ const AuthScreen = ({ navigation }) => {
         setVerificationId(confirmationResult.verificationId);
         Alert.alert('Verification Code Sent', 'Please check your phone for the verification code.');
   
-        // Increase the attempts count
+        // Increase attempts and throttle if needed
         setAttempts((prev) => prev + 1);
-  
         if (attempts >= 3) {
           setIsThrottled(true);
           setTimeout(() => {
             setIsThrottled(false);
-            setAttempts(0); // Reset attempts after throttling period
-          }, 60000); // Throttle for 60 seconds
+            setAttempts(0); // Reset after throttle period
+          }, 60000); // 60-second throttle
         }
       } else {
+        // If we have the verification ID, verify the OTP
         const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
         const userCredential = await signInWithCredential(auth, credential);
   
+        // Fetch user data from the Firestore
         const userRef = doc(db, 'users', userCredential.user.uid);
         const userSnapshot = await getDoc(userRef);
   
         if (!userSnapshot.exists()) {
-          // If the user document does not exist, create it and assign a default role
+          // Create user document with default role if it doesn't exist
           await setDoc(userRef, {
-            role: role, // Assign role based on form input (Parent or Teacher)
+            role: 'Parent', // Assign "Parent" role by default
             phoneNumber: formattedPhoneNumber,
           });
         }
   
+        // Get the token for session persistence
         const token = await userCredential.user.getIdToken();
         await AsyncStorage.setItem('userToken', token);
+  
+        // Fetch user data to determine the next screen
+        const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
+  
+        // Check the role and navigate accordingly
+        if (userData.data().role === 'Parent') {
+          navigation.replace('StudentList', { ParentID: userCredential.user.uid, phoneNumber: formattedPhoneNumber });
+        } else {
+          // Handle case if they are not a Parent
+          Alert.alert('If you are a teacher, please use email login.');
+        }
       }
     } catch (error) {
       console.error('Phone Login Error: ', error);
@@ -94,6 +108,7 @@ const AuthScreen = ({ navigation }) => {
       }
     }
   };
+  
   
 
   const handleEmailLogin = async () => {

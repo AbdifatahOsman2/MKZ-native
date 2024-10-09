@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Modal, TouchableOpacity } fr
 import { createStudent, fetchTeachers } from '../services/airtableService';
 import RNPickerSelect from 'react-native-picker-select';
 import { getParentIds } from '../firebaseConfig';
+import { ParentsPhoneNumber } from '../firebaseConfig';
 
 const AddStudent = ({ navigation }) => {
     const [studentName, setStudentName] = useState('');
@@ -16,11 +17,15 @@ const AddStudent = ({ navigation }) => {
     const [selectedTeacherId, setSelectedTeacherId] = useState(''); // For selected teacher
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-
+    const [parentPhoneNumber, setParentPhoneNumber] = useState('');
+    const [parentPhoneNumbers, setParentPhoneNumbers] = useState([]);
     useEffect(() => {
         async function loadInitialData() {
             try {
                 const ids = await getParentIds();
+                const phoneNumber = await ParentsPhoneNumber();
+                setParentPhoneNumbers(phoneNumber.map(phone => ({ label: phone, value: phone })));
+                console.log(phoneNumber);
                 setParentIds(ids.map(id => ({ label: id, value: id })));
 
                 const fetchedTeachers = await fetchTeachers();
@@ -37,7 +42,7 @@ const AddStudent = ({ navigation }) => {
     }, []);
 
     const handleSubmit = async () => {
-        if (!studentName || !age || !classroom || !schedule || !gender || !parentId || !selectedTeacherId) {
+        if (!studentName || !age || !classroom || !schedule || !gender || !parentPhoneNumber || !selectedTeacherId) {
             setError('Please fill in all fields.');
             return;
         }
@@ -48,7 +53,7 @@ const AddStudent = ({ navigation }) => {
             class: classroom,
             schedule: schedule,
             Gender: gender,
-            ParentID: parentId,
+            PhoneNumber: parentPhoneNumber,
             Teachers: [selectedTeacherId]
         };
 
@@ -120,14 +125,17 @@ const AddStudent = ({ navigation }) => {
                 value={gender}
             />
 
-            <Text style={styles.label}>Parent ID</Text>
+
+
+            <Text style={styles.label}>Phone Number</Text>
             <RNPickerSelect
-                onValueChange={(value) => setParentId(value)}
-                items={parentIds}
+                onValueChange={(value) => setParentPhoneNumber(value)}
+                items={parentPhoneNumbers}
                 style={pickerSelectStyles}
-                value={parentId}
-                placeholder={{ label: "Select Parent ID", value: null }}
+                value={parentPhoneNumber}
+                placeholder={{ label: "Select Parent Phone Number", value: null }}
             />
+
 
             <Text style={styles.label}>Teacher</Text>
             <RNPickerSelect

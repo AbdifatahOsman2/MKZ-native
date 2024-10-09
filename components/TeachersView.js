@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, T
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { fetchStudents } from '../services/airtableService';
+import { fetchStudents, fetchStudentsWithPhoneNumbers } from '../services/airtableService';
 
 const TeachersView = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
@@ -17,7 +17,7 @@ const TeachersView = ({ navigation, route }) => {
   const getStudentsData = async () => {
     try {
       setLoading(true);
-      const studentsData = await fetchStudents(null, TeacherID);
+      const studentsData = await fetchStudents(null);
       setStudents(studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);

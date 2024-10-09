@@ -56,13 +56,10 @@ export const fetchTeachersComment = async (commentIds) => {
 };
 
 // airtableService.js (modify fetchStudents)
-export const fetchStudents = async (ParentID = null) => {
+
+export const fetchStudents = async () => {
   try {
     let url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
-    if (ParentID) {
-      const filterByFormula = `AND({ParentID} = '${ParentID}')`;
-      url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
-    }
     const response = await axios.get(url, { headers: airtableHeaders });
     const students = response.data.records.map(record => ({
       id: record.id,
@@ -90,6 +87,53 @@ export const fetchStudents = async (ParentID = null) => {
     throw error;
   }
 };
+
+
+
+export const fetchStudentsWithPhoneNumbers = async (phoneNumber = null, ParentID = null) => {
+  try {
+    let url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
+    
+    // Apply the phone number filter if it's provided
+    if (phoneNumber) {
+      const filterByFormula = `AND({PhoneNumber} = '${phoneNumber}')`;
+      url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
+    }else if (ParentID) {
+      const filterByFormula = `AND({ParentID} = '${ParentID}')`;
+      url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
+    }
+
+    const response = await axios.get(url, { headers: airtableHeaders });
+    const students = response.data.records.map(record => ({
+      id: record.id,
+      ...record.fields,
+    }));
+
+    // Fetch linked data for each student
+    for (const student of students) {
+      if (student.Lessons) {
+        student.LessonsData = await fetchLessons(student.Lessons);
+      }
+      if (student.Behavior) {
+        student.BehaviorData = await fetchBehavior(student.Behavior);
+      }
+      if (student.Attendance) {
+        student.AttendanceData = await fetchAttendance(student.Attendance);
+      }
+      if (student.Comment) {
+        student.CommentData = await fetchTeachersComment(student.Comment);
+      }
+    }
+    
+    return students;
+  } catch (error) {
+    console.error('Error fetching students with linked data:', error);
+    throw error;
+  }
+};
+
+
+
 
 export const createStudent = async (studentData) => {
   const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;

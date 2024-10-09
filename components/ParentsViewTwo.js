@@ -9,9 +9,9 @@ const StudentDetailScreen = ({ route, navigation }) => {
   const { student, studentImage } = route.params;  // Retrieve studentImage from route params
 
   // Combine Comments and their respective IDs
-  const combinedComments = student.Comment.map((comment, index) => ({
-    id: student.TeachersComment[index],  // Corresponding ID from TeachersComment array
-    comment: comment                     // The actual comment from the Comment array
+  const combinedComments = (student.Comment || []).map((comment, index) => ({
+    id: student.TeachersComment ? student.TeachersComment[index] : null,  // Use null if TeachersComment is undefined
+    comment: comment
   }));
 
   return (

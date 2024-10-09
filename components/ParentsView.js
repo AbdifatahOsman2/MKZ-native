@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { fetchStudents } from '../services/airtableService';
+import { fetchStudents, fetchStudentsWithPhoneNumbers } from '../services/airtableService';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 
@@ -11,12 +11,13 @@ const StudentListScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const { ParentID } = route.params;
-  console.log(route.params);
+  const {phoneNumber} = route.params;
+
 
   const getStudentsData = async () => {
     try {
       setLoading(true);
-      const studentsData = await fetchStudents(ParentID);
+      const studentsData = await fetchStudentsWithPhoneNumbers(phoneNumber, ParentID);
       setStudents(studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -53,7 +54,6 @@ const StudentListScreen = ({ navigation, route }) => {
     }
     return null;
   };
-
   const filteredStudents = searchQuery.length > 0
     ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
     : students;
