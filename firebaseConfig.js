@@ -87,15 +87,3 @@ export async function addUserFeedback(name, comment) {
 //   return codes;
 // }
 
-// Example function where you call ParentsPhoneNumber
-async function exampleUsage() {
-  try {
-    const phoneNumbers = await ParentsPhoneNumber(); // Call the function
-    console.log('Parents phone numbers:', phoneNumbers); // Log the result
-  } catch (error) {
-    console.error('Error fetching parent phone numbers:', error);
-  }
-}
-
-// Call the example function
-exampleUsage();
