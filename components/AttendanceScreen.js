@@ -83,16 +83,8 @@ const AttendanceScreen = ({ route }) => {
     navigation.navigate('AddAttendance', { studentId });
   };
 
-  // Function to handle refresh action
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    // Simulating network call to refresh the data
-    setTimeout(() => {
-      // Here you can re-fetch or refresh your attendances data
-      setAttendances(initialAttendances); // Replace with actual data fetching logic
-      setRefreshing(false);
-    }, 2000); // Simulating a 2-second network request
-  }, [initialAttendances]);
+
+
 
   return (
     <View style={styles.container}>
@@ -100,9 +92,7 @@ const AttendanceScreen = ({ route }) => {
         data={attendances}
         renderItem={renderAttendance}
         keyExtractor={(item) => item.id.toString()}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+
       />
     </View>
   );

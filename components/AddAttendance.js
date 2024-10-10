@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform, TextInput } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker'; 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import RNPickerSelect from 'react-native-picker-select'; // Import RNPickerSelect
@@ -9,6 +9,7 @@ const AddAttendance = ({ navigation, route }) => {
   const { studentId } = route.params;
   const [date, setDate] = useState(new Date());
   const [attendanceStatus, setAttendanceStatus] = useState('Present');
+  const [customStatus, setCustomStatus] = useState(''); // New state for custom status
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -42,7 +43,7 @@ const AddAttendance = ({ navigation, route }) => {
     const attendanceData = {
       Students: [studentId],
       Date: formatDate(date),
-      Attendance: attendanceStatus
+      Attendance: attendanceStatus === 'Other' ? customStatus : attendanceStatus // Use custom status if 'Other' is selected
     };
 
     try {
@@ -72,7 +73,7 @@ const AddAttendance = ({ navigation, route }) => {
         onCancel={hideDatePicker}
         display={Platform.OS === 'ios' ? 'inline' : 'default'}
         themeVariant="light" // Set light theme for DateTimePicker
-        textColor="#000" // Ensure text is visible for light theme
+        textColor="#000"
       />
 
       {/* Attendance Status Input */}
@@ -84,11 +85,14 @@ const AddAttendance = ({ navigation, route }) => {
         }}
         onValueChange={(value) => {
           setAttendanceStatus(value);
+          setCustomStatus(''); // Clear custom status when a new option is selected
           setError(''); // Clear error when the user selects an option
         }}
         items={[
           { label: 'Present', value: 'Present' },
           { label: 'Not Present', value: 'Not Present' },
+          { label: 'Tardy', value: 'Tardy' },
+          { label: 'Other', value: 'Other' }, // Added 'Other' option
         ]}
         style={{
           inputIOS: styles.input,
@@ -97,6 +101,17 @@ const AddAttendance = ({ navigation, route }) => {
         }}
         value={attendanceStatus} // Set the selected value
       />
+
+      {/* Conditional Text Input for 'Other' Option */}
+      {attendanceStatus === 'Other' && (
+        <TextInput
+          style={styles.input}
+          placeholder="Specify attendance status..."
+          placeholderTextColor="#ccc"
+          value={customStatus}
+          onChangeText={setCustomStatus}
+        />
+      )}
 
       {/* Error Message */}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -136,6 +151,7 @@ const AddAttendance = ({ navigation, route }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -16,7 +16,7 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-// Function to get Parent IDs
+
 export async function getParentIds() {
   const usersCollectionRef = collection(db, "users");
   const querySnapshot = await getDocs(usersCollectionRef);

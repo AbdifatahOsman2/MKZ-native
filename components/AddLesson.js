@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
-import DateTimePickerModal from 'react-native-modal-datetime-picker'; // New Date Picker
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform, TextInput } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { createLesson } from '../services/airtableService';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import RNPickerSelect from 'react-native-picker-select';
@@ -8,10 +8,18 @@ import RNPickerSelect from 'react-native-picker-select';
 const AddLesson = ({ navigation, route }) => {
   const { studentId } = route.params;
   const [date, setDate] = useState(new Date());
-  const [passed, setPassed] = useState('');
+  const [lessonDescription, setLessonDescription] = useState('');
+  const [selectedLessonType, setSelectedLessonType] = useState(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
+  const lessonOptions = [
+    { label: 'Passed Full', value: 'Passed Full' },
+    { label: 'Passed Half', value: 'Passed Half' },
+    { label: 'Passed None', value: 'Passed None' },
+    { label: 'Other', value: 'Other' },
+  ];
 
   // Show Date Picker
   const showDatePicker = () => {
@@ -32,19 +40,21 @@ const AddLesson = ({ navigation, route }) => {
   };
 
   const handleSubmit = async () => {
-    if (!passed.trim()) {
-      setError('Please specify if passed or not.');
+    let finalLessonDescription = selectedLessonType === 'Other' ? lessonDescription : selectedLessonType;
+
+    if (!finalLessonDescription.trim()) {
+      setError('Please select a lesson type or enter a description.');
       return;
     }
-  
-    const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-  
+
+    const formattedDate = formatDate(date);
+
     const lessonData = {
       Students: [studentId],
       Date: formattedDate,
-      Passed: passed
+      LessonType: finalLessonDescription,
     };
-  
+
     try {
       await createLesson(lessonData);
       setShowConfirmationModal(true);
@@ -53,21 +63,19 @@ const AddLesson = ({ navigation, route }) => {
       setError('Failed to submit lesson. Please try again.');
     }
   };
-  
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add New Lesson</Text>
 
-      
       {/* Date Picker Button */}
       <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
-      <Icon name="calendar-today" size={20} color="#fff" />
-      <Text style={styles.datePickerText}>Pick Date</Text>
+        <Icon name="calendar-today" size={20} color="#fff" />
+        <Text style={styles.datePickerText}>Pick Date</Text>
       </TouchableOpacity>
-      
+
       <Text style={styles.dateDisplay}>Date: {formatDate(date)}</Text>
-      
+
       {/* Date Picker Modal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
@@ -75,22 +83,34 @@ const AddLesson = ({ navigation, route }) => {
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
         display={Platform.OS === 'ios' ? 'inline' : 'default'}
-        // Custom style for dark theme
-        themeVariant="light" // Use dark theme on iOS and Android
-        textColor="#fff"  // Ensure the text is visible on the dark background
+        themeVariant="light"
+        textColor="#fff"
       />
 
-      {/* Picker for 'Passed' status */}
+      {/* Picker for Lesson Type */}
       <RNPickerSelect
-        onValueChange={value => setPassed(value)}
-        items={[
-          { label: 'Passed Full', value: 'Passed Full' },
-          { label: 'Passed Half', value: 'Passed Half' },
-          { label: 'Passed None', value: 'Passed None' },
-        ]}
+        onValueChange={value => {
+          setSelectedLessonType(value);
+          setError('');
+        }}
+        items={lessonOptions}
         style={pickerSelectStyles}
-        value={passed}
+        placeholder={{ label: 'Select a lesson type...', value: null }}
       />
+
+      {/* Show description input if 'Other' is selected */}
+      {selectedLessonType === 'Other' && (
+        <TextInput
+          placeholder="Enter lesson description"
+          placeholderTextColor="#ccc"
+          value={lessonDescription}
+          onChangeText={text => {
+            setLessonDescription(text);
+            setError('');
+          }}
+          style={styles.input}
+        />
+      )}
 
       {/* Error message */}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -144,6 +164,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
     color: '#FFF'
+  },
+  input: {
+    height: 50,
+    backgroundColor: '#333840',
+    borderColor: '#666',
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    fontSize: 16,
+    color: '#FFF',
+    borderRadius: 5,
   },
   datePickerButton: {
     flexDirection: 'row',
@@ -229,6 +260,7 @@ const pickerSelectStyles = {
     color: 'white',
     backgroundColor: '#333840',
     paddingRight: 30, // to ensure the text is never behind the icon
+    marginBottom: 20,
   },
   inputAndroid: {
     fontSize: 16,
@@ -240,6 +272,7 @@ const pickerSelectStyles = {
     color: 'white',
     backgroundColor: '#333840',
     paddingRight: 30, // to ensure the text is never behind the icon
+    marginBottom: 20,
   },
 };
 

@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPhoneNumber } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'; // Import Firebase Recaptcha Modal
-import { app, auth, db } from '../firebaseConfig'; // Import Firebase configuration
-import { PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+import { app, auth, db } from '../firebaseConfig';
+
 
 const AuthScreen = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,7 +18,7 @@ const AuthScreen = ({ navigation }) => {
   const [verificationId, setVerificationId] = useState(null); // Store verificationId from Firebase
   const [attempts, setAttempts] = useState(0);
   const [isThrottled, setIsThrottled] = useState(false);
-
+  const [inputMethod, setInputMethod] = useState('email'); // 'email' or 'phone'
 
   const recaptchaVerifier = useRef(null); // Ref for RecaptchaVerifier
 
@@ -28,27 +28,25 @@ const AuthScreen = ({ navigation }) => {
     return phoneRegex.test(number);
   };
 
-  // Ensure the phone number starts with +1 for the US, and perform login/signup
   const handlePhoneLogin = async () => {
     if (isThrottled) {
       Alert.alert('Too Many Attempts', 'Please wait before trying again.');
       return;
     }
-  
+
     let formattedPhoneNumber = phoneNumber;
     if (!phoneNumber.startsWith('+1')) {
       formattedPhoneNumber = `+1${phoneNumber}`;
       setPhoneNumber(formattedPhoneNumber);
     }
-  
+
     if (!validatePhoneNumber(formattedPhoneNumber)) {
       Alert.alert('Invalid Phone Number', 'Please enter a valid US phone number.');
       return;
     }
-  
+
     try {
       if (!verificationId) {
-        // If no verification ID, send the verification code
         const confirmationResult = await signInWithPhoneNumber(
           auth,
           formattedPhoneNumber,
@@ -56,51 +54,42 @@ const AuthScreen = ({ navigation }) => {
         );
         setVerificationId(confirmationResult.verificationId);
         Alert.alert('Verification Code Sent', 'Please check your phone for the verification code.');
-  
-        // Increase attempts and throttle if needed
         setAttempts((prev) => prev + 1);
         if (attempts >= 3) {
           setIsThrottled(true);
           setTimeout(() => {
             setIsThrottled(false);
-            setAttempts(0); // Reset after throttle period
-          }, 60000); // 60-second throttle
+            setAttempts(0);
+          }, 60000);
         }
       } else {
-        // If we have the verification ID, verify the OTP
         const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
         const userCredential = await signInWithCredential(auth, credential);
-  
-        // Fetch user data from the Firestore
+
         const userRef = doc(db, 'users', userCredential.user.uid);
         const userSnapshot = await getDoc(userRef);
-  
+
         if (!userSnapshot.exists()) {
-          // Create user document with default role if it doesn't exist
           await setDoc(userRef, {
-            role: 'Parent', // Assign "Parent" role by default
+            role: 'Parent',
             phoneNumber: formattedPhoneNumber,
           });
         }
-  
-        // Get the token for session persistence
+
         const token = await userCredential.user.getIdToken();
         await AsyncStorage.setItem('userToken', token);
-  
-        // Fetch user data to determine the next screen
+
         const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
-  
-        // Check the role and navigate accordingly
+
         if (userData.data().role === 'Parent') {
           navigation.replace('StudentList', { ParentID: userCredential.user.uid, phoneNumber: formattedPhoneNumber });
         } else {
-          // Handle case if they are not a Parent
           Alert.alert('If you are a teacher, please use email login.');
         }
       }
     } catch (error) {
       console.error('Phone Login Error: ', error);
-  
+
       if (error.code === 'auth/too-many-requests') {
         Alert.alert('Too Many Requests', 'You have made too many requests. Please try again later.');
       } else {
@@ -108,18 +97,14 @@ const AuthScreen = ({ navigation }) => {
       }
     }
   };
-  
-  
 
   const handleEmailLogin = async () => {
     try {
       let userCredential;
 
       if (isLogin) {
-        // Attempt to sign in
         userCredential = await signInWithEmailAndPassword(auth, email, password);
       } else {
-        // Validate invitation code if role is Teacher
         if (role === 'Teacher') {
           const codeDocRef = doc(db, 'invitationCodes', invitationCode);
           const codeDocSnap = await getDoc(codeDocRef);
@@ -129,7 +114,6 @@ const AuthScreen = ({ navigation }) => {
           }
         }
 
-        // Register the new user and set additional data
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const userDocRef = doc(db, 'users', userCredential.user.uid);
         await setDoc(userDocRef, {
@@ -138,15 +122,13 @@ const AuthScreen = ({ navigation }) => {
         });
       }
 
-      // Get the token for session persistence
       const token = await userCredential.user.getIdToken();
       await AsyncStorage.setItem('userToken', token);
 
-      // Fetch user data to determine the next screen
       const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
 
       if (userData.data().role === 'Parent') {
-        navigation.replace('StudentList', { ParentID: userCredential.user.uid, phoneNumber: phoneNumber });
+        navigation.replace('StudentList', { ParentID: userCredential.user.uid });
       } else {
         navigation.replace('TeachersView', { TeacherID: userCredential.user.uid });
       }
@@ -197,9 +179,10 @@ const AuthScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <FirebaseRecaptchaVerifierModal
+        
         ref={recaptchaVerifier}
-        firebaseConfig={app.options} // Pass Firebase config here
-        attemptInvisibleVerification={true} // Enable invisible verification
+        firebaseConfig={app.options}
+        attemptInvisibleVerification={true}
       />
 
       <View style={styles.logoContainer}>
@@ -262,13 +245,14 @@ const AuthScreen = ({ navigation }) => {
               <Text style={styles.roleLabel}>Register as:</Text>
               <View style={styles.roleButtonContainer}>
                 <TouchableOpacity style={styles.roleButton} onPress={() => setRole('Parent')}>
-                  <Text style={role === 'Parent' ? styles.roleActiveText : styles.roleInactiveText}>Parent</Text>
+                  <Text style={role === 'Parent' ? styles.activeText : styles.inactiveText}>Parent</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.roleButton} onPress={() => setRole('Teacher')}>
-                  <Text style={role === 'Teacher' ? styles.roleActiveText : styles.roleInactiveText}>Teacher</Text>
+                  <Text style={role === 'Teacher' ? styles.activeText : styles.inactiveText}>Teacher</Text>
                 </TouchableOpacity>
               </View>
             </View>
+
             {role === 'Teacher' && (
               <TextInput
                 placeholder="Invitation Code"
@@ -284,8 +268,6 @@ const AuthScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.submitButton} onPress={handleAuth}>
         <Text style={styles.submitButtonText}>{isLogin ? 'Log In' : 'Register'}</Text>
       </TouchableOpacity>
-
-      <View id="recaptcha-container" />
     </View>
   );
 };

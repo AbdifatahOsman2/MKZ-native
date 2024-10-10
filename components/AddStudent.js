@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Modal, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { createStudent, fetchTeachers } from '../services/airtableService';
 import RNPickerSelect from 'react-native-picker-select';
-import { getParentIds } from '../firebaseConfig';
-import { ParentsPhoneNumber } from '../firebaseConfig';
+import { getParentIds, ParentsPhoneNumber } from '../firebaseConfig';
+import { Ionicons } from '@expo/vector-icons';
 
 const AddStudent = ({ navigation }) => {
     const [studentName, setStudentName] = useState('');
@@ -14,18 +14,19 @@ const AddStudent = ({ navigation }) => {
     const [parentId, setParentId] = useState('');
     const [parentIds, setParentIds] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const [selectedTeacherId, setSelectedTeacherId] = useState(''); // For selected teacher
+    const [selectedTeacherId, setSelectedTeacherId] = useState('');
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [parentPhoneNumber, setParentPhoneNumber] = useState('');
     const [parentPhoneNumbers, setParentPhoneNumbers] = useState([]);
+    const [useParentId, setUseParentId] = useState(false);
+
     useEffect(() => {
         async function loadInitialData() {
             try {
                 const ids = await getParentIds();
                 const phoneNumber = await ParentsPhoneNumber();
                 setParentPhoneNumbers(phoneNumber.map(phone => ({ label: phone, value: phone })));
-                console.log(phoneNumber);
                 setParentIds(ids.map(id => ({ label: id, value: id })));
 
                 const fetchedTeachers = await fetchTeachers();
@@ -57,6 +58,10 @@ const AddStudent = ({ navigation }) => {
             Teachers: [selectedTeacherId]
         };
 
+        if (useParentId && parentId) {
+            studentData.ParentID = parentId;
+        }
+
         try {
             await createStudent(studentData);
             setShowSuccessModal(true);
@@ -67,156 +72,148 @@ const AddStudent = ({ navigation }) => {
     };
 
     const handleModalClose = () => {
-        // Close the modal and navigate back to TeachersView, passing 'reload' as true
         setShowSuccessModal(false);
         navigation.replace('TeachersView', { reload: true });
     };
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.sectionHeader}>Add Student</Text>
-            <Text style={styles.label}>Student Name</Text>
+    const renderInput = (label, value, onChangeText, placeholder, keyboardType = 'default') => (
+        <View style={styles.inputContainer}>
+            <Text style={styles.label}>{label}</Text>
             <TextInput
-                placeholder="Student Name"
-                value={studentName}
-                onChangeText={setStudentName}
+                placeholder={placeholder}
+                placeholderTextColor="#999"
+                value={value}
+                onChangeText={onChangeText}
                 style={styles.input}
+                keyboardType={keyboardType}
             />
-            
-            <Text style={styles.label}>Age</Text>
-            <TextInput
-                placeholder="Age"
-                value={age}
-                onChangeText={setAge}
-                style={styles.input}
-                keyboardType="numeric"
-            />
+        </View>
+    );
 
-            <Text style={styles.label}>Class</Text>
+    const renderPicker = (label, value, onValueChange, items, placeholder) => (
+        <View style={styles.inputContainer}>
+            <Text style={styles.label}>{label}</Text>
             <RNPickerSelect
-                onValueChange={(value) => setClassroom(value)}
-                items={[
+                onValueChange={onValueChange}
+                items={items}
+                style={pickerSelectStyles}
+                value={value}
+                placeholder={placeholder}
+                useNativeAndroidPickerStyle={false}
+                Icon={() => <Ionicons name="chevron-down" size={24} color="#FFF" />}
+            />
+        </View>
+    );
+
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <ScrollView style={styles.container}>
+                <Text style={styles.sectionHeader}>Add Student</Text>
+
+                {renderInput("Student Name", studentName, setStudentName, "Enter student name")}
+                {renderInput("Age", age, setAge, "Enter age", "numeric")}
+                
+                {renderPicker("Class", classroom, setClassroom, [
                     { label: 'Quran', value: 'Quran' },
                     { label: 'Alif', value: 'Alif' },
-                ]}
-                style={pickerSelectStyles}
-                value={classroom}
-            />
+                ], { label: "Select Class", value: null })}
 
-            <Text style={styles.label}>Schedule</Text>
-            <RNPickerSelect
-                onValueChange={(value) => setSchedule(value)}
-                items={[
+                {renderPicker("Schedule", schedule, setSchedule, [
                     { label: 'Sat-Sun, Wed', value: 'Sat-Sun, Wed' },
                     { label: 'Sat-Sun, Fri', value: 'Sat-Sun, Fri' },
-                ]}
-                style={pickerSelectStyles}
-                value={schedule}
-            />
+                ], { label: "Select Schedule", value: null })}
 
-            <Text style={styles.label}>Gender</Text>
-            <RNPickerSelect
-                onValueChange={(value) => setGender(value)}
-                items={[
+                {renderPicker("Gender", gender, setGender, [
                     { label: 'Male', value: 'Male' },
                     { label: 'Female', value: 'Female' },
-                ]}
-                style={pickerSelectStyles}
-                value={gender}
-            />
+                ], { label: "Select Gender", value: null })}
 
+                {renderPicker("Phone Number", parentPhoneNumber, setParentPhoneNumber, parentPhoneNumbers, { label: "Select Parent Phone Number", value: null })}
 
+                {renderPicker("Teacher", selectedTeacherId, setSelectedTeacherId, teachers, { label: "Select Teacher", value: null })}
 
-            <Text style={styles.label}>Phone Number</Text>
-            <RNPickerSelect
-                onValueChange={(value) => setParentPhoneNumber(value)}
-                items={parentPhoneNumbers}
-                style={pickerSelectStyles}
-                value={parentPhoneNumber}
-                placeholder={{ label: "Select Parent Phone Number", value: null }}
-            />
+                {!useParentId && (
+                    <TouchableOpacity onPress={() => setUseParentId(true)} style={styles.addParentIdButton}>
+                        <Text style={styles.addParentIdText}>+ Add Parent ID</Text>
+                    </TouchableOpacity>
+                )}
 
+                {useParentId && renderPicker("Parent ID", parentId, setParentId, parentIds, { label: "Select Parent ID", value: null })}
 
-            <Text style={styles.label}>Teacher</Text>
-            <RNPickerSelect
-                onValueChange={(value) => setSelectedTeacherId(value)}
-                items={teachers}
-                style={pickerSelectStyles}
-                value={selectedTeacherId}
-                placeholder={{ label: "Select Teacher", value: null }}
-            />
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
-                <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
+                <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+                    <Text style={styles.submitButtonText}>Submit</Text>
+                </TouchableOpacity>
+            </ScrollView>
 
-            {showSuccessModal && (
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={showSuccessModal}
-                    onRequestClose={() => {
-                        setShowSuccessModal(false);
-                    }}
-                >
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <Text style={styles.modalText}>Student added successfully!</Text>
-                            <TouchableOpacity
-                                style={styles.buttonClose}
-                                onPress={handleModalClose} // Navigate back and reload TeachersView
-                            >
-                                <Text style={styles.textStyle}>OK</Text>
-                            </TouchableOpacity>
-                        </View>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showSuccessModal}
+                onRequestClose={() => setShowSuccessModal(false)}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>Student added successfully!</Text>
+                        <TouchableOpacity
+                            style={styles.buttonClose}
+                            onPress={handleModalClose}
+                        >
+                            <Text style={styles.textStyle}>OK</Text>
+                        </TouchableOpacity>
                     </View>
-                </Modal>
-            )}
-        </View>
+                </View>
+            </Modal>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#252C30',
+    },
     container: {
         flex: 1,
         padding: 20,
-        paddingTop: 125,
-        backgroundColor: '#252C30',
-        justifyContent: 'flex-start', // Ensure layout starts from the top
     },
     sectionHeader: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         color: '#FFF',
-        marginBottom: 20,
+        marginBottom: 30,
         textAlign: 'center',
+    },
+    inputContainer: {
+        marginBottom: 20,
     },
     input: {
         height: 50,
         backgroundColor: '#333840',
-        borderColor: '#666',
+        borderColor: '#444',
         borderWidth: 1,
-        marginBottom: 0,
-        paddingHorizontal: 10,
+        paddingHorizontal: 15,
         fontSize: 16,
         color: '#FFF',
-        borderRadius: 10, 
+        borderRadius: 10,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
     },
     label: {
         fontSize: 16,
         color: '#FFF',
-        marginVertical: 10
+        marginBottom: 8,
+        fontWeight: '600',
     },
     errorText: {
-        fontSize: 16,
-        color: 'red',
-        marginBottom: 20
+        fontSize: 14,
+        color: '#FF6B6B',
+        marginBottom: 20,
+        textAlign: 'center',
     },
     submitButton: {
         backgroundColor: "#2dba4e",
@@ -224,17 +221,22 @@ const styles = StyleSheet.create({
         padding: 15,
         alignItems: 'center',
         marginTop: 20,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
     },
     submitButtonText: {
         color: '#FFF',
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: 18,
     },
     centeredView: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
     },
     modalView: {
         margin: 20,
@@ -243,28 +245,37 @@ const styles = StyleSheet.create({
         padding: 35,
         alignItems: 'center',
         shadowColor: "#000",
-        shadowOffset: {
-            width: 0, height: 2
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5
+        shadowRadius: 4,
+        elevation: 5,
     },
     buttonClose: {
         backgroundColor: "#1B73E8",
         borderRadius: 20,
-        padding: 10,
-        elevation: 2
+        padding: 12,
+        paddingHorizontal: 30,
+        elevation: 2,
     },
     textStyle: {
         color: "white",
         fontWeight: "bold",
-        textAlign: "center"
+        textAlign: "center",
+        fontSize: 16,
     },
     modalText: {
-        marginBottom: 15,
+        marginBottom: 20,
         textAlign: "center",
         color: '#FFF',
+        fontSize: 18,
+    },
+    addParentIdButton: {
+        marginBottom: 20,
+    },
+    addParentIdText: {
+        color: '#4A90E2',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 
@@ -272,24 +283,37 @@ const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
         fontSize: 16,
         paddingVertical: 12,
-        paddingHorizontal: 10,
+        paddingHorizontal: 15,
         borderWidth: 1,
-        borderColor: '#555',
-        borderRadius: 10, // Updated for consistency
+        borderColor: '#444',
+        borderRadius: 10,
         color: '#FFF',
         paddingRight: 30,
         backgroundColor: '#333840',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
     },
     inputAndroid: {
         fontSize: 16,
-        paddingHorizontal: 10,
+        paddingHorizontal: 15,
         paddingVertical: 8,
         borderWidth: 1,
-        borderColor: '#555',
-        borderRadius: 10, // Updated for consistency
+        borderColor: '#444',
+        borderRadius: 10,
         color: '#FFF',
         paddingRight: 30,
         backgroundColor: '#333840',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+    },
+    iconContainer: {
+        top: 12,
+        right: 12,
     },
 });
 

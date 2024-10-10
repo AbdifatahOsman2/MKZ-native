@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
-import DateTimePickerModal from 'react-native-modal-datetime-picker'; // New Date Picker
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import RNPickerSelect from 'react-native-picker-select';
 import { createBehavior } from '../services/airtableService';
 
 const AddBehavior = ({ navigation, route }) => {
   const { studentId } = route.params;
   const [date, setDate] = useState(new Date());
   const [behaviorDescription, setBehaviorDescription] = useState('');
+  const [selectedBehavior, setSelectedBehavior] = useState(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
+  const behaviorOptions = [
+    { label: 'Disruptive', value: 'Disruptive' },
+    { label: 'Cooperative', value: 'Cooperative' },
+    { label: 'Inattentive', value: 'Inattentive' },
+    { label: 'Proactive', value: 'Proactive' },
+    { label: 'Other', value: 'Other' },
+  ];
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -30,15 +40,17 @@ const AddBehavior = ({ navigation, route }) => {
   };
 
   const handleSubmit = async () => {
-    if (!behaviorDescription.trim()) {
-      setError('Please enter a behavior description.');
+    let finalBehaviorDescription = selectedBehavior === 'Other' ? behaviorDescription : selectedBehavior;
+
+    if (!finalBehaviorDescription.trim()) {
+      setError('Please select a behavior or enter a description.');
       return;
     }
 
     const behaviorData = {
       Students: [studentId],
-      Date: formatDate(date), 
-      Behavior: behaviorDescription
+      Date: formatDate(date),
+      Behavior: finalBehaviorDescription
     };
 
     try {
@@ -68,22 +80,33 @@ const AddBehavior = ({ navigation, route }) => {
         onCancel={hideDatePicker}
         display={Platform.OS === 'ios' ? 'inline' : 'default'}
         themeVariant="light"
-        textColor="#000" 
+        textColor="#000"
       />
 
-      <TextInput
-        placeholder="Behavior description"
-        placeholderTextColor="#ccc"
-        value={behaviorDescription}
-        onChangeText={text => {
-          setBehaviorDescription(text);
+      <RNPickerSelect
+        onValueChange={(value) => {
+          setSelectedBehavior(value);
           setError('');
         }}
-        style={styles.input}
+        items={behaviorOptions}
+        style={pickerSelectStyles}
+        placeholder={{ label: 'Select a behavior...', value: null }}
       />
 
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {selectedBehavior === 'Other' && (
+        <TextInput
+          placeholder="Enter behavior description"
+          placeholderTextColor="#ccc"
+          value={behaviorDescription}
+          onChangeText={text => {
+            setBehaviorDescription(text);
+            setError('');
+          }}
+          style={styles.input}
+        />
+      )}
 
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit Behavior</Text>
@@ -215,6 +238,33 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center"
   }
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#666',
+    borderRadius: 4,
+    color: 'white',
+    paddingRight: 30,
+    backgroundColor: '#333840',
+    marginBottom: 20,
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#666',
+    borderRadius: 8,
+    color: 'white',
+    paddingRight: 30,
+    backgroundColor: '#333840',
+    marginBottom: 20,
+  },
 });
 
 export default AddBehavior;

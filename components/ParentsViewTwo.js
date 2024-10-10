@@ -1,150 +1,159 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-import maleImage from '../assets/M-1-Image.png'; 
-import femaleImage from '../assets/Fm1-Image.png';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-const StudentDetailScreen = ({ route, navigation }) => {
-  const { student, studentImage } = route.params;  // Retrieve studentImage from route params
 
-  // Combine Comments and their respective IDs
+import maleImage from '../assets/M-1-Image.png';
+import femaleImage from '../assets/Fm1-Image.png';
+
+const StudentDetailScreen = ({ route, navigation }) => {
+  const { student, studentImage } = route.params;
+
   const combinedComments = (student.Comment || []).map((comment, index) => ({
-    id: student.TeachersComment ? student.TeachersComment[index] : null,  // Use null if TeachersComment is undefined
+    id: student.TeachersComment ? student.TeachersComment[index] : null,
     comment: comment
   }));
 
+  const renderInfoItem = (label, value) => (
+    <View style={styles.infoItem}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View>
+  );
+
+  const renderButton = (icon, text, onPress) => (
+    <TouchableOpacity style={styles.button} onPress={onPress}>
+      {icon}
+      <Text style={styles.buttonText}>{text}</Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <Image
-          source={studentImage || (student.Gender === 'Male' ? maleImage : femaleImage)} // Use passed studentImage or fallback
-          style={styles.profileImage}
-        />
-        <View style={styles.textContainer}>
-          <Text style={styles.studentName}>{student.StudentName}</Text>
-          <Text style={styles.studentInfo}><Text style={styles.studentInfoText}>Age / da' : </Text>{student.Age}</Text>
-          <Text style={styles.studentInfo}><Text style={styles.studentInfoText}>Class / fasalka : </Text>{student.class}</Text>
-          <Text style={styles.studentInfo}><Text style={styles.studentInfoText}>Schedule / jadwalka : </Text>{student.schedule}</Text>
-          <Text style={styles.studentInfo}><Text style={styles.studentInfoText}>Teacher / Macallin : </Text>{student.teacherName}</Text>
-        </View>
-      </View>
-
-      <View style={styles.buttonContainer}>
-        {student.LessonsData && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Lessons', { lessons: student.LessonsData })}
-          >
-          <Icon name="book-quran" size={45} style={{paddingVertical: 10}} color="#0D1321" />
-            <Text style={styles.buttonText}>Lesson / Cashar</Text>
-          </TouchableOpacity>
-        )}
-
-        {student.BehaviorData && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Behavior', { behaviors: student.BehaviorData })}
-          >
-          <MaterialCommunityIcons
-            name="head-cog-outline"
-            size={50}
-            style={{ paddingVertical: 10 }}
-            color="#788AA3"
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <Image
+            source={studentImage || (student.Gender === 'Male' ? maleImage : femaleImage)}
+            style={styles.profileImage}
           />
-            <Text style={styles.buttonText}>Behavior</Text>
-          </TouchableOpacity>
-        )}
+          <Text style={styles.studentName}>{student.StudentName}</Text>
+        </View>
 
-        {student.AttendanceData && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('Attendance', { attendances: student.AttendanceData })}
-          >
-          <Icon name="calendar-days" size={50} style={{paddingVertical: 10}} color="#91AB3B" />
-            <Text style={styles.buttonText}>Attendance</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.infoContainer}>
+          {renderInfoItem("Age / da'", student.Age)}
+          {renderInfoItem("Class / fasalka", student.class)}
+          {renderInfoItem("Schedule / jadwalka", student.schedule)}
+          {renderInfoItem("Teacher / Macallin", student.teacherName)}
+        </View>
 
-        {combinedComments.length > 0 && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('TeachersComment', { comments: combinedComments, StudentID: student.id })}
-          >
-          <Icon name="pen-clip" size={45} style={{paddingVertical: 10}} color="#502977" />
-            <Text style={styles.buttonText}>Teacher Comment</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </ScrollView>
+        <View style={styles.buttonContainer}>
+          {student.LessonsData && renderButton(
+            <Icon name="book-quran" size={50} color="#0D1321" />,
+            "Lesson / Cashar",
+            () => navigation.navigate('Lessons', { lessons: student.LessonsData })
+          )}
+
+          {student.BehaviorData && renderButton(
+            <MaterialCommunityIcons name="head-cog-outline" size={55} color="#788AA3" />,
+            "Behavior",
+            () => navigation.navigate('Behavior', { behaviors: student.BehaviorData })
+          )}
+
+          {student.AttendanceData && renderButton(
+            <Icon name="calendar-days" size={50} color="#91AB3B" />,
+            "Attendance",
+            () => navigation.navigate('Attendance', { attendances: student.AttendanceData })
+          )}
+
+          {combinedComments.length > 0 && renderButton(
+            <Icon name="pen-clip" size={50} color="#502977" />,
+            "Teacher Comment",
+            () => navigation.navigate('TeachersComment', { comments: combinedComments, StudentID: student.id })
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
+  safeArea: {
+    flex: 1,
     backgroundColor: '#252C30',
   },
-  textContainer:{
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  studentInfoText: {
-    fontWeight: 'bold',
-    color: '#FFF',
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    marginTop: 30,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 10,
+    marginBottom: 15,
+    borderWidth: 0,
+    borderColor: '#FFF',
   },
   studentName: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#FFF',
+    textAlign: 'center',
   },
-  studentInfo: {
-    fontSize: 16,
+  infoContainer: {
+    backgroundColor: '#333840',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 30,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  infoLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#FFF',
-    marginTop: 5,
+    flex: 1,
+  },
+  infoValue: {
+    fontSize: 18,
+    color: '#FFF',
+    flex: 1,
+    textAlign: 'right',
   },
   buttonContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginTop: 40,
+    justifyContent: 'space-between',
   },
   button: {
     backgroundColor: '#333840',
     padding: 15,
-    margin: 10,
-    borderRadius: 10,
-    width: 150,
-    height: 130,
+    borderRadius: 15,
+    width: '48%',
+    aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 15,
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
-  },
-  buttonIcon: {
-    width: 40,
-    height: 40,
-    marginBottom: 5,
   },
   buttonText: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#FFF',
     textAlign: 'center',
+    marginTop: 10,
+    fontWeight: '600',
   },
 });
 
