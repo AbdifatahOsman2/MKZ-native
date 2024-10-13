@@ -1,24 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react'; 
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import { app, auth, db } from '../firebaseConfig';
 
-
 const AuthScreen = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState(''); // Added state for name
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Parent');
-  const [invitationCode, setInvitationCode] = useState(''); // For Teacher Invitation Code
   const [phoneNumber, setPhoneNumber] = useState(''); // State for phone number
   const [verificationCode, setVerificationCode] = useState(''); // State for OTP
   const [verificationId, setVerificationId] = useState(null); // Store verificationId from Firebase
   const [attempts, setAttempts] = useState(0);
   const [isThrottled, setIsThrottled] = useState(false);
-  const [inputMethod, setInputMethod] = useState('email'); // 'email' or 'phone'
 
   const recaptchaVerifier = useRef(null); // Ref for RecaptchaVerifier
 
@@ -73,16 +71,17 @@ const AuthScreen = ({ navigation }) => {
           await setDoc(userRef, {
             role: 'Parent',
             phoneNumber: formattedPhoneNumber,
+            name: name || '', // Store name if provided
           });
         }
 
         const token = await userCredential.user.getIdToken();
         await AsyncStorage.setItem('userToken', token);
 
-        const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
+        const userData = await getDoc(userRef);
 
         if (userData.data().role === 'Parent') {
-          navigation.replace('StudentList', { ParentID: userCredential.user.uid, phoneNumber: formattedPhoneNumber });
+          navigation.replace('StudentList', { ParentID: userCredential.user.uid, name: userData.data().name });
         } else {
           Alert.alert('If you are a teacher, please use email login.');
         }
@@ -100,41 +99,47 @@ const AuthScreen = ({ navigation }) => {
 
   const handleEmailLogin = async () => {
     try {
-      let userCredential;
-
       if (isLogin) {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        // Existing login logic
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        // Handle post-login actions
+        await postAuthActions(userCredential);
       } else {
-        if (role === 'Teacher') {
-          const codeDocRef = doc(db, 'invitationCodes', invitationCode);
-          const codeDocSnap = await getDoc(codeDocRef);
+        // Registration logic
 
-          if (!codeDocSnap.exists || codeDocSnap.data().used) {
-            throw new Error('Invalid or already used invitation code.');
-          }
-        }
+        // Create user account
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Set user document in Firestore
         const userDocRef = doc(db, 'users', userCredential.user.uid);
         await setDoc(userDocRef, {
           role: role,
           [`${role}ID`]: userCredential.user.uid,
+          name: name, // Store the name
         });
-      }
 
-      const token = await userCredential.user.getIdToken();
-      await AsyncStorage.setItem('userToken', token);
-
-      const userData = await getDoc(doc(db, 'users', userCredential.user.uid));
-
-      if (userData.data().role === 'Parent') {
-        navigation.replace('StudentList', { ParentID: userCredential.user.uid });
-      } else {
-        navigation.replace('TeachersView', { TeacherID: userCredential.user.uid });
+        // Handle post-authentication actions
+        await postAuthActions(userCredential);
       }
     } catch (error) {
       console.error(error);
       handleAuthError(error);
+    }
+  };
+
+  const postAuthActions = async (userCredential) => {
+    const token = await userCredential.user.getIdToken();
+    await AsyncStorage.setItem('userToken', token);
+
+    const userDocRef = doc(db, 'users', userCredential.user.uid);
+    const userData = await getDoc(userDocRef);
+
+    const userName = userData.data().name || '';
+
+    if (userData.data().role === 'Parent') {
+      navigation.replace('StudentList', { ParentID: userCredential.user.uid, name: userName });
+    } else {
+      navigation.replace('TeachersView', { TeacherID: userCredential.user.uid, name: userName });
     }
   };
 
@@ -179,7 +184,6 @@ const AuthScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <FirebaseRecaptchaVerifierModal
-        
         ref={recaptchaVerifier}
         firebaseConfig={app.options}
         attemptInvisibleVerification={true}
@@ -241,6 +245,12 @@ const AuthScreen = ({ navigation }) => {
 
         {!isLogin && !phoneNumber && (
           <View>
+            <TextInput
+              placeholder="Your Name"
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+            />
             <View style={styles.roleContainer}>
               <Text style={styles.roleLabel}>Register as:</Text>
               <View style={styles.roleButtonContainer}>
@@ -252,15 +262,6 @@ const AuthScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
-
-            {role === 'Teacher' && (
-              <TextInput
-                placeholder="Invitation Code"
-                style={styles.input}
-                value={invitationCode}
-                onChangeText={setInvitationCode}
-              />
-            )}
           </View>
         )}
       </View>

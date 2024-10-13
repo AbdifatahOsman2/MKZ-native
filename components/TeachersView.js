@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, T
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { fetchStudents, fetchStudentsWithPhoneNumbers } from '../services/airtableService';
+import { fetchStudents } from '../services/airtableService';
 
 const TeachersView = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
@@ -11,13 +11,15 @@ const TeachersView = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const { TeacherID } = route.params;
+  const {userName } = route.params;
+  console.log(route.params);
 
   const iconColors = ['#A4CFF1', '#F1A4A4']; // Colors to be randomly assigned to icons
 
   const getStudentsData = async () => {
     try {
       setLoading(true);
-      const studentsData = await fetchStudents(null);
+      const studentsData = await fetchStudents(TeacherID);
       setStudents(studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);

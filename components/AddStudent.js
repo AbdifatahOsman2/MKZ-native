@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Modal, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { createStudent, fetchTeachers } from '../services/airtableService';
 import RNPickerSelect from 'react-native-picker-select';
-import { getParentIds, ParentsPhoneNumber } from '../firebaseConfig';
+import { getParentIds, ParentsPhoneNumber, getTeacherIds } from '../firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
+
 
 const AddStudent = ({ navigation }) => {
     const [studentName, setStudentName] = useState('');
@@ -14,7 +15,7 @@ const AddStudent = ({ navigation }) => {
     const [parentId, setParentId] = useState('');
     const [parentIds, setParentIds] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const [selectedTeacherId, setSelectedTeacherId] = useState('');
+    const [selectedTeacher, setSelectedTeacher] = useState('');
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [parentPhoneNumber, setParentPhoneNumber] = useState('');
@@ -34,6 +35,13 @@ const AddStudent = ({ navigation }) => {
                     label: teacher.Name,
                     value: teacher.id
                 })));
+
+                const fetchedTeacherIds = await getTeacherIds();
+                console.log(fetchedTeacherIds);
+            setTeachersId(fetchedTeacherIds.map(id => ({
+                label: `Teacher ${id}`, // Adjust the label to match your data
+                value: id
+            })));
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             }
@@ -43,7 +51,7 @@ const AddStudent = ({ navigation }) => {
     }, []);
 
     const handleSubmit = async () => {
-        if (!studentName || !age || !classroom || !schedule || !gender || !parentPhoneNumber || !selectedTeacherId) {
+        if (!studentName || !age || !classroom || !schedule || !gender || !parentPhoneNumber || !selectedTeacher) {
             setError('Please fill in all fields.');
             return;
         }
@@ -55,7 +63,7 @@ const AddStudent = ({ navigation }) => {
             schedule: schedule,
             Gender: gender,
             PhoneNumber: parentPhoneNumber,
-            Teachers: [selectedTeacherId]
+            Teachers: [selectedTeacher]
         };
 
         if (useParentId && parentId) {
@@ -130,7 +138,7 @@ const AddStudent = ({ navigation }) => {
 
                 {renderPicker("Phone Number", parentPhoneNumber, setParentPhoneNumber, parentPhoneNumbers, { label: "Select Parent Phone Number", value: null })}
 
-                {renderPicker("Teacher", selectedTeacherId, setSelectedTeacherId, teachers, { label: "Select Teacher", value: null })}
+                {renderPicker("Teacher", selectedTeacher, setSelectedTeacher, teachers, { label: "Select Teacher", value: null })}
 
                 {!useParentId && (
                     <TouchableOpacity onPress={() => setUseParentId(true)} style={styles.addParentIdButton}>

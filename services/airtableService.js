@@ -57,9 +57,15 @@ export const fetchTeachersComment = async (commentIds) => {
 
 // airtableService.js (modify fetchStudents)
 
-export const fetchStudents = async () => {
+export const fetchStudents = async (TeacherID) => {
   try {
     let url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
+
+    if (TeacherID) {
+      const filterByFormula = `AND({TeacherID} = '${TeacherID}')`;
+      url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
+    }
+    
     const response = await axios.get(url, { headers: airtableHeaders });
     const students = response.data.records.map(record => ({
       id: record.id,

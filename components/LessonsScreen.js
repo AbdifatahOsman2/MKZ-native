@@ -70,7 +70,7 @@ const LessonsScreen = ({ route }) => {
         return <Icon name="book-open-reader" size={30} color="#A4CFF1" />;
       case 'Passed None':
       default:
-        return <Icon name="book-quran" size={30} color="#F1A4A4" />;
+        return <Icon name="book-open-reader" size={30} color="#A4CFF1" />;
     }
   };
 

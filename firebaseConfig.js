@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore"; // Added missing imports
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -15,8 +16,8 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-
-
+ 
+// Function to get Parent IDs
 export async function getParentIds() {
   const usersCollectionRef = collection(db, "users");
   const querySnapshot = await getDocs(usersCollectionRef);
@@ -45,7 +46,21 @@ export async function ParentsPhoneNumber() {
   return phoneNumbers;
 }
 
+// Function to get Teacher IDs from Firestore
+export async function getTeacherIds() {
+  const usersCollectionRef = collection(db, "users");
+  const querySnapshot = await getDocs(usersCollectionRef);
+  const teacherIds = [];
 
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.role === "Teacher" && data.TeacherID) {
+      teacherIds.push(data.TeacherID);
+    }
+  });
+
+  return teacherIds;
+}
 
 export async function addUserFeedback(name, comment) {
   try {
@@ -61,29 +76,42 @@ export async function addUserFeedback(name, comment) {
   }
 }
 
-// function generateCode(length = 5) { 
-//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//   let result = '';
-//   for (let i = 0; i < length; i++) {
-//     result += characters.charAt(Math.floor(Math.random() * characters.length));
+function generateCode(length = 5) { 
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
+export async function createInvitationCodes(numberOfCodes) {
+  const codes = [];
+  for (let i = 0; i < numberOfCodes; i++) {
+    let newCode = generateCode();
+    const codeRef = doc(db, "invitationCodes", newCode);
+
+    const docSnap = await getDoc(codeRef);
+    if (!docSnap.exists()) {
+      await setDoc(codeRef, { used: false });
+      codes.push(newCode);
+    } else {
+      i--;
+    }
+  }
+  return codes;
+}
+
+// Generate invitation codes when the app is initialized
+// async function generateAndLogCodes() {
+//   const numberOfCodes = 10; // Define how many codes to generate
+//   try {
+//     const generatedCodes = await createInvitationCodes(numberOfCodes);
+//     console.log("Generated Invitation Codes: ", generatedCodes);
+//   } catch (error) {
+//     console.error("Error generating codes: ", error);
 //   }
-//   return result;
 // }
 
-// export async function createInvitationCodes(numberOfCodes) {
-//   const codes = [];
-//   for (let i = 0; i < numberOfCodes; i++) {
-//     let newCode = generateCode();
-//     const codeRef = doc(db, "invitationCodes", newCode);
-
-//     const docSnap = await getDoc(codeRef);
-//     if (!docSnap.exists()) {
-//       await setDoc(codeRef, { used: false });
-//       codes.push(newCode);
-//     } else {
-//       i--;
-//     }
-//   }
-//   return codes;
-// }
-
+// // Call the function to generate codes on app start (or you can move this to an event)
+// generateAndLogCodes();

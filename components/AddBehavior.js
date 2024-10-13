@@ -15,11 +15,9 @@ const AddBehavior = ({ navigation, route }) => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   const behaviorOptions = [
-    { label: 'Disruptive', value: 'Disruptive' },
-    { label: 'Cooperative', value: 'Cooperative' },
-    { label: 'Inattentive', value: 'Inattentive' },
-    { label: 'Proactive', value: 'Proactive' },
-    { label: 'Other', value: 'Other' },
+    { label: 'Good', value: 'Good' },
+    { label: 'Excellent', value: 'Excellent' },
+    { label: 'Bad', value: 'Bad' },
   ];
 
   const showDatePicker = () => {

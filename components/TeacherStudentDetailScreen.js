@@ -42,8 +42,28 @@ const TeacherStudentDetailScreen = ({ route }) => {
     );
   };
 
-  const commentsArray = student.Comment || [];
-  const teachersCommentArray = student.TeachersComment || [];
+  const formatPhoneNumber = (phoneNumber) => {
+    if (!phoneNumber) return ''; // Handle empty phone numbers
+  
+    // Remove non-digit characters but keep the plus sign if present
+    const cleaned = ('' + phoneNumber).replace(/[^\d+]/g, '');
+  
+    // Check if the number starts with +1
+    const hasCountryCode = cleaned.startsWith('+1');
+    const numberWithoutCode = hasCountryCode ? cleaned.slice(2) : cleaned;
+  
+    const match = numberWithoutCode.match(/^(\d{3})(\d{3})(\d{4})$/); // Match XXX-XXX-XXXX
+  
+    if (match) {
+      return hasCountryCode
+        ? `+1 ${match[1]}-${match[2]}-${match[3]}` // Format with +1
+        : `${match[1]}-${match[2]}-${match[3]}`;  // Format without country code
+    }
+  
+    return phoneNumber; // Return original number if it doesn't match the pattern
+  };
+  
+  
 
   // Combine Comments and their respective IDs
   const combinedComments = (student.Comment || []).map((comment, index) => ({
@@ -79,7 +99,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
           </View>
           <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Parent:</Text>
-          <Text style={styles.infoValue}>{student.PhoneNumber}</Text>
+          <Text style={styles.infoValue}>{formatPhoneNumber(student.PhoneNumber)}</Text>
         </View>
         </View>
       </View>

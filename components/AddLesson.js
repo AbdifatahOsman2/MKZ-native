@@ -52,7 +52,7 @@ const AddLesson = ({ navigation, route }) => {
     const lessonData = {
       Students: [studentId],
       Date: formattedDate,
-      LessonType: finalLessonDescription,
+      Passed: finalLessonDescription,
     };
 
     try {
