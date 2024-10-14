@@ -11,7 +11,7 @@ const TeachersView = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const { TeacherID } = route.params;
-  const {userName } = route.params;
+  const { name } = route.params;
   console.log(route.params);
 
   const iconColors = ['#A4CFF1', '#F1A4A4']; // Colors to be randomly assigned to icons
@@ -19,7 +19,7 @@ const TeachersView = ({ navigation, route }) => {
   const getStudentsData = async () => {
     try {
       setLoading(true);
-      const studentsData = await fetchStudents(TeacherID);
+      const studentsData = await fetchStudents(name);
       setStudents(studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -45,10 +45,13 @@ const TeachersView = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Home</Text>
+        <View style={styles.headerLeft}>
+
+          <Text style={styles.headerTitle}>Welcome {name}</Text>
+        </View>
         <TouchableOpacity
           style={styles.iconWrapper}
-          onPress={() => navigation.navigate('AddStudent')}
+          onPress={() => navigation.navigate('AddStudent', { name })}
         >
           <MaterialCommunityIcons name="account-plus" size={32} style={{ marginHorizontal: 5 }} color="#fff" />
         </TouchableOpacity>
@@ -125,9 +128,16 @@ const styles = StyleSheet.create({
     paddingTop: 70,
     paddingBottom: 10,
   },
+  headerLeft: {
+    flexDirection: 'column',
+  },
   headerTitle: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  welcomeText: {
+    fontSize: 18,
     color: '#FFFFFF',
   },
   searchBar: {

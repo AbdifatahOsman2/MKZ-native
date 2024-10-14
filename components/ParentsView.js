@@ -4,15 +4,13 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudents, fetchStudentsWithPhoneNumbers } from '../services/airtableService';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-
 const StudentListScreen = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const { ParentID } = route.params;
-  const {phoneNumber} = route.params;
-
+  const { ParentID, phoneNumber, name } = route.params; // Destructure 'name' from route.params
+  console.log(route.params);
 
   const getStudentsData = async () => {
     try {
@@ -38,15 +36,9 @@ const StudentListScreen = ({ navigation, route }) => {
 
   // Function to randomly pick an image based on gender
   const getRandomImage = (gender) => {
-    const maleImages = [
-      require('../assets/M-1-Image.png'), 
-      require('../assets/M-2-Image.png')
-    ];
-    const femaleImages = [
-      require('../assets/Fm1-Image.png'), 
-      require('../assets/Fm-2-Image.png')
-    ];
-  
+    const maleImages = [require('../assets/M-1-Image.png')];
+    const femaleImages = [require('../assets/Fm1-Image.png')];
+
     if (gender === 'Male') {
       return maleImages[Math.floor(Math.random() * maleImages.length)];
     } else if (gender === 'Female') {
@@ -54,6 +46,7 @@ const StudentListScreen = ({ navigation, route }) => {
     }
     return null;
   };
+
   const filteredStudents = searchQuery.length > 0
     ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
     : students;
@@ -61,15 +54,10 @@ const StudentListScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Students</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.headerTitle}>Welcome {name}</Text>
+        </View>
       </View>
-      <TextInput
-        style={styles.searchBar}
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        placeholder="Search Students"
-        placeholderTextColor="#ccc"
-      />
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#1B73E8" />
@@ -81,12 +69,11 @@ const StudentListScreen = ({ navigation, route }) => {
         >
           {filteredStudents.length > 0 ? (
             filteredStudents.map(student => {
-              const studentImage = getRandomImage(student.Gender); // Get random image for the student
-              
+              const studentImage = getRandomImage(student.Gender);
               return (
                 <View key={student.id} style={styles.card}>
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('StudentDetail', { student, studentImage })} // Pass the image along with student data
+                    onPress={() => navigation.navigate('StudentDetail', { student, studentImage })}
                   >
                     <View style={styles.cardContent}>
                       <Image source={studentImage} style={styles.avatar} />
@@ -107,14 +94,14 @@ const StudentListScreen = ({ navigation, route }) => {
         </ScrollView>
       )}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID })}>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID, name, phoneNumber })}>
           <Icon name="home" size={28} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage', { ParentID })}>
           <Icon name="cog" size={28} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('FeedbackScreen')}>
-        <MaterialIcons name="feedback" size={28} color="#fafbfc" />
+          <MaterialIcons name="feedback" size={28} color="#fafbfc" />
         </TouchableOpacity>
       </View>
     </View>
@@ -128,32 +115,24 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 70,
+    paddingTop: 80,
     paddingBottom: 10,
   },
+  headerLeft: {
+    flexDirection: 'column',
+  },
   headerTitle: {
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: 'bold',
     color: '#FFFFFF',
-  },
-  searchBar: {
-    height: 40,
-    marginHorizontal: 20,
-    marginVertical: 10,
-    paddingHorizontal: 10,
-    backgroundColor: '#1f2428',
-    borderRadius: 20,
-    color: '#FFFFFF',
-    fontSize: 16,
   },
   scrollContainer: {
     paddingBottom: 100,
   },
   card: {
-    marginTop: 20, 
+    marginTop: 20,
     marginHorizontal: 20,
     padding: 15,
     backgroundColor: '#1f2428',

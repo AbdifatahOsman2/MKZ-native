@@ -76,6 +76,25 @@ export async function addUserFeedback(name, comment) {
   }
 }
 
+
+// Function to get Teacher Names from Firestore
+export async function getTeacherNames() {
+  const usersCollectionRef = collection(db, "users");
+  const querySnapshot = await getDocs(usersCollectionRef);
+  const teacherNames = [];
+
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.role === "Teacher" && data.name) {
+      teacherNames.push(data.name);
+    }
+  });
+
+  return teacherNames;
+}
+
+
+
 function generateCode(length = 5) { 
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';

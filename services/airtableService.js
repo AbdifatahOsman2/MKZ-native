@@ -55,19 +55,23 @@ export const fetchTeachersComment = async (commentIds) => {
   return fetchTableData(TEACHERS_COMMENT_TABLE, commentIds);
 };
 
-// airtableService.js (modify fetchStudents)
 
-export const fetchStudents = async (TeacherID) => {
+
+// airtableService.js
+
+export const fetchStudents = async (teacherName) => {
   try {
     let url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
 
-    if (TeacherID) {
-      const filterByFormula = `AND({TeacherID} = '${TeacherID}')`;
+    if (teacherName) {
+      // Escape double quotes in teacherName for the formula
+      const escapedTeacherName = teacherName.replace(/"/g, '\\"');
+      const filterByFormula = `{TeacherName} = "${escapedTeacherName}"`;
       url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
     }
-    
+
     const response = await axios.get(url, { headers: airtableHeaders });
-    const students = response.data.records.map(record => ({
+    const students = response.data.records.map((record) => ({
       id: record.id,
       ...record.fields,
     }));
@@ -98,18 +102,36 @@ export const fetchStudents = async (TeacherID) => {
 
 export const fetchStudentsWithPhoneNumbers = async (phoneNumber = null, ParentID = null) => {
   try {
-    let url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
-    
-    // Apply the phone number filter if it's provided
+    const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
+    const params = new URLSearchParams();
+
+    // Initialize an array to hold individual filter conditions
+    let filterConditions = [];
+
+    // Add conditions based on provided parameters
     if (phoneNumber) {
-      const filterByFormula = `AND({PhoneNumber} = '${phoneNumber}')`;
-      url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
-    }else if (ParentID) {
-      const filterByFormula = `AND({ParentID} = '${ParentID}')`;
-      url += `?filterByFormula=${encodeURIComponent(filterByFormula)}`;
+      filterConditions.push(`{PhoneNumber} = '${phoneNumber}'`);
+    }
+    if (ParentID) {
+      filterConditions.push(`{ParentID} = '${ParentID}'`);
     }
 
-    const response = await axios.get(url, { headers: airtableHeaders });
+    // Build the filter formula
+    if (filterConditions.length > 0) {
+      // For OR condition between the filters
+      // const filterByFormula = `OR(${filterConditions.join(',')})`;
+
+      // For AND condition between the filters
+      const filterByFormula = `OR(${filterConditions.join(',')})`;
+
+      // Append the filterByFormula to the query parameters
+      params.append('filterByFormula', filterByFormula);
+    }
+
+    // Construct the full URL with query parameters
+    const fullUrl = `${url}?${params.toString()}`;
+
+    const response = await axios.get(fullUrl, { headers: airtableHeaders });
     const students = response.data.records.map(record => ({
       id: record.id,
       ...record.fields,
@@ -130,14 +152,13 @@ export const fetchStudentsWithPhoneNumbers = async (phoneNumber = null, ParentID
         student.CommentData = await fetchTeachersComment(student.Comment);
       }
     }
-    
+
     return students;
   } catch (error) {
-    console.error('Error fetching students with linked data:', error);
+    console.error('Error fetching students with linked data:', error.response?.data || error.message);
     throw error;
   }
 };
-
 
 
 
@@ -148,20 +169,21 @@ export const createStudent = async (studentData) => {
     const payload = {
       records: [
         {
-          fields: studentData
-        }
-      ]
+          fields: studentData,
+        },
+      ],
     };
 
     const response = await axios.post(url, payload, { headers: airtableHeaders });
-
     return response.data;
   } catch (error) {
-    console.error('Error creating student:', error.response ? error.response.data : error);  // Log detailed error
+    console.error(
+      'Error creating student:',
+      error.response ? error.response.data : error
+    ); // Log detailed error
     throw error;
   }
 };
-
 
 // Update an existing record
 export const updateStudent = async (recordId, updatedData) => {
