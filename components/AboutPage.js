@@ -6,8 +6,7 @@ const AboutPage = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.title}>About Us</Text>
       <Text style={styles.description}>
-        This app is a platform for teachers, parents, and students to connect and gain valuable insights into their Islamic and Quranic learning journey. It fosters communication and understanding, ensuring that everyone involved can monitor progress and contribute to a student’s spiritual and educational growth.
-      </Text>
+      Markaz al-Najah (Success Center) is a platform for teachers, parents, and students to connect and gain valuable insights into their Islamic and Quranic learning journey. It fosters communication and understanding, ensuring that everyone involved can monitor progress and contribute to a student’s spiritual and educational growth.     </Text>
     </ScrollView>
   );
 };
