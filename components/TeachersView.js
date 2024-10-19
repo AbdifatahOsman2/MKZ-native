@@ -49,12 +49,6 @@ const TeachersView = ({ navigation, route }) => {
 
           <Text style={styles.headerTitle}>Welcome {name}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.iconWrapper}
-          onPress={() => navigation.navigate('AddStudent', { name })}
-        >
-          <MaterialCommunityIcons name="account-plus" size={32} style={{ marginHorizontal: 5 }} color="#fff" />
-        </TouchableOpacity>
       </View>
       <TextInput
         style={styles.searchBar}

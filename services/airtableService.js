@@ -98,7 +98,36 @@ export const fetchStudents = async (teacherName) => {
   }
 };
 
+export const fetchAllStudents = async () => {
+  try {
+    const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}`;
+    const response = await axios.get(url, { headers: airtableHeaders });
+    const students = response.data.records.map((record) => ({
+      id: record.id,
+      ...record.fields,
+    }));
 
+    // Fetch linked data for each student
+    for (const student of students) {
+      if (student.Lessons) {
+        student.LessonsData = await fetchLessons(student.Lessons);
+      }
+      if (student.Behavior) {
+        student.BehaviorData = await fetchBehavior(student.Behavior);
+      }
+      if (student.Attendance) {
+        student.AttendanceData = await fetchAttendance(student.Attendance);
+      }
+      if (student.Comment) {
+        student.CommentData = await fetchTeachersComment(student.Comment);
+      }
+    }
+    return students;
+  } catch (error) {
+    console.error('Error fetching all students with linked data:', error);
+    throw error;
+  }
+};
 
 export const fetchStudentsWithPhoneNumbers = async (phoneNumber = null, ParentID = null) => {
   try {

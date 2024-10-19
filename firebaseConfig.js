@@ -95,31 +95,31 @@ export async function getTeacherNames() {
 
 
 
-function generateCode(length = 5) { 
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
+// function generateCode(length = 5) { 
+//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//   let result = '';
+//   for (let i = 0; i < length; i++) {
+//     result += characters.charAt(Math.floor(Math.random() * characters.length));
+//   }
+//   return result;
+// }
 
-export async function createInvitationCodes(numberOfCodes) {
-  const codes = [];
-  for (let i = 0; i < numberOfCodes; i++) {
-    let newCode = generateCode();
-    const codeRef = doc(db, "invitationCodes", newCode);
+// export async function createInvitationCodes(numberOfCodes) {
+//   const codes = [];
+//   for (let i = 0; i < numberOfCodes; i++) {
+//     let newCode = generateCode();
+//     const codeRef = doc(db, "invitationCodes", newCode);
 
-    const docSnap = await getDoc(codeRef);
-    if (!docSnap.exists()) {
-      await setDoc(codeRef, { used: false });
-      codes.push(newCode);
-    } else {
-      i--;
-    }
-  }
-  return codes;
-}
+//     const docSnap = await getDoc(codeRef);
+//     if (!docSnap.exists()) {
+//       await setDoc(codeRef, { used: false });
+//       codes.push(newCode);
+//     } else {
+//       i--;
+//     }
+//   }
+//   return codes;
+// }
 
 // Generate invitation codes when the app is initialized
 // async function generateAndLogCodes() {

@@ -1,22 +1,23 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { fetchStudentsWithPhoneNumbers } from '../services/airtableService';
+import React, { useEffect, useState, useCallback } from 'react';  
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { fetchAllStudents } from '../services/airtableService';
 
-const StudentListScreen = ({ navigation, route }) => {
+const AdminView = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const { ParentID, phoneNumber, name } = route.params; // Destructure 'name' from route.params
-  console.log(route.params);
-  console.log("phoneNumber:", route.params.phoneNumber);
+  const { AdminID, name } = route.params;
+
+  const iconColors = ['#FFD700', '#FF8C00']; // Different accent colors for admin
 
   const getStudentsData = async () => {
     try {
       setLoading(true);
-      const studentsData = await fetchStudentsWithPhoneNumbers(phoneNumber, ParentID);
+      const studentsData = await fetchAllStudents(); // Fetch all students for admin
       setStudents(studentsData);
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -35,19 +36,6 @@ const StudentListScreen = ({ navigation, route }) => {
     setRefreshing(false);
   }, []);
 
-  // Function to randomly pick an image based on gender
-  const getRandomImage = (gender) => {
-    const maleImages = [require('../assets/M-1-Image.png')];
-    const femaleImages = [require('../assets/Fm1-Image.png')];
-
-    if (gender === 'Male') {
-      return maleImages[Math.floor(Math.random() * maleImages.length)];
-    } else if (gender === 'Female') {
-      return femaleImages[Math.floor(Math.random() * femaleImages.length)];
-    }
-    return null;
-  };
-
   const filteredStudents = searchQuery.length > 0
     ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
     : students;
@@ -56,12 +44,25 @@ const StudentListScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>Welcome {name}</Text>
+          <Text style={styles.headerTitle}>Welcome Admin</Text>
         </View>
+        <TouchableOpacity
+          style={styles.iconWrapper}
+          onPress={() => navigation.navigate('AddStudent', { name })}
+        >
+          <MaterialCommunityIcons name="account-plus" size={32} style={{ marginHorizontal: 5 }} color="#fff" />
+        </TouchableOpacity>
       </View>
+      <TextInput
+        style={styles.searchBar}
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+        placeholder="Search Students"
+        placeholderTextColor="#ccc"
+      />
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#1B73E8" />
+          <ActivityIndicator size="large" color="#FFD700" />
         </View>
       ) : (
         <ScrollView
@@ -70,23 +71,25 @@ const StudentListScreen = ({ navigation, route }) => {
         >
           {filteredStudents.length > 0 ? (
             filteredStudents.map(student => {
-              const studentImage = getRandomImage(student.Gender);
+              const iconName = student.Gender === 'Male' ? 'human' : 'human-female';
+              const iconColor = iconColors[Math.floor(Math.random() * iconColors.length)];
+
               return (
-                <View key={student.id} style={styles.card}>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate('StudentDetail', { student, studentImage })}
-                  >
-                    <View style={styles.cardContent}>
-                      <Image source={studentImage} style={styles.avatar} />
-                      <View style={styles.textContent}>
-                        <Text style={styles.cardTitle}>{student.StudentName}</Text>
-                        <Text style={styles.cardText}>Age: {student.Age}</Text>
-                        <Text style={styles.cardText}>Class: {student.class}</Text>
-                      </View>
-                      <Icon name="chevron-right" size={20} color="#1B73E8" />
+                <TouchableOpacity
+                  key={student.id}
+                  style={styles.card}
+                  onPress={() => navigation.navigate('TeacherStudentDetail', { student })} // Admin-specific student detail
+                >
+                  <View style={styles.cardContent}>
+                    <MaterialCommunityIcons name={iconName} size={40} color={iconColor} style={styles.avatar} />
+                    <View style={styles.textContent}>
+                      <Text style={styles.cardTitle}>{student.StudentName}</Text>
+                      <Text style={styles.cardText}>Age: {student.Age}</Text>
+                      <Text style={styles.cardText}>Class: {student.class}</Text>
                     </View>
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                  <Icon name="chevron-right" size={20} color="#ccc" />
+                </TouchableOpacity>
               );
             })
           ) : (
@@ -95,10 +98,10 @@ const StudentListScreen = ({ navigation, route }) => {
         </ScrollView>
       )}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID, name, phoneNumber })}>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('AdminView', { AdminID })}>
           <Icon name="home" size={28} color="#fafbfc" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage', { ParentID })}>
+        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage')}>
           <Icon name="cog" size={28} color="#fafbfc" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('FeedbackScreen')}>
@@ -116,57 +119,63 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 80,
+    paddingTop: 70,
     paddingBottom: 10,
   },
   headerLeft: {
     flexDirection: 'column',
   },
   headerTitle: {
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#FFFFFF',
+  },
+  searchBar: {
+    height: 40,
+    marginHorizontal: 20,
+    marginVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: '#1f2428',
+    borderRadius: 20,
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  iconWrapper: {
+    paddingHorizontal: 18,
   },
   scrollContainer: {
     paddingBottom: 100,
   },
   card: {
-    marginTop: 20,
-    marginHorizontal: 20,
-    padding: 15,
-    backgroundColor: '#1f2428',
-    borderRadius: 10,
-    shadowColor: '#fafbfc',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#fff',
   },
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 20,
     marginRight: 15,
   },
   textContent: {
     flex: 1,
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fafbfc',
+    fontSize: 16,
+    color: '#fff',
     marginBottom: 3,
   },
   cardText: {
     fontSize: 14,
-    color: '#cccccc',
+    color: '#ccc',
   },
   noStudentsAvailable: {
     color: '#ccc',
@@ -195,4 +204,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StudentListScreen;
+export default AdminView;

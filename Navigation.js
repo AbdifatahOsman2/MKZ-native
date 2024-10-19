@@ -22,6 +22,7 @@ import AddAttendance from './components/AddAttendance';
 import AddComment from './components/AddComment';
 import FeedbackScreen from './components/FeedbackScreen';
 import ParentID from './components/ParentID';
+import AdminView from './components/AdminView';
 
 const Stack = createStackNavigator();
 
@@ -51,6 +52,7 @@ const Navigation = () => {
         <Stack.Screen name="SettingsPage" component={SettingsPage} options={screenOptions} />
         <Stack.Screen name="AboutPage" component={AboutPage} options={screenOptions} />
         <Stack.Screen name="TeachersView" component={TeachersView} options={{ headerShown: false, headerTransparent: true, headerLeft: ()=> null, }}/>
+        <Stack.Screen name="AdminView" component={AdminView} options={{ headerShown: false, headerTransparent: true, headerLeft: ()=> null, }}/>
         <Stack.Screen name="TeacherStudentDetail" component={TeacherStudentDetailScreen} options={screenOptions} />
         <Stack.Screen name="AddStudent" component={AddStudent} options={screenOptions} />
         <Stack.Screen name="AddLesson" component={AddLesson} options={screenOptions} />

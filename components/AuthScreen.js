@@ -79,11 +79,16 @@ const AuthScreen = ({ navigation }) => {
         await AsyncStorage.setItem('userToken', token);
 
         const userData = await getDoc(userRef);
+        console.log(formattedPhoneNumber, "formattedPhoneNumber");
 
         if (userData.data().role === 'Parent') {
-          navigation.replace('StudentList', { ParentID: userCredential.user.uid, name: userData.data().name });
+          navigation.replace('StudentList', {
+            ParentID: userCredential.user.uid,
+            name: userData.data().name,
+            phoneNumber: formattedPhoneNumber,
+          });
         } else {
-          Alert.alert('If you are a teacher, please use email login.');
+          Alert.alert('If you are a teacher or admin, please use email login.');
         }
       }
     } catch (error) {
@@ -106,6 +111,12 @@ const AuthScreen = ({ navigation }) => {
         await postAuthActions(userCredential);
       } else {
         // Registration logic
+
+        // Prevent users from registering as Admin
+        if (role === 'Admin') {
+          Alert.alert('Registration Error', 'You cannot register as an Admin through the app.');
+          return;
+        }
 
         // Create user account
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -138,13 +149,22 @@ const AuthScreen = ({ navigation }) => {
 
     if (userData.data().role === 'Parent') {
       navigation.replace('StudentList', { ParentID: userCredential.user.uid, name: userName });
-    } else {
+    } else if (userData.data().role === 'Teacher') {
       navigation.replace('TeachersView', { TeacherID: userCredential.user.uid, name: userName });
+    } else if (userData.data().role === 'Admin') {
+      navigation.replace('AdminView', { AdminID: userCredential.user.uid, name: userName });
+    } else {
+      Alert.alert('Login Error', 'User role is not recognized.');
     }
   };
 
   const handleAuth = () => {
     if (phoneNumber) {
+      // Prevent teachers and admins from registering with phone number
+      if (!isLogin && (role === 'Teacher' || role === 'Admin')) {
+        Alert.alert('Registration Error', 'Teachers and Admins must register with an email address.');
+        return;
+      }
       handlePhoneLogin();
     } else {
       handleEmailLogin();
@@ -234,16 +254,7 @@ const AuthScreen = ({ navigation }) => {
           />
         )}
 
-        {phoneNumber && verificationId && (
-          <TextInput
-            placeholder="Verification Code"
-            style={styles.input}
-            value={verificationCode}
-            onChangeText={setVerificationCode}
-          />
-        )}
-
-        {!isLogin && !phoneNumber && (
+        {!isLogin && (
           <View>
             <TextInput
               placeholder="Your Name"
@@ -260,9 +271,19 @@ const AuthScreen = ({ navigation }) => {
                 <TouchableOpacity style={styles.roleButton} onPress={() => setRole('Teacher')}>
                   <Text style={role === 'Teacher' ? styles.activeText : styles.inactiveText}>Teacher</Text>
                 </TouchableOpacity>
+                {/* Admin role is not selectable during registration */}
               </View>
             </View>
           </View>
+        )}
+
+        {phoneNumber && verificationId && (
+          <TextInput
+            placeholder="Verification Code"
+            style={styles.input}
+            value={verificationCode}
+            onChangeText={setVerificationCode}
+          />
         )}
       </View>
 
@@ -378,6 +399,3 @@ const styles = StyleSheet.create({
 });
 
 export default AuthScreen;
-
-
-//
