@@ -13,7 +13,7 @@ const SettingsPage = ({ navigation, route }) => {
         // Reset navigation stack and redirect to login screen after successful logout
         navigation.reset({
           index: 0,
-          routes: [{ name: 'AuthScreen' }],
+          routes: [{ name: 'Login' }],
         });
       })
       .catch((error) => {

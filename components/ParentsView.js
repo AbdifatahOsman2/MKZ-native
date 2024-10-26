@@ -9,9 +9,8 @@ const StudentListScreen = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const { ParentID, phoneNumber, name } = route.params; // Destructure 'name' from route.params
-  console.log(route.params);
-  console.log("phoneNumber:", route.params.phoneNumber);
+  const { ParentID, phoneNumber, name } = route.params; 
+  console.log("Phone Number:", phoneNumber);
 
   const getStudentsData = async () => {
     try {

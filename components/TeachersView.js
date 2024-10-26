@@ -12,10 +12,9 @@ const TeachersView = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const { TeacherID } = route.params;
   const { name } = route.params;
-  console.log(route.params);
+  console.log("name:", name);
 
   const iconColors = ['#A4CFF1', '#F1A4A4']; // Colors to be randomly assigned to icons
-
   const getStudentsData = async () => {
     try {
       setLoading(true);

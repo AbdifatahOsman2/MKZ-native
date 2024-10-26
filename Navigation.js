@@ -1,9 +1,10 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { TouchableOpacity, Alert } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AuthScreen from './components/AuthScreen';
+import LoginScreen from './components/LoginScreen';
+import RegisterScreen from './components/RegisterScreen';
 import StudentListScreen from './components/ParentsView';
 import StudentDetailScreen from './components/ParentsViewTwo';
 import LessonsScreen from './components/LessonsScreen';
@@ -23,6 +24,10 @@ import AddComment from './components/AddComment';
 import FeedbackScreen from './components/FeedbackScreen';
 import ParentID from './components/ParentID';
 import AdminView from './components/AdminView';
+import PhoneNumberScreen from './components/PhoneNumberScreen'; 
+import VerificationCodeScreen from './components/VerificationCodeScreen'; 
+import TeacherRegisterScreen from './components/TeacherRegisterScreen';
+
 
 const Stack = createStackNavigator();
 
@@ -42,7 +47,11 @@ const Navigation = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="SplashScreen">
         <Stack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="AuthScreen" component={AuthScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="PhoneNumber" component={PhoneNumberScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="VerificationCode" component={VerificationCodeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="TeacherRegister" component={TeacherRegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StudentList" component={StudentListScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StudentDetail" component={StudentDetailScreen} options={screenOptions} />
         <Stack.Screen name="Lessons" component={LessonsScreen} options={screenOptions} />
@@ -51,8 +60,8 @@ const Navigation = () => {
         <Stack.Screen name="TeachersComment" component={TeachersCommentScreen} options={screenOptions} />
         <Stack.Screen name="SettingsPage" component={SettingsPage} options={screenOptions} />
         <Stack.Screen name="AboutPage" component={AboutPage} options={screenOptions} />
-        <Stack.Screen name="TeachersView" component={TeachersView} options={{ headerShown: false, headerTransparent: true, headerLeft: ()=> null, }}/>
-        <Stack.Screen name="AdminView" component={AdminView} options={{ headerShown: false, headerTransparent: true, headerLeft: ()=> null, }}/>
+        <Stack.Screen name="TeachersView" component={TeachersView} options={{ headerShown: false, headerTransparent: true, headerLeft: () => null }} />
+        <Stack.Screen name="AdminView" component={AdminView} options={{ headerShown: false, headerTransparent: true, headerLeft: () => null }} />
         <Stack.Screen name="TeacherStudentDetail" component={TeacherStudentDetailScreen} options={screenOptions} />
         <Stack.Screen name="AddStudent" component={AddStudent} options={screenOptions} />
         <Stack.Screen name="AddLesson" component={AddLesson} options={screenOptions} />

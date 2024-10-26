@@ -38,7 +38,7 @@ const SplashScreen = () => {
       } else {
         // No user is signed in
         setTimeout(() => {
-          navigation.replace('AuthScreen');
+          navigation.replace('Login');
         }, 2500);
       }
     });
