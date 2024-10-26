@@ -48,7 +48,7 @@ const PhoneNumberScreen = ({ navigation }) => {
         firebaseConfig={app.options}
         attemptInvisibleVerification={true}
       />
-      <Image source={require('../assets/BG4.png')} style={styles.backgroundImage} />
+      <Image source={require('../assets/pbg.png')} style={styles.backgroundImage} />
       <View style={styles.innerContainer}>
         <View style={styles.logoContainer}>
           <Image source={require('../assets/MKZlogo.png')} style={styles.logo} />
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   },
   innerContainer: {
     width: '85%',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#e0e5ec',
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',

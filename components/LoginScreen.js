@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   innerContainer: {
     width: '85%',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#e0e5ec',
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',
@@ -170,7 +170,8 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 14,
-    color: '#777',
+    color: '#000000',
+    fontWeight: 'semibold',
     marginBottom: 20,
   },
   signUpLink: {
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   orText: {
-    color: '#777',
+    color: '#000000',
     marginVertical: 10,
   },
   socialButton: {
