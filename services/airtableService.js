@@ -14,20 +14,55 @@ const airtableHeaders = {
   Authorization: `Bearer ${apiKey}`,
 };
 
+export const fetchStudentById = async (studentId) => {
+  try {
+    const url = `https://api.airtable.com/v0/${baseId}/${STUDENTS_TABLE}/${studentId}`;
+    const response = await axios.get(url, { headers: airtableHeaders });
+
+    const student = {
+      id: response.data.id,
+      ...response.data.fields,
+    };
+    
+
+    // Fetch linked data for the student
+    if (student.Lessons) {
+      student.LessonsData = await fetchLessons(student.Lessons);
+    }
+    if (student.Behavior) {
+      student.BehaviorData = await fetchBehavior(student.Behavior);
+    }
+    if (student.Attendance) {
+      student.AttendanceData = await fetchAttendance(student.Attendance);
+    }
+    if (student.Comment) {
+      student.CommentData = await fetchTeachersComment(student.Comment);
+      
+    }
+
+    return student;
+  } catch (error) {
+    console.error('Error fetching student:', error.response?.data || error.message);
+    throw error;
+  }
+};
 
 const fetchTableData = async (tableName, recordIds = []) => {
-  
   // Ensure recordIds is always an array
   if (!Array.isArray(recordIds)) {
     recordIds = [];
   }
 
-  const filterByFormula = recordIds.length ? `OR(${recordIds.map(id => `RECORD_ID()='${id}'`).join(',')})` : '';
-  const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${filterByFormula ? `filterByFormula=${filterByFormula}` : ''}`;
+  const filterByFormula = recordIds.length
+    ? `OR(${recordIds.map((id) => `RECORD_ID()='${id}'`).join(',')})`
+    : '';
+  const url = `https://api.airtable.com/v0/${baseId}/${tableName}?${
+    filterByFormula ? `filterByFormula=${filterByFormula}` : ''
+  }`;
 
   try {
     const response = await axios.get(url, { headers: airtableHeaders });
-    return response.data.records.map(record => ({
+    return response.data.records.map((record) => ({
       id: record.id,
       ...record.fields,
     }));
@@ -40,6 +75,7 @@ const fetchTableData = async (tableName, recordIds = []) => {
 export const fetchLessons = async (lessonIds) => {
   return fetchTableData(LESSONS_TABLE, lessonIds);
 };
+
 
 export const fetchBehavior = async (behaviorIds) => {
   return fetchTableData(BEHAVIOR_TABLE, behaviorIds);

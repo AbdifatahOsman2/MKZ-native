@@ -1,38 +1,47 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ImageBackground } from 'react-native';
+import aboutBG from '../assets/aboutBG.png';
 
 const AboutPage = () => {
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.title}>About Us</Text>
-      <Text style={styles.description}>
-      Markaz al-Najah (Success Center) is a platform for teachers, parents, and students to connect and gain valuable insights into their Islamic and Quranic learning journey. It fosters communication and understanding, ensuring that everyone involved can monitor progress and contribute to a student’s spiritual and educational growth.     </Text>
-    </ScrollView>
+    <ImageBackground source={aboutBG} style={styles.backgroundImage}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>About Us</Text>
+          <Text style={styles.description}>
+            Markaz al-Najah (Success Center) is a platform for teachers, parents, and students to connect and gain valuable insights into their Islamic and Quranic learning journey. It fosters communication and understanding, ensuring that everyone involved can monitor progress and contribute to a student’s spiritual and educational growth.
+          </Text>
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  backgroundImage: {
     flex: 1,
-    backgroundColor: '#000000',
+    resizeMode: 'cover',
+    backgroundColor: '#2a3232',
   },
   contentContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    justifyContent: 'center',
+  },
+  textContainer: {
+    marginTop: 150, // Pushes the text up by 50 units
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#fff',
+    color: '#FFFFFF',
+    textAlign: 'center',
   },
   description: {
-    fontSize: 16,
+    fontSize: 18,
+    lineHeight: 28,
+    color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: 24, // Enhanced readability with increased line height
-    color: '#fff',  // Softened text color for better readability
   },
 });
 

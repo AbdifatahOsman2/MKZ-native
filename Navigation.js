@@ -24,20 +24,20 @@ import AddComment from './components/AddComment';
 import FeedbackScreen from './components/FeedbackScreen';
 import ParentID from './components/ParentID';
 import AdminView from './components/AdminView';
-import PhoneNumberScreen from './components/PhoneNumberScreen'; 
-import VerificationCodeScreen from './components/VerificationCodeScreen'; 
+import PhoneNumberScreen from './components/PhoneNumberScreen';
+import VerificationCodeScreen from './components/VerificationCodeScreen';
 import TeacherRegisterScreen from './components/TeacherRegisterScreen';
-
 
 const Stack = createStackNavigator();
 
 const Navigation = () => {
-  const screenOptions = ({ navigation }) => ({
-    headerLeft: () => (
-      <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-        <Ionicons name="arrow-back" size={24} color="white" />
-      </TouchableOpacity>
-    ),
+  const screenOptions = ({ navigation, route }) => ({
+    headerLeft: () =>
+      route.name !== 'StudentList' && route.name !== 'TeachersView' && route.name !== 'AdminView' ? (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+      ) : null,
     title: '',
     headerTransparent: true,
     headerStyle: { backgroundColor: 'rgba(0, 0, 0, 0)' },
@@ -52,7 +52,7 @@ const Navigation = () => {
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen name="TeacherRegister" component={TeacherRegisterScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="StudentList" component={StudentListScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="StudentList" component={StudentListScreen} options={{ headerShown: false, headerLeft: () => null }} />
         <Stack.Screen name="StudentDetail" component={StudentDetailScreen} options={screenOptions} />
         <Stack.Screen name="Lessons" component={LessonsScreen} options={screenOptions} />
         <Stack.Screen name="Behavior" component={BehaviorScreen} options={screenOptions} />

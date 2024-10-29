@@ -1,19 +1,20 @@
-import React, { useState, useCallback } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, SectionList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { deleteLesson } from '../services/airtableService';
-import Icon from 'react-native-vector-icons/FontAwesome6'; // Using FontAwesome6
-import { Ionicons } from '@expo/vector-icons'; // For the plus icon
-import { useNavigation } from '@react-navigation/native';
+import { deleteLesson, fetchStudentById } from '../services/airtableService';
+import Icon from 'react-native-vector-icons/FontAwesome6';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const LessonsScreen = ({ route }) => {
   const navigation = useNavigation();
   const { lessons: initialLessons, TeacherID } = route.params;
   const studentId = route.params.StudentID;
-  const [lessons, setLessons] = useState(initialLessons); // Track lessons in state
-  const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
+  const [lessons, setLessons] = useState(initialLessons || []);
+  const [groupedLessons, setGroupedLessons] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Set header with back button and plus icon
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -31,28 +32,22 @@ const LessonsScreen = ({ route }) => {
     });
   }, [navigation, TeacherID]);
 
-  // Handle lesson deletion with proper promise handling
   const handleDeleteLesson = async (lessonId) => {
     try {
-      // Confirm deletion with the user
       Alert.alert(
         'Delete Lesson',
         'Are you sure you want to delete this lesson?',
         [
           { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Delete', 
-            style: 'destructive', 
+          {
+            text: 'Delete',
+            style: 'destructive',
             onPress: async () => {
-              await deleteLesson([lessonId]); // Send as an array, as per the updated function
-              
-              // Filter out the deleted lesson from the local state
+              await deleteLesson([lessonId]);
               setLessons((prevLessons) => prevLessons.filter((lesson) => lesson.id !== lessonId));
-
-              // Notify the user
               Alert.alert('Success', 'Lesson deleted successfully');
-            }
-          }
+            },
+          },
         ]
       );
     } catch (error) {
@@ -61,7 +56,6 @@ const LessonsScreen = ({ route }) => {
     }
   };
 
-  // Function to conditionally render the appropriate icon
   const getLessonIcon = (status) => {
     switch (status) {
       case 'Passed Full':
@@ -70,58 +64,115 @@ const LessonsScreen = ({ route }) => {
         return <Icon name="book-open-reader" size={30} color="#A4CFF1" />;
       case 'Passed None':
       default:
-        return <Icon name="book-open-reader" size={30} color="#A4CFF1" />;
+        return <Icon name="book" size={30} color="#FF4F4B" />;
     }
   };
 
-  const renderRightActions = (progress, dragX, lessonId) => (
+  const renderRightActions = (progress, dragX, lessonId) =>
     TeacherID ? (
       <TouchableOpacity onPress={() => handleDeleteLesson(lessonId)} style={styles.deleteButton}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
-    ) : null // Only render the delete button if TeacherID is available
-  );
+    ) : null;
 
   const renderLesson = ({ item }) => (
-    <Swipeable
-      renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}
-    >
+    <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
       <View style={styles.itemContainer}>
         <View style={styles.textContainer}>
           <Text style={styles.lessonDate}>{item.Date}</Text>
           <Text style={styles.lessonStatus}>{item['Passed']}</Text>
         </View>
-        {/* Render icon based on lesson status */}
         {getLessonIcon(item['Passed'])}
       </View>
     </Swipeable>
   );
 
-  // Function to navigate to the add lesson screen
+  const renderSectionHeader = ({ section: { title } }) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionHeaderText}>{title}</Text>
+      <View style={styles.sectionHeaderLine} />
+    </View>
+  );
+
   const handleAddLesson = () => {
     navigation.navigate('AddLesson', { studentId });
   };
 
-  // Function to handle refresh action
-  const onRefresh = useCallback(() => {
+  // Function to process lessons: sort by date descending and group by month
+  const processLessons = useCallback(() => {
+    if (!lessons || lessons.length === 0) {
+      setGroupedLessons([]);
+      return;
+    }
+
+    // Parse dates and sort lessons by date descending
+    const lessonsWithParsedDates = lessons
+      .map((lesson) => {
+        const dateObj = new Date(lesson.Date);
+        return {
+          ...lesson,
+          dateObj,
+        };
+      })
+      .filter((lesson) => !isNaN(lesson.dateObj)); // Filter out invalid dates
+
+    // Sort by date descending
+    lessonsWithParsedDates.sort((a, b) => b.dateObj - a.dateObj);
+
+    // Group by month and year
+    const grouped = {};
+
+    lessonsWithParsedDates.forEach((lesson) => {
+      const monthYear = lesson.dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+      if (!grouped[monthYear]) {
+        grouped[monthYear] = [];
+      }
+      grouped[monthYear].push(lesson);
+    });
+
+    // Convert grouped object to array of sections
+    const sections = Object.keys(grouped).map((monthYear) => ({
+      title: monthYear,
+      data: grouped[monthYear],
+    }));
+
+    setGroupedLessons(sections);
+  }, [lessons]);
+
+  // Process lessons whenever lessons state changes
+  useEffect(() => {
+    processLessons();
+  }, [lessons, processLessons]);
+
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    // Simulating network call to refresh the data
-    setTimeout(() => {
-      // Here you can re-fetch or refresh your lessons data
-      setLessons(initialLessons); // Replace with actual data fetching logic
+    try {
+      // Fetch the student and get updated lessons
+      const student = await fetchStudentById(studentId);
+      const refreshedLessons = student.LessonsData || [];
+      setLessons(refreshedLessons);
+    } catch (error) {
+      console.error('Error refreshing lessons:', error);
+    } finally {
       setRefreshing(false);
-    }, 2000); // Simulating a 2-second network request
-  }, [initialLessons]);
+    }
+  }, [studentId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh();
+    }, [onRefresh])
+  );
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={lessons}
-        renderItem={renderLesson}
+      <SectionList
+        sections={groupedLessons}
         keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        renderItem={renderLesson}
+        renderSectionHeader={renderSectionHeader}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        contentContainerStyle={{ paddingBottom: 16 }}
       />
     </View>
   );
@@ -130,18 +181,18 @@ const LessonsScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#252C30', // Dark background
+    backgroundColor: '#192c3b',
     padding: 16,
-    paddingTop: 108
+    paddingTop: 108,
   },
   itemContainer: {
-    backgroundColor: '#333', // Dark item background
+    backgroundColor: '#f5f5dc',
     padding: 16,
-    marginVertical: 8,
+    marginVertical: 4, // Adjusted to accommodate section headers
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around', // Changed to 'around' to add space for swipe button
+    justifyContent: 'space-around',
   },
   textContainer: {
     flexDirection: 'row',
@@ -151,11 +202,11 @@ const styles = StyleSheet.create({
   lessonDate: {
     marginRight: 20,
     fontSize: 16,
-    color: '#FFF', // Light text for dark mode
+    color: '#032f3e',
   },
   lessonStatus: {
     fontSize: 16,
-    color: '#FFF', // Light text for dark mode
+    color: '#032f3e',
     fontWeight: 'bold',
   },
   icon: {
@@ -163,7 +214,7 @@ const styles = StyleSheet.create({
     height: 27,
   },
   deleteButton: {
-    backgroundColor: 'red', // Red delete button
+    backgroundColor: 'red',
     padding: 10,
     justifyContent: 'center',
     borderRadius: 8,
@@ -172,6 +223,21 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  sectionHeader: {
+    backgroundColor: '#192c3b', // Same as background to blend in
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  sectionHeaderText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+  sectionHeaderLine: {
+    height: 1,
+    backgroundColor: '#FFF',
+    marginTop: 4,
   },
 });
 

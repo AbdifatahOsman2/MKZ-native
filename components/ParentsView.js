@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, ActivityIndicator, ImageBackground } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { fetchStudentsWithPhoneNumbers } from '../services/airtableService';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -9,8 +9,7 @@ const StudentListScreen = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const { ParentID, phoneNumber, name } = route.params; 
-  console.log("Phone Number:", phoneNumber);
+  const { ParentID, phoneNumber, name } = route.params;
 
   const getStudentsData = async () => {
     try {
@@ -34,7 +33,6 @@ const StudentListScreen = ({ navigation, route }) => {
     setRefreshing(false);
   }, []);
 
-  // Function to randomly pick an image based on gender
   const getRandomImage = (gender) => {
     const maleImages = [require('../assets/M-1-Image.png')];
     const femaleImages = [require('../assets/Fm1-Image.png')];
@@ -47,12 +45,18 @@ const StudentListScreen = ({ navigation, route }) => {
     return null;
   };
 
+  const getLatestLessonStatus = (lessons) => {
+    if (!lessons || lessons.length === 0) return 'No recent lessons';
+    const sortedLessons = lessons.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+    return sortedLessons[0].Passed;
+  };
+
   const filteredStudents = searchQuery.length > 0
     ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
     : students;
 
   return (
-    <View style={styles.container}>
+    <ImageBackground source={require('../assets/CharColBG.png')} style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.headerTitle}>Welcome {name}</Text>
@@ -70,6 +74,7 @@ const StudentListScreen = ({ navigation, route }) => {
           {filteredStudents.length > 0 ? (
             filteredStudents.map(student => {
               const studentImage = getRandomImage(student.Gender);
+              const latestLessonStatus = getLatestLessonStatus(student.LessonsData);
               return (
                 <View key={student.id} style={styles.card}>
                   <TouchableOpacity
@@ -81,6 +86,7 @@ const StudentListScreen = ({ navigation, route }) => {
                         <Text style={styles.cardTitle}>{student.StudentName}</Text>
                         <Text style={styles.cardText}>Age: {student.Age}</Text>
                         <Text style={styles.cardText}>Class: {student.class}</Text>
+                        <Text style={styles.cardText}>Latest Lesson: {latestLessonStatus}</Text>
                       </View>
                       <Icon name="chevron-right" size={20} color="#1B73E8" />
                     </View>
@@ -95,23 +101,24 @@ const StudentListScreen = ({ navigation, route }) => {
       )}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID, name, phoneNumber })}>
-          <Icon name="home" size={28} color="#fafbfc" />
+          <Icon name="home" size={28} color="#12273e" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage', { ParentID })}>
-          <Icon name="cog" size={28} color="#fafbfc" />
+          <Icon name="cog" size={28} color="#12273e" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('FeedbackScreen')}>
-          <MaterialIcons name="feedback" size={28} color="#fafbfc" />
+          <MaterialIcons name="feedback" size={28} color="#12273e" />
         </TouchableOpacity>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    resizeMode: 'cover',
+    backgroundColor: '#10263b',
   },
   header: {
     flexDirection: 'row',
@@ -134,10 +141,10 @@ const styles = StyleSheet.create({
   card: {
     marginTop: 20,
     marginHorizontal: 20,
-    padding: 15,
-    backgroundColor: '#1f2428',
+    padding: 20, // Increased padding for larger cards
+    backgroundColor: '#e5ecf4',
     borderRadius: 10,
-    shadowColor: '#fafbfc',
+    shadowColor: '#12273e',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -149,26 +156,27 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 20,
+    width: 80, // Increased width
+    height: 80, // Increased height
+    borderRadius: 40,
     marginRight: 15,
   },
   textContent: {
     flex: 1,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 20, // Increased font size for title
     fontWeight: '600',
-    color: '#fafbfc',
-    marginBottom: 3,
+    color: '#12273e',
+    marginBottom: 5,
   },
   cardText: {
-    fontSize: 14,
-    color: '#cccccc',
+    fontSize: 16, // Increased font size for additional info
+    color: '#334f7d',
+    marginBottom: 3,
   },
   noStudentsAvailable: {
-    color: '#ccc',
+    color: '#334f7d',
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
@@ -187,7 +195,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 80,
-    backgroundColor: '#1f2428',
+    backgroundColor: '#e5ecf4',
   },
   bottomNavIcon: {
     marginBottom: 10,

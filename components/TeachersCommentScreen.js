@@ -12,9 +12,9 @@ const TeachersCommentScreen = ({ route }) => {
   // Combine comments and IDs (this comes from the previous screen)
   const formattedComments = Array.isArray(comments)
     ? comments.map((comment, index) => ({
-        id: comment.id,  // Airtable record ID
-        comment: comment.comment,  // Comment text
-        index: index, // For display purposes
+        id: comment.id, 
+        comment: comment.comment, 
+        index: index,                            
       }))
     : [];
 
@@ -154,12 +154,12 @@ const TeachersCommentScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#252C30',
+    backgroundColor: '#192c3b',
     padding: 16,
     paddingTop: 108,
   },
   itemContainer: {
-    backgroundColor: '#333840',
+    backgroundColor: '#f5f5dc',
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
@@ -177,17 +177,17 @@ const styles = StyleSheet.create({
   commentText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#FFF',
+    color: '#000000',
   },
   viewButton: {
-    backgroundColor: '#3A3B3C',
+    backgroundColor: '#6699CC',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
   },
   viewButtonText: {
     fontSize: 14,
-    color: '#FFF',
+    color: '#000000',
   },
   modalContainer: {
     flex: 1,

@@ -65,7 +65,6 @@ const AddAttendance = ({ navigation, route }) => {
       </TouchableOpacity>
 
       <Text style={styles.dateDisplay}>Date: {formatDate(date)}</Text>
-
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"

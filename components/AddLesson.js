@@ -112,10 +112,9 @@ const AddLesson = ({ navigation, route }) => {
         />
       )}
 
-      {/* Error message */}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      {/* Submit Button */}
+
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit Lesson</Text>
       </TouchableOpacity>

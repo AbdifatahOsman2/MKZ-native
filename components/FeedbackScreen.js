@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Alert } from 'react-native';
-import { addUserFeedback } from '../firebaseConfig'; // Import the updated feedback function
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Alert, ImageBackground } from 'react-native';
+import { addUserFeedback } from '../firebaseConfig';
 
 const FeedbackScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [name, setName] = useState(''); // State for name input
+  const [name, setName] = useState('');
   const [comment, setComment] = useState('');
 
   const handleInput = () => {
-    setModalVisible(true); // Show the modal when the button is pressed
+    setModalVisible(true);
   };
 
   const handleSubmit = async () => {
@@ -16,12 +16,11 @@ const FeedbackScreen = ({ navigation }) => {
       Alert.alert('Error', 'Please enter both name and comment.');
     } else {
       try {
-        // Call the addUserFeedback function and pass the name and comment
         await addUserFeedback(name, comment);
         Alert.alert('Feedback Submitted', 'Thank you for your feedback!');
-        setName(''); // Clear name input
-        setComment(''); // Clear the input field after submission
-        setModalVisible(false); // Close the modal after submission
+        setName('');
+        setComment('');
+        setModalVisible(false);
       } catch (error) {
         Alert.alert('Error', 'There was an issue submitting your feedback. Please try again.');
         console.error(error);
@@ -30,73 +29,79 @@ const FeedbackScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Send Us Your Feedback</Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Help Improve Our App</Text>
-        <Text style={styles.cardText}>
-          We value your feedback! Share your thoughts and suggestions to help us enhance your experience.
-        </Text>
-        <TouchableOpacity style={styles.button} onPress={handleInput}>
-          <Text style={styles.buttonText}>Submit Feedback</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Modal for Input */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false); // Close modal if the user clicks outside
-        }}
-      >
-        <View style={styles.centeredView}>
-        
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Enter your name:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Your Name"
-              placeholderTextColor="#ccc"
-              value={name}
-              onChangeText={setName}
-            />
-
-            <Text style={styles.modalText}>Enter your comment:</Text>
-            <TextInput
-              editable
-              multiline
-              numberOfLines={4}
-              maxLength={40}
-              style={styles.inputComment}
-              placeholder="Write a comment..."
-              placeholderTextColor="#ccc"
-              value={comment}
-              onChangeText={setComment}
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
+    <ImageBackground source={require('../assets/fedbg.png')} style={styles.background}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Send Us Your Feedback</Text>
         </View>
-      </Modal>
-    </ScrollView>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Help Improve Our App</Text>
+          <Text style={styles.cardText}>
+            We value your feedback! Share your thoughts and suggestions to help us enhance your experience.
+          </Text>
+          <TouchableOpacity style={styles.button} onPress={handleInput}>
+            <Text style={styles.buttonText}>Submit Feedback</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Modal for Input */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>Enter your name:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Your Name"
+                placeholderTextColor="#ccc"
+                value={name}
+                onChangeText={setName}
+              />
+
+              <Text style={styles.modalText}>Enter your comment:</Text>
+              <TextInput
+                editable
+                multiline
+                numberOfLines={4}
+                maxLength={40}
+                style={styles.inputComment}
+                placeholder="Write a comment..."
+                placeholderTextColor="#ccc"
+                value={comment}
+                onChangeText={setComment}
+              />
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover', // Ensures the image covers the background
+    backgroundColor: '#000000',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Adds a semi-transparent overlay
   },
   header: {
     marginTop: 100,

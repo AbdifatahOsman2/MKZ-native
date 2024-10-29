@@ -124,7 +124,7 @@ const LoginScreen = ({ navigation }) => {
             <Text style={styles.socialButtonText}>Continue with Google</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.socialButton}>
-            <MaterialCommunityIcons name="facebook" size={24} color="#333" />
+            <MaterialCommunityIcons name="facebook" size={24} color="#316FF6" />
             <Text style={styles.socialButtonText}>Continue with Facebook</Text>
           </TouchableOpacity>
         </View>

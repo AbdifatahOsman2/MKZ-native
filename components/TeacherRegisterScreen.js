@@ -72,7 +72,7 @@ const TeacherRegisterScreen = ({ navigation }) => {
 
   return (
     <View style={styles.outerContainer}>
-      <Image source={require('../assets/teacherbg.png')} style={styles.backgroundImage} />
+      <Image source={require('../assets/teachscreenbg.png')} style={styles.backgroundImage} />
       <View style={styles.innerContainer}>
         <View style={styles.logoContainer}>
           <Image source={require('../assets/MKZlogo.png')} style={styles.logo} />

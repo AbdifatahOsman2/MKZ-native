@@ -8,7 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const VerificationCodeScreen = ({ route, navigation }) => {
   const [verificationCode, setVerificationCode] = useState('');
   const { phoneNumber, verificationId } = route.params;
-
   const handleVerifyCode = async () => {
     try {
       const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
@@ -42,7 +41,7 @@ const VerificationCodeScreen = ({ route, navigation }) => {
         navigation.replace('StudentList', { ParentID: userCredential.user.uid, phoneNumber });
       } else {
         Alert.alert('Authorization Error', 'This role requires email login.');
-        navigation.navigate('Login');
+        navigation.replace('Login');
       }
     } catch (error) {
       console.error('Verification Error: ', error);

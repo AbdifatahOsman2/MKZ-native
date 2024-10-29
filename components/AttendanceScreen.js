@@ -1,15 +1,16 @@
-import React, { useState, useCallback } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, SectionList, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { deleteAttendance } from '../services/airtableService';
+import { deleteAttendance, fetchStudentById } from '../services/airtableService';
 import { Ionicons } from '@expo/vector-icons'; // For the plus and back icons
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const AttendanceScreen = ({ route }) => {
   const navigation = useNavigation();
   const { attendances: initialAttendances, TeacherID } = route.params;
   const studentId = route.params.StudentID;
-  const [attendances, setAttendances] = useState(initialAttendances); // Manage attendances in state
+  const [attendances, setAttendances] = useState(initialAttendances || []); // Manage attendances in state
+  const [groupedAttendances, setGroupedAttendances] = useState([]); // For grouped data
   const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
 
   // Set header with back button and plus icon
@@ -30,6 +31,52 @@ const AttendanceScreen = ({ route }) => {
     });
   }, [navigation, TeacherID]);
 
+  // Function to process attendances: sort by date descending and group by month
+  const processAttendances = useCallback(() => {
+    if (!attendances || attendances.length === 0) {
+      setGroupedAttendances([]);
+      return;
+    }
+
+    // Parse dates and sort attendances by date descending
+    const attendancesWithParsedDates = attendances
+      .map((attendance) => {
+        const dateObj = new Date(attendance.Date);
+        return {
+          ...attendance,
+          dateObj,
+        };
+      })
+      .filter((attendance) => !isNaN(attendance.dateObj)); // Filter out invalid dates
+
+    // Sort by date descending
+    attendancesWithParsedDates.sort((a, b) => b.dateObj - a.dateObj);
+
+    // Group by month and year
+    const grouped = {};
+
+    attendancesWithParsedDates.forEach((attendance) => {
+      const monthYear = attendance.dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+      if (!grouped[monthYear]) {
+        grouped[monthYear] = [];
+      }
+      grouped[monthYear].push(attendance);
+    });
+
+    // Convert grouped object to array of sections
+    const sections = Object.keys(grouped).map((monthYear) => ({
+      title: monthYear,
+      data: grouped[monthYear],
+    }));
+
+    setGroupedAttendances(sections);
+  }, [attendances]);
+
+  // Process attendances whenever attendances state changes
+  useEffect(() => {
+    processAttendances();
+  }, [attendances, processAttendances]);
+
   // Handle attendance deletion with proper confirmation and state update
   const handleDeleteAttendance = async (attendanceId) => {
     Alert.alert(
@@ -37,8 +84,8 @@ const AttendanceScreen = ({ route }) => {
       'Are you sure you want to delete this attendance record?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
+        {
+          text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -49,50 +96,80 @@ const AttendanceScreen = ({ route }) => {
               console.error('Error deleting attendance:', error);
               Alert.alert('Error', 'Failed to delete attendance. Please try again.');
             }
-          } 
+          },
         },
       ]
     );
   };
 
-  const renderRightActions = (progress, dragX, attendanceId) => (
+  const renderRightActions = (progress, dragX, attendanceId) =>
     TeacherID ? (
       <TouchableOpacity onPress={() => handleDeleteAttendance(attendanceId)} style={styles.deleteButton}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
-    ) : null // Only render the delete button if TeacherID is available
-  );
+    ) : null;
 
   const renderAttendance = ({ item }) => {
-    // Determine the color based on attendance status
-    const statusColor = item.Attendance === 'Present' ? styles.presentStatus : styles.notPresentStatus;
+    let statusStyle = styles.notPresentStatus; // Default style
+
+    if (item.Attendance === 'Present') {
+      statusStyle = styles.presentStatus;
+    } else if (item.Attendance === 'Tardy') {
+      statusStyle = styles.tardyStatus;
+    }
 
     return (
       <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
         <View style={styles.itemContainer}>
           <View style={styles.row}>
             <Text style={styles.dateText}>{item.Date}</Text>
-            <Text style={[styles.statusText, statusColor]}>{item.Attendance}</Text>
+            <Text style={[styles.statusText, statusStyle]}>{item.Attendance}</Text>
           </View>
         </View>
       </Swipeable>
     );
   };
 
+  const renderSectionHeader = ({ section: { title } }) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionHeaderText}>{title}</Text>
+      <View style={styles.sectionHeaderLine} />
+    </View>
+  );
+
   const handleAddAttendance = () => {
     navigation.navigate('AddAttendance', { studentId });
   };
 
+  // Function to handle refresh action
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const student = await fetchStudentById(studentId);
+      const refreshedAttendances = student.AttendanceData || [];
+      setAttendances(refreshedAttendances);
+    } catch (error) {
+      console.error('Error refreshing attendances:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [studentId]);
 
-
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh();
+    }, [onRefresh])
+  );
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={attendances}
-        renderItem={renderAttendance}
+      <SectionList
+        sections={groupedAttendances}
         keyExtractor={(item) => item.id.toString()}
-
+        renderItem={renderAttendance}
+        renderSectionHeader={renderSectionHeader}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        contentContainerStyle={{ paddingBottom: 16 }}
       />
     </View>
   );
@@ -101,16 +178,16 @@ const AttendanceScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#252C30',
+    backgroundColor: '#192c3b',
     padding: 16,
     paddingTop: 108,
   },
   itemContainer: {
-    backgroundColor: '#333840',
+    backgroundColor: '#f5f5dc',
     padding: 16,
-    marginVertical: 8,
+    marginVertical: 4,
     borderRadius: 8,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -125,18 +202,21 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFF',
+    color: '#000000',
   },
   statusText: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  // Styling for Present and Not Present statuses
+  // Styling for Present, Tardy, and Not Present statuses
   presentStatus: {
-    color: '#A4CFF1', // Light blue for Present
+    color: '#00308F', // Light blue for Present
+  },
+  tardyStatus: {
+    color: '#E49B0F', // Light yellow for Tardy
   },
   notPresentStatus: {
-    color: '#F1A4A4', // Light red for Not Present
+    color: '#FF1D18', // Light red for Not Present
   },
   deleteButton: {
     backgroundColor: 'red',
@@ -148,7 +228,22 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: 'white',
     fontWeight: 'bold',
-  }
+  },
+  sectionHeader: {
+    backgroundColor: '#192c3b', // Same as background to blend in
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  sectionHeaderText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+  sectionHeaderLine: {
+    height: 1,
+    backgroundColor: '#FFF',
+    marginTop: 4,
+  },
 });
 
 export default AttendanceScreen;

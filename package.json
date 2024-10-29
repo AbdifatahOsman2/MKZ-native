@@ -48,7 +48,8 @@
     "react-native-webview": "13.8.6",
     "rimraf": "^6.0.1",
     "rn-secure-storage": "^3.0.1",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "expo-av": "~14.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.22.5",
