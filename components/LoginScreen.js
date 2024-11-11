@@ -119,14 +119,7 @@ const LoginScreen = ({ navigation }) => {
             <MaterialCommunityIcons name="phone" size={24} color="#107E4D" />
             <Text style={styles.socialButtonText}>Continue with Phone Number</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}>
-            <MaterialCommunityIcons name="google" size={24} color="#333" />
-            <Text style={styles.socialButtonText}>Continue with Google</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}>
-            <MaterialCommunityIcons name="facebook" size={24} color="#316FF6" />
-            <Text style={styles.socialButtonText}>Continue with Facebook</Text>
-          </TouchableOpacity>
+
         </View>
       </View>
     </View>
@@ -198,7 +191,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   loginButtonText: {
     color: '#fff',
@@ -207,6 +200,7 @@ const styles = StyleSheet.create({
   },
   socialLoginContainer: {
     width: '100%',
+    marginTop: 15,
     alignItems: 'center',
   },
   phoneButton: {
