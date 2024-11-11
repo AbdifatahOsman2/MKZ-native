@@ -9,7 +9,7 @@ const AboutPage = () => {
         <View style={styles.textContainer}>
           <Text style={styles.title}>About Us</Text>
           <Text style={styles.description}>
-            Markaz al-Najah (Success Center) is a platform for teachers, parents, and students to connect and gain valuable insights into their Islamic and Quranic learning journey. It fosters communication and understanding, ensuring that everyone involved can monitor progress and contribute to a student’s spiritual and educational growth.
+            Markaz al-Najah (Success Center) is a platform for teachers and students to connect and gain valuable insights into their Islamic and Quranic learning journey. It fosters communication and understanding, ensuring that everyone involved can monitor progress and contribute to a student’s spiritual and educational growth.
           </Text>
         </View>
       </ScrollView>

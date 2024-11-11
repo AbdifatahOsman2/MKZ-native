@@ -29,6 +29,11 @@ const SettingsPage = ({ navigation, route }) => {
             <Text style={styles.optionText}>About</Text>
             <Ionicons name="chevron-forward-outline" size={20} color="#334f7d" />
           </TouchableOpacity>
+          <TouchableOpacity style={styles.option} onPress={() => navigation.navigate('PrivacyPolicy')}>
+          <Text style={styles.optionText}>Privacy</Text>
+          <Ionicons name="chevron-forward-outline" size={20} color="#334f7d" />
+        </TouchableOpacity>
+          
           {ParentID && (
             <TouchableOpacity style={styles.option} onPress={() => navigation.navigate('ParentID', { ParentID })}>
               <Text style={styles.optionText}>Parent Code</Text>

@@ -76,6 +76,7 @@ const FeedbackScreen = ({ navigation }) => {
                 value={comment}
                 onChangeText={setComment}
               />
+
               <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                 <Text style={styles.submitButtonText}>Submit</Text>
               </TouchableOpacity>
@@ -186,8 +187,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     width: '100%',
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
     padding: 30,
   },
   submitButton: {

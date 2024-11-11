@@ -1,10 +1,19 @@
 {
   "expo": {
-    "name": "mkz-Native",
-    "slug": "mkz-Native",
+    "name": "Markaz Al-Najaax",
+    "slug": "Markaz Al-Najaax",
     "version": "1.0.0",
     "orientation": "portrait",
-
+    "icon": "./assets/icon.png",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
@@ -16,17 +25,10 @@
     "assetBundlePatterns": [
       "assets/*"
     ],
-    
     "extra": {
-      "firebase": {
-        "apiKey": "YOUR_API_KEY",
-        "authDomain": "YOUR_PROJECT_ID.firebaseapp.com",
-        "projectId": "YOUR_PROJECT_ID",
-        "storageBucket": "YOUR_PROJECT_ID.appspot.com",
-        "messagingSenderId": "YOUR_MESSAGING_SENDER_ID",
-        "appId": "YOUR_APP_ID"
+      "eas": {
+        "projectId": "1593be8a-3265-4818-bfb0-6845afe4dd00"
       }
     }
-
   }
 }

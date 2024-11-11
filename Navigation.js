@@ -27,6 +27,7 @@ import AdminView from './components/AdminView';
 import PhoneNumberScreen from './components/PhoneNumberScreen';
 import VerificationCodeScreen from './components/VerificationCodeScreen';
 import TeacherRegisterScreen from './components/TeacherRegisterScreen';
+import PrivacyPolicyScreen from './components/PrivacyPolicyScreen';
 
 const Stack = createStackNavigator();
 
@@ -35,7 +36,7 @@ const Navigation = () => {
     headerLeft: () =>
       route.name !== 'StudentList' && route.name !== 'TeachersView' && route.name !== 'AdminView' ? (
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <Ionicons name="arrow-back" size={24} color="gray" />
         </TouchableOpacity>
       ) : null,
     title: '',
@@ -70,6 +71,7 @@ const Navigation = () => {
         <Stack.Screen name="AddComment" component={AddComment} options={screenOptions} />
         <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} options={screenOptions} />
         <Stack.Screen name="ParentID" component={ParentID} options={screenOptions} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={screenOptions} />
       </Stack.Navigator>
     </NavigationContainer>
   );
