@@ -177,8 +177,8 @@ const AddStudent = ({ navigation, route }) => {
               value: '8:00 AM - 12:00 PM, Sat-Sun, Wed ',
             },
             {
-              label: '01:00 PM - 05:00 PM, Sat-Sun, Fri',
-              value: '01:00 PM - 05:00 PM, Sat-Sun, Fri',
+              label: '1:00 PM - 05:00 PM, Sat-Sun, Fri',
+              value: '1:00 PM - 05:00 PM, Sat-Sun, Fri',
             },
           ],
           { label: 'Select Schedule', value: null }

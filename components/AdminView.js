@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, T
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Modal from 'react-native-modal';
 import { fetchAllStudents } from '../services/airtableService';
 
 const AdminView = ({ navigation, route }) => {
@@ -10,6 +11,7 @@ const AdminView = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
   const { AdminID, name } = route.params;
 
   const iconColor = '#f5f5dc'; // Set a single light color for icons
@@ -47,19 +49,42 @@ const AdminView = ({ navigation, route }) => {
           <View style={styles.headerLeft}>
             <Text style={styles.headerTitle}>Welcome Admin</Text>
           </View>
-          <TouchableOpacity
-            style={styles.iconWrapper}
-            onPress={() => navigation.navigate('AddStudent', { name })}
-          >
-            <MaterialCommunityIcons name="account-plus" size={32} color="#FFFFFF" />
+          <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.headerRight}>
+            <Icon name="bars" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
+
+        {/* Bottom Sheet */}
+        <Modal
+          isVisible={menuVisible}
+          onBackdropPress={() => setMenuVisible(false)}
+          style={styles.bottomModal}
+          backdropOpacity={0.5}
+          animationIn="slideInUp"
+          animationOut="slideOutDown"
+        >
+          <View style={styles.bottomSheet}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); navigation.navigate('AddStudent', { name }); }}>
+              <MaterialCommunityIcons name="account-plus" style={{ marginRight: 10 }} size={26} color={iconColor} />
+              <Text style={styles.menuItemText}>Add Student</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); navigation.navigate('SettingsPage'); }}>
+              <MaterialIcons name="settings" style={{ marginRight: 10 }} size={26} color={iconColor} />
+              <Text style={styles.menuItemText}>Settings</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); navigation.navigate('FeedbackScreen'); }}>
+              <MaterialIcons name="feedback" style={{ marginRight: 10 }} size={26} color={iconColor} />
+              <Text style={styles.menuItemText}>Feedback</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+
         <TextInput
           style={styles.searchBar}
           onChangeText={setSearchQuery}
           value={searchQuery}
           placeholder="Search Students"
-          placeholderTextColor="#ccc"
+          placeholderTextColor="#000"
         />
         {loading ? (
           <View style={styles.loadingContainer}>
@@ -97,17 +122,6 @@ const AdminView = ({ navigation, route }) => {
             )}
           </ScrollView>
         )}
-        <View style={styles.bottomNav}>
-          <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('AdminView', { AdminID })}>
-            <Icon name="home" size={28} color="#feeac7" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage')}>
-            <Icon name="cog" size={28} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('FeedbackScreen')}>
-            <MaterialIcons name="feedback" size={28} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
       </View>
     </ImageBackground>
   );
@@ -116,12 +130,12 @@ const AdminView = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: 'cover', // Ensures the background image covers the screen
+    resizeMode: 'cover',
     backgroundColor: '#010f18',
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark overlay for better contrast
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   header: {
     flexDirection: 'row',
@@ -139,12 +153,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
+  headerRight: {
+    padding: 10,
+  },
   searchBar: {
     height: 45,
     marginHorizontal: 20,
     marginVertical: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#e5ecf4', // Light background for search bar
+    backgroundColor: '#e5ecf4',
     borderRadius: 10,
     color: '#12273e',
     fontSize: 16,
@@ -173,7 +190,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    color: '#FFF', // Dark text for contrast on light backgrounds
+    color: '#FFF',
     marginBottom: 3,
   },
   cardText: {
@@ -191,20 +208,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: '#010f18',
-
+  // Bottom Sheet Styles
+  bottomModal: {
+    justifyContent: 'flex-end',
+    margin: 0,
   },
-  bottomNavIcon: {
-    marginBottom: 10,
+  bottomSheet: {
+    backgroundColor: '#010f18',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+  },
+  menuItemText: {
+    color: '#FFFFFF',
+    fontSize: 20,
   },
 });
 

@@ -1,15 +1,28 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, StyleSheet, Image, ActivityIndicator, ImageBackground } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { fetchStudentsWithPhoneNumbers } from '../services/airtableService';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+  ImageBackground,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Modal from 'react-native-modal';
+import { fetchStudentsWithPhoneNumbers } from '../services/airtableService';
 
 const StudentListScreen = ({ navigation, route }) => {
   const [students, setStudents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
   const { ParentID, phoneNumber, name } = route.params;
+
+  const iconColor = '#f5f5dc'; // Unified light color for icons
 
   const getStudentsData = async () => {
     try {
@@ -51,9 +64,7 @@ const StudentListScreen = ({ navigation, route }) => {
     return sortedLessons[0].Passed;
   };
 
-  const filteredStudents = searchQuery.length > 0
-    ? students.filter(student => student.StudentName.toLowerCase().includes(searchQuery.toLowerCase()))
-    : students;
+  const filteredStudents = students; // Removed searchQuery as it's not used
 
   return (
     <ImageBackground source={require('../assets/CharColBG.png')} style={styles.container}>
@@ -61,10 +72,47 @@ const StudentListScreen = ({ navigation, route }) => {
         <View style={styles.headerLeft}>
           <Text style={styles.headerTitle}>Welcome {name}</Text>
         </View>
+        <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.headerRight}>
+          <Icon name="bars" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
       </View>
+
+      {/* Bottom Sheet */}
+      <Modal
+        isVisible={menuVisible}
+        onBackdropPress={() => setMenuVisible(false)}
+        style={styles.bottomModal}
+        backdropOpacity={0.5}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+      >
+        <View style={styles.bottomSheet}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate('SettingsPage', { ParentID });
+            }}
+          >
+            <MaterialIcons name="settings" style={{ marginRight: 10 }} size={26} color={iconColor} />
+            <Text style={styles.menuItemText}>Settings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate('FeedbackScreen');
+            }}
+          >
+            <MaterialIcons name="feedback" style={{ marginRight: 10 }} size={26} color={iconColor} />
+            <Text style={styles.menuItemText}>Feedback</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#1B73E8" />
+          <ActivityIndicator size="large" color={iconColor} />
         </View>
       ) : (
         <ScrollView
@@ -72,7 +120,7 @@ const StudentListScreen = ({ navigation, route }) => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {filteredStudents.length > 0 ? (
-            filteredStudents.map(student => {
+            filteredStudents.map((student) => {
               const studentImage = getRandomImage(student.Gender);
               const latestLessonStatus = getLatestLessonStatus(student.LessonsData);
               return (
@@ -88,7 +136,7 @@ const StudentListScreen = ({ navigation, route }) => {
                         <Text style={styles.cardText}>Class: {student.class}</Text>
                         <Text style={styles.cardText}>Latest Lesson: {latestLessonStatus}</Text>
                       </View>
-                      <Icon name="chevron-right" size={20} color="#1B73E8" />
+                      <Icon name="chevron-right" size={20} color={iconColor} />
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -99,17 +147,6 @@ const StudentListScreen = ({ navigation, route }) => {
           )}
         </ScrollView>
       )}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('StudentList', { ParentID, name, phoneNumber })}>
-          <Icon name="home" size={28} color="#12273e" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('SettingsPage', { ParentID })}>
-          <Icon name="cog" size={28} color="#12273e" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavIcon} onPress={() => navigation.navigate('FeedbackScreen')}>
-          <MaterialIcons name="feedback" size={28} color="#12273e" />
-        </TouchableOpacity>
-      </View>
     </ImageBackground>
   );
 };
@@ -126,6 +163,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 80,
     paddingBottom: 10,
+    justifyContent: 'space-between',
   },
   headerLeft: {
     flexDirection: 'column',
@@ -135,13 +173,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
+  headerRight: {
+    padding: 10,
+  },
   scrollContainer: {
     paddingBottom: 100,
   },
   card: {
     marginTop: 20,
     marginHorizontal: 20,
-    padding: 20, // Increased padding for larger cards
+    padding: 20,
     backgroundColor: '#e5ecf4',
     borderRadius: 10,
     shadowColor: '#12273e',
@@ -156,8 +197,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   avatar: {
-    width: 80, // Increased width
-    height: 80, // Increased height
+    width: 80,
+    height: 80,
     borderRadius: 40,
     marginRight: 15,
   },
@@ -165,13 +206,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontSize: 20, // Increased font size for title
+    fontSize: 20,
     fontWeight: '600',
     color: '#12273e',
     marginBottom: 5,
   },
   cardText: {
-    fontSize: 16, // Increased font size for additional info
+    fontSize: 16,
     color: '#334f7d',
     marginBottom: 3,
   },
@@ -186,19 +227,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: '#e5ecf4',
+  // Bottom Sheet Styles
+  bottomModal: {
+    justifyContent: 'flex-end',
+    margin: 0,
   },
-  bottomNavIcon: {
-    marginBottom: 10,
+  bottomSheet: {
+    backgroundColor: '#010f18',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+  },
+  menuItemText: {
+    color: '#FFFFFF',
+    fontSize: 20,
   },
 });
 
