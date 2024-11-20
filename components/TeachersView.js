@@ -13,6 +13,7 @@ const TeachersView = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
   const { TeacherID, name } = route.params;
+  const userRole  = 'Teacher';
 
   const iconColor = '#f5f5dc'; // Unified light color for icons
 
@@ -99,7 +100,7 @@ const TeachersView = ({ navigation, route }) => {
                   <TouchableOpacity
                     key={student.id}
                     style={styles.card}
-                    onPress={() => navigation.navigate('TeacherStudentDetail', { student })}
+                    onPress={() => navigation.navigate('TeacherStudentDetail', { student, userRole  })}
                   >
                     <View style={styles.cardContent}>
                       <MaterialCommunityIcons name={iconName} size={40} color={iconColor} style={styles.avatar} />

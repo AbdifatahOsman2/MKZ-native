@@ -7,17 +7,25 @@ import { deleteStudent } from '../services/airtableService';
 
 const TeacherStudentDetailScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { student } = route.params;
+  const { student, userRole } = route.params;
+
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={handleDelete} style={{ paddingRight: 10 }}>
-          <Icon name="trash-can" size={24} style={{ paddingHorizontal: 20 }} color="#f1a4a4" />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+    if (userRole === 'Admin') {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity onPress={handleDelete} style={{ paddingRight: 10 }}>
+            <Icon name="trash-can" size={24} style={{ paddingHorizontal: 20 }} color="#f1a4a4" />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerRight: () => null,
+      });
+    }
+  }, [navigation, userRole]);
+  
 
   const handleDelete = () => {
     Alert.alert(
@@ -104,6 +112,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
                 lessons: student.LessonsData,
                 TeacherID: student.TeacherID,
                 StudentID: student.id,
+                StudentClass: student.class,
               })
             }
           >
@@ -136,7 +145,6 @@ const TeacherStudentDetailScreen = ({ route }) => {
               navigation.navigate('Attendance', {
                 attendances: student.AttendanceData,
                 TeacherID: student.TeacherID,
-                StudentID: student.id,
               })
             }
           >

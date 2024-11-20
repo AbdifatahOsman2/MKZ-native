@@ -8,7 +8,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const LessonsScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { lessons: initialLessons, TeacherID } = route.params;
+  const { lessons: initialLessons, TeacherID, StudentClass } = route.params;
+  console.log('StudentClass:', StudentClass);
   const studentId = route.params.StudentID;
   const [lessons, setLessons] = useState(initialLessons || []);
   const [groupedLessons, setGroupedLessons] = useState([]);
@@ -95,7 +96,7 @@ const LessonsScreen = ({ route }) => {
   );
 
   const handleAddLesson = () => {
-    navigation.navigate('AddLesson', { studentId });
+    navigation.navigate('AddLesson', { studentId, StudentClass });
   };
 
   // Function to process lessons: sort by date descending and group by month
