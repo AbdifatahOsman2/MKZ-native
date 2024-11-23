@@ -145,6 +145,7 @@ const TeacherStudentDetailScreen = ({ route }) => {
               navigation.navigate('Attendance', {
                 attendances: student.AttendanceData,
                 TeacherID: student.TeacherID,
+                StudentID: student.id,
               })
             }
           >

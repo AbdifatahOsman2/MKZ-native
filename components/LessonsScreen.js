@@ -8,13 +8,12 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const LessonsScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { lessons: initialLessons, TeacherID, StudentClass } = route.params;
-  console.log('StudentClass:', StudentClass);
+  const { initialLessons, TeacherID, StudentClass } = route.params;
   const studentId = route.params.StudentID;
+
   const [lessons, setLessons] = useState(initialLessons || []);
   const [groupedLessons, setGroupedLessons] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -79,11 +78,29 @@ const LessonsScreen = ({ route }) => {
   const renderLesson = ({ item }) => (
     <Swipeable renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}>
       <View style={styles.itemContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.lessonDate}>{item.Date}</Text>
-          <Text style={styles.lessonStatus}>{item['Passed']}</Text>
+        {/* Lesson Header */}
+        <View style={styles.lessonHeader}>
+          <View>
+            <Text style={styles.lessonDate}>{item.Date}</Text>
+            <Text style={styles.lessonStatus}>Status: {item['Passed']}</Text>
+          </View>
+          {getLessonIcon(item['Passed'])}
         </View>
-        {getLessonIcon(item['Passed'])}
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Next Lesson Due */}
+        {item.NextSurahDue && (
+          <View style={styles.nextLessonContainer}>
+            <Text style={styles.nextLessonTitle}>Next Lesson Due</Text>
+            <Text style={styles.nextLessonText}>Surah: {item.NextSurahDue}</Text>
+            <Text style={styles.nextLessonText}>
+              Ayahs: {item.FromAyah} - {item.ToAyah}
+            </Text>
+            <Text style={styles.nextLessonText}>Due Date: {item.DueDate}</Text>
+          </View>
+        )}
       </View>
     </Swipeable>
   );
@@ -189,30 +206,43 @@ const styles = StyleSheet.create({
   itemContainer: {
     backgroundColor: '#f5f5dc',
     padding: 16,
-    marginVertical: 4, // Adjusted to accommodate section headers
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    marginVertical: 8,
+    borderRadius: 12,
   },
-  textContainer: {
+  lessonHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   lessonDate: {
-    marginRight: 20,
-    fontSize: 16,
-    color: '#032f3e',
-  },
-  lessonStatus: {
     fontSize: 16,
     color: '#032f3e',
     fontWeight: 'bold',
   },
-  icon: {
-    width: 27,
-    height: 27,
+  lessonStatus: {
+    fontSize: 16,
+    color: '#032f3e',
+    marginTop: 4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#ccc',
+    marginVertical: 12,
+  },
+  nextLessonContainer: {
+    marginTop: 8,
+  },
+  nextLessonTitle: {
+    fontSize: 16,
+    color: '#032f3e',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  nextLessonText: {
+    fontSize: 16,
+    color: '#032f3e',
+    marginLeft: 8,
+    marginTop: 2,
   },
   deleteButton: {
     backgroundColor: 'red',
@@ -226,7 +256,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   sectionHeader: {
-    backgroundColor: '#192c3b', // Same as background to blend in
+    backgroundColor: '#192c3b',
     paddingTop: 16,
     paddingBottom: 8,
   },

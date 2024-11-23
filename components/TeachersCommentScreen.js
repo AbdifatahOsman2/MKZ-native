@@ -66,7 +66,6 @@ const TeachersCommentScreen = ({ route }) => {
             }
 
             try {
-              console.log('Deleting comment ID:', commentId);
               await deleteTeachersComment([commentId]); // Pass ID in an array
               setComments((prevComments) => prevComments.filter((comment) => comment.id !== commentId));
               Alert.alert('Success', 'Comment deleted successfully');

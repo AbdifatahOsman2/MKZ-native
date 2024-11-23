@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,19 +9,19 @@ import {
   StyleSheet,
   ImageBackground,
   StatusBar,
+  FlatList,
 } from 'react-native';
 import { createStudent } from '../services/airtableService';
-import RNPickerSelect from 'react-native-picker-select';
 import { ParentsPhoneNumber, getTeacherNames } from '../firebaseConfig';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import backgroundImage from '../assets/AddstudentBG.png'; // Replace with your image path
 
 const AddStudent = ({ navigation, route }) => {
   const [studentName, setStudentName] = useState('');
   const [age, setAge] = useState('');
-  const [classroom, setClassroom] = useState('Quran');
-  const [schedule, setSchedule] = useState('Sat-Sun');
-  const [gender, setGender] = useState('Male');
+  const [classroom, setClassroom] = useState('');
+  const [schedule, setSchedule] = useState('');
+  const [gender, setGender] = useState('');
   const [teachers, setTeachers] = useState([]);
   const [selectedTeacher, setSelectedTeacher] = useState('');
   const [error, setError] = useState('');
@@ -29,6 +29,27 @@ const AddStudent = ({ navigation, route }) => {
   const [parentPhoneNumber, setParentPhoneNumber] = useState('');
   const [parentPhoneNumbers, setParentPhoneNumbers] = useState([]);
   const { name } = route.params;
+
+  // Dropdown visibility and layout states
+  const [isClassroomDropdownVisible, setClassroomDropdownVisible] = useState(false);
+  const classDropdownButtonRef = useRef();
+  const [classDropdownLayout, setClassDropdownLayout] = useState(null);
+
+  const [isScheduleDropdownVisible, setScheduleDropdownVisible] = useState(false);
+  const scheduleDropdownButtonRef = useRef();
+  const [scheduleDropdownLayout, setScheduleDropdownLayout] = useState(null);
+
+  const [isGenderDropdownVisible, setGenderDropdownVisible] = useState(false);
+  const genderDropdownButtonRef = useRef();
+  const [genderDropdownLayout, setGenderDropdownLayout] = useState(null);
+
+  const [isPhoneNumberDropdownVisible, setPhoneNumberDropdownVisible] = useState(false);
+  const phoneNumberDropdownButtonRef = useRef();
+  const [phoneNumberDropdownLayout, setPhoneNumberDropdownLayout] = useState(null);
+
+  const [isTeacherDropdownVisible, setTeacherDropdownVisible] = useState(false);
+  const teacherDropdownButtonRef = useRef();
+  const [teacherDropdownLayout, setTeacherDropdownLayout] = useState(null);
 
   useEffect(() => {
     async function loadInitialData() {
@@ -123,21 +144,7 @@ const AddStudent = ({ navigation, route }) => {
         onChangeText={onChangeText}
         style={styles.input}
         keyboardType={keyboardType}
-      />
-    </View>
-  );
-
-  const renderPicker = (label, value, onValueChange, items, placeholder) => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <RNPickerSelect
-        onValueChange={onValueChange}
-        items={items}
-        style={pickerSelectStyles}
-        value={value}
-        placeholder={placeholder}
-        useNativeAndroidPickerStyle={false}
-        Icon={() => <Ionicons name="chevron-down" size={24} color="#FFF" />}
+        returnKeyType="done"
       />
     </View>
   );
@@ -156,60 +163,360 @@ const AddStudent = ({ navigation, route }) => {
         )}
         {renderInput('Age', age, setAge, 'Enter age', 'numeric')}
 
-        {renderPicker(
-          'Class',
-          classroom,
-          setClassroom,
-          [
-            { label: 'Quran', value: 'Quran' },
-            { label: 'Alif', value: 'Alif' },
-          ],
-          { label: 'Select Class', value: null }
-        )}
+        {/* Custom Dropdown for Class */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Class</Text>
+          <TouchableOpacity
+            ref={classDropdownButtonRef}
+            style={styles.dropdownButton}
+            onPress={() => {
+              classDropdownButtonRef.current.measure(
+                (fx, fy, width, height, px, py) => {
+                  setClassDropdownLayout({ x: px, y: py, width, height });
+                  setClassroomDropdownVisible(true);
+                }
+              );
+            }}
+          >
+            <Text
+              style={
+                classroom ? styles.dropdownButtonText : styles.dropdownPlaceholderText
+              }
+            >
+              {classroom || 'Select Class'}
+            </Text>
+            <Icon name="arrow-drop-down" size={24} color="#FFF" />
+          </TouchableOpacity>
+          {isClassroomDropdownVisible && (
+            <Modal
+              transparent={true}
+              animationType="fade"
+              visible={isClassroomDropdownVisible}
+              onRequestClose={() => setClassroomDropdownVisible(false)}
+            >
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                onPress={() => setClassroomDropdownVisible(false)}
+              />
+              <View
+                style={[
+                  styles.dropdownModal,
+                  {
+                    top: classDropdownLayout
+                      ? classDropdownLayout.y + classDropdownLayout.height
+                      : 0,
+                    left: classDropdownLayout ? classDropdownLayout.x : 0,
+                    width: classDropdownLayout ? classDropdownLayout.width : '100%',
+                  },
+                ]}
+              >
+                <FlatList
+                  data={[
+                    { label: 'Quran', value: 'Quran' },
+                    { label: 'Alif', value: 'Alif' },
+                  ]}
+                  keyExtractor={(item) => item.value}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setClassroom(item.value);
+                        setClassroomDropdownVisible(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownItemText}>{item.label}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </Modal>
+          )}
+        </View>
 
-        {renderPicker(
-          'Schedule',
-          schedule,
-          setSchedule,
-          [
-            {
-              label: '8:00 AM - 12:00 PM, Sat-Sun, Wed',
-              value: '8:00 AM - 12:00 PM, Sat-Sun, Wed ',
-            },
-            {
-              label: '1:00 PM - 05:00 PM, Sat-Sun, Fri',
-              value: '1:00 PM - 05:00 PM, Sat-Sun, Fri',
-            },
-          ],
-          { label: 'Select Schedule', value: null }
-        )}
+        {/* Custom Dropdown for Schedule */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Schedule</Text>
+          <TouchableOpacity
+            ref={scheduleDropdownButtonRef}
+            style={styles.dropdownButton}
+            onPress={() => {
+              scheduleDropdownButtonRef.current.measure(
+                (fx, fy, width, height, px, py) => {
+                  setScheduleDropdownLayout({ x: px, y: py, width, height });
+                  setScheduleDropdownVisible(true);
+                }
+              );
+            }}
+          >
+            <Text
+              style={
+                schedule ? styles.dropdownButtonText : styles.dropdownPlaceholderText
+              }
+            >
+              {schedule || 'Select Schedule'}
+            </Text>
+            <Icon name="arrow-drop-down" size={24} color="#FFF" />
+          </TouchableOpacity>
+          {isScheduleDropdownVisible && (
+            <Modal
+              transparent={true}
+              animationType="fade"
+              visible={isScheduleDropdownVisible}
+              onRequestClose={() => setScheduleDropdownVisible(false)}
+            >
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                onPress={() => setScheduleDropdownVisible(false)}
+              />
+              <View
+                style={[
+                  styles.dropdownModal,
+                  {
+                    top: scheduleDropdownLayout
+                      ? scheduleDropdownLayout.y + scheduleDropdownLayout.height
+                      : 0,
+                    left: scheduleDropdownLayout ? scheduleDropdownLayout.x : 0,
+                    width: scheduleDropdownLayout
+                      ? scheduleDropdownLayout.width
+                      : '100%',
+                  },
+                ]}
+              >
+                <FlatList
+                  data={[
+                    {
+                      label: '8:00 AM - 12:00 PM, Sat-Sun, Wed',
+                      value: '8:00 AM - 12:00 PM, Sat-Sun, Wed ',
+                    },
+                    {
+                      label: '1:00 PM - 05:00 PM, Sat-Sun, Fri',
+                      value: '1:00 PM - 05:00 PM, Sat-Sun, Fri',
+                    },
+                  ]}
+                  keyExtractor={(item) => item.value}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setSchedule(item.value);
+                        setScheduleDropdownVisible(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownItemText}>{item.label}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </Modal>
+          )}
+        </View>
 
-        {renderPicker(
-          'Gender',
-          gender,
-          setGender,
-          [
-            { label: 'Male', value: 'Male' },
-            { label: 'Female', value: 'Female' },
-          ],
-          { label: 'Select Gender', value: null }
-        )}
+        {/* Custom Dropdown for Gender */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Gender</Text>
+          <TouchableOpacity
+            ref={genderDropdownButtonRef}
+            style={styles.dropdownButton}
+            onPress={() => {
+              genderDropdownButtonRef.current.measure(
+                (fx, fy, width, height, px, py) => {
+                  setGenderDropdownLayout({ x: px, y: py, width, height });
+                  setGenderDropdownVisible(true);
+                }
+              );
+            }}
+          >
+            <Text
+              style={gender ? styles.dropdownButtonText : styles.dropdownPlaceholderText}
+            >
+              {gender || 'Select Gender'}
+            </Text>
+            <Icon name="arrow-drop-down" size={24} color="#FFF" />
+          </TouchableOpacity>
+          {isGenderDropdownVisible && (
+            <Modal
+              transparent={true}
+              animationType="fade"
+              visible={isGenderDropdownVisible}
+              onRequestClose={() => setGenderDropdownVisible(false)}
+            >
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                onPress={() => setGenderDropdownVisible(false)}
+              />
+              <View
+                style={[
+                  styles.dropdownModal,
+                  {
+                    top: genderDropdownLayout
+                      ? genderDropdownLayout.y + genderDropdownLayout.height
+                      : 0,
+                    left: genderDropdownLayout ? genderDropdownLayout.x : 0,
+                    width: genderDropdownLayout ? genderDropdownLayout.width : '100%',
+                  },
+                ]}
+              >
+                <FlatList
+                  data={[
+                    { label: 'Male', value: 'Male' },
+                    { label: 'Female', value: 'Female' },
+                  ]}
+                  keyExtractor={(item) => item.value}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setGender(item.value);
+                        setGenderDropdownVisible(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownItemText}>{item.label}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </Modal>
+          )}
+        </View>
 
-        {renderPicker(
-          'Phone Number',
-          parentPhoneNumber,
-          setParentPhoneNumber,
-          parentPhoneNumbers,
-          { label: 'Select Parent Phone Number', value: null }
-        )}
+        {/* Custom Dropdown for Phone Number */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Phone Number</Text>
+          <TouchableOpacity
+            ref={phoneNumberDropdownButtonRef}
+            style={styles.dropdownButton}
+            onPress={() => {
+              phoneNumberDropdownButtonRef.current.measure(
+                (fx, fy, width, height, px, py) => {
+                  setPhoneNumberDropdownLayout({ x: px, y: py, width, height });
+                  setPhoneNumberDropdownVisible(true);
+                }
+              );
+            }}
+          >
+            <Text
+              style={
+                parentPhoneNumber
+                  ? styles.dropdownButtonText
+                  : styles.dropdownPlaceholderText
+              }
+            >
+              {formatPhoneNumber(parentPhoneNumber) || 'Select Parent Phone Number'}
+            </Text>
+            <Icon name="arrow-drop-down" size={24} color="#FFF" />
+          </TouchableOpacity>
+          {isPhoneNumberDropdownVisible && (
+            <Modal
+              transparent={true}
+              animationType="fade"
+              visible={isPhoneNumberDropdownVisible}
+              onRequestClose={() => setPhoneNumberDropdownVisible(false)}
+            >
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                onPress={() => setPhoneNumberDropdownVisible(false)}
+              />
+              <View
+                style={[
+                  styles.dropdownModal,
+                  {
+                    top: phoneNumberDropdownLayout
+                      ? phoneNumberDropdownLayout.y + phoneNumberDropdownLayout.height
+                      : 0,
+                    left: phoneNumberDropdownLayout ? phoneNumberDropdownLayout.x : 0,
+                    width: phoneNumberDropdownLayout ? phoneNumberDropdownLayout.width : '100%',
+                  },
+                ]}
+              >
+                <FlatList
+                  data={parentPhoneNumbers}
+                  keyExtractor={(item, index) => `${item.value}-${index}`} // Ensure unique keys
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setParentPhoneNumber(item.value);
+                        setPhoneNumberDropdownVisible(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownItemText}>{item.label}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </Modal>
+          )}
+        </View>
 
-        {renderPicker(
-          'Teacher',
-          selectedTeacher,
-          setSelectedTeacher,
-          teachers,
-          { label: 'Select Teacher', value: null }
-        )}
+        {/* Custom Dropdown for Teacher */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Teacher</Text>
+          <TouchableOpacity
+            ref={teacherDropdownButtonRef}
+            style={styles.dropdownButton}
+            onPress={() => {
+              teacherDropdownButtonRef.current.measure(
+                (fx, fy, width, height, px, py) => {
+                  setTeacherDropdownLayout({ x: px, y: py, width, height });
+                  setTeacherDropdownVisible(true);
+                }
+              );
+            }}
+          >
+            <Text
+              style={
+                selectedTeacher
+                  ? styles.dropdownButtonText
+                  : styles.dropdownPlaceholderText
+              }
+            >
+              {selectedTeacher || 'Select Teacher'}
+            </Text>
+            <Icon name="arrow-drop-down" size={24} color="#FFF" />
+          </TouchableOpacity>
+
+          {isTeacherDropdownVisible && (
+            <Modal
+              transparent={true}
+              animationType="fade"
+              visible={isTeacherDropdownVisible}
+              onRequestClose={() => setTeacherDropdownVisible(false)}
+            >
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                onPress={() => setTeacherDropdownVisible(false)}
+              />
+              <View
+                style={[
+                  styles.dropdownModal,
+                  {
+                    top: teacherDropdownLayout
+                      ? teacherDropdownLayout.y + teacherDropdownLayout.height
+                      : 0,
+                    left: teacherDropdownLayout ? teacherDropdownLayout.x : 0,
+                    width: teacherDropdownLayout ? teacherDropdownLayout.width : '100%',
+                  },
+                ]}
+              >
+                <FlatList
+                  data={teachers}
+                  keyExtractor={(item, index) => `${item.value}-${index}`} // Ensure unique keys
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setSelectedTeacher(item.value);
+                        setTeacherDropdownVisible(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownItemText}>{item.label}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            </Modal>
+          )}
+        </View>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -227,10 +534,7 @@ const AddStudent = ({ navigation, route }) => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Student added successfully!</Text>
-            <TouchableOpacity
-              style={styles.buttonClose}
-              onPress={handleModalClose}
-            >
+            <TouchableOpacity style={styles.buttonClose} onPress={handleModalClose}>
               <Text style={styles.textStyle}>OK</Text>
             </TouchableOpacity>
           </View>
@@ -344,43 +648,50 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
   },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: '#444',
-    borderRadius: 10,
-    color: '#FFF',
-    paddingRight: 30, // to ensure the text is never behind the icon
+  // Styles for custom dropdowns
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: 'rgba(51, 56, 64, 0.8)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  inputAndroid: {
-    fontSize: 16,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderWidth: 1,
     borderColor: '#444',
+    borderWidth: 1,
     borderRadius: 10,
-    color: '#FFF',
-    paddingRight: 30, // to ensure the text is never behind the icon
-    backgroundColor: 'rgba(51, 56, 64, 0.8)',
+    paddingHorizontal: 15,
+    height: 50,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
   },
-  iconContainer: {
-    top: 12,
-    right: 12,
+  dropdownButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+  },
+  dropdownPlaceholderText: {
+    color: '#999',
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+  },
+  dropdownModal: {
+    position: 'absolute',
+    backgroundColor: '#333840',
+    borderRadius: 10,
+    maxHeight: 200,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  dropdownItem: {
+    padding: 15,
+    borderBottomColor: '#444',
+    borderBottomWidth: 1,
+  },
+  dropdownItemText: {
+    color: '#FFF',
+    fontSize: 16,
   },
 });
 

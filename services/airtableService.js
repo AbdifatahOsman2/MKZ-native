@@ -278,6 +278,9 @@ export const deleteStudent = async (recordId) => {
 
 
 export const createLesson = async (lessonData) => {
+  // Log the data for debugging
+  console.log('Creating lesson with data:', lessonData);
+
   const url = `https://api.airtable.com/v0/${baseId}/${LESSONS_TABLE}`;
   try {
     const response = await axios.post(url, { fields: lessonData }, { headers: airtableHeaders });
@@ -287,6 +290,7 @@ export const createLesson = async (lessonData) => {
     throw error;
   }
 };
+
 
 export const createBehavior = async (behaviorData) => {
   const url = `https://api.airtable.com/v0/${baseId}/${BEHAVIOR_TABLE}`;

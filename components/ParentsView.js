@@ -60,11 +60,23 @@ const StudentListScreen = ({ navigation, route }) => {
 
   const getLatestLessonStatus = (lessons) => {
     if (!lessons || lessons.length === 0) return 'No recent lessons';
-    const sortedLessons = lessons.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+    const sortedLessons = [...lessons].sort((a, b) => new Date(b.Date) - new Date(a.Date));
     return sortedLessons[0].Passed;
   };
 
-  const filteredStudents = students; // Removed searchQuery as it's not used
+  // New function to get the next lesson due
+  const getNextLessonDue = (lessons) => {
+    if (!lessons || lessons.length === 0) return null;
+    const sortedLessons = [...lessons].sort((a, b) => new Date(b.Date) - new Date(a.Date));
+    for (const lesson of sortedLessons) {
+      if (lesson.NextSurahDue && (lesson.FromAyah || lesson.FromAyah === 0) && (lesson.ToAyah || lesson.ToAyah === 0)) {
+        return lesson;
+      }
+    }
+    return null;
+  };
+
+  const filteredStudents = students;
 
   return (
     <ImageBackground source={require('../assets/CharColBG.png')} style={styles.container}>
@@ -123,6 +135,7 @@ const StudentListScreen = ({ navigation, route }) => {
             filteredStudents.map((student) => {
               const studentImage = getRandomImage(student.Gender);
               const latestLessonStatus = getLatestLessonStatus(student.LessonsData);
+              const nextLessonDue = getNextLessonDue(student.LessonsData);
               return (
                 <View key={student.id} style={styles.card}>
                   <TouchableOpacity
@@ -134,7 +147,20 @@ const StudentListScreen = ({ navigation, route }) => {
                         <Text style={styles.cardTitle}>{student.StudentName}</Text>
                         <Text style={styles.cardText}>Age: {student.Age}</Text>
                         <Text style={styles.cardText}>Class: {student.class}</Text>
-                        <Text style={styles.cardText}>Latest Lesson: {latestLessonStatus}</Text>
+                        <Text style={styles.cardText}>Last Lesson: {latestLessonStatus}</Text>
+                        {nextLessonDue ? (
+                          <>
+                            <Text style={styles.cardText}>
+                              Next Lesson Due:
+                              { '\n'} Surah: {'\t'} {nextLessonDue.NextSurahDue}
+                            </Text>
+                            <Text style={styles.cardText}>
+                              {'\t'}Ayahs {nextLessonDue.FromAyah} - {nextLessonDue.ToAyah}
+                            </Text>
+                          </>
+                        ) : (
+                          <Text style={styles.cardText}>No next lesson due</Text>
+                        )}
                       </View>
                       <Icon name="chevron-right" size={20} color={iconColor} />
                     </View>
@@ -184,7 +210,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     padding: 20,
     backgroundColor: '#e5ecf4',
-    borderRadius: 10,
+    borderRadius: 15, // Increased border radius for a modern look
     shadowColor: '#12273e',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
@@ -193,7 +219,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start', // Adjusted alignment
     justifyContent: 'space-between',
   },
   avatar: {
@@ -204,9 +230,10 @@ const styles = StyleSheet.create({
   },
   textContent: {
     flex: 1,
+    paddingRight: 10,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 22, // Slightly increased font size
     fontWeight: '600',
     color: '#12273e',
     marginBottom: 5,
