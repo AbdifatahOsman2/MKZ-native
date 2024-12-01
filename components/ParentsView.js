@@ -162,7 +162,6 @@ const StudentListScreen = ({ navigation, route }) => {
                           <Text style={styles.cardText}>No next lesson due</Text>
                         )}
                       </View>
-                      <Icon name="chevron-right" size={20} color={iconColor} />
                     </View>
                   </TouchableOpacity>
                 </View>
