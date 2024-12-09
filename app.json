@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Markaz Al-Najaax",
-    "slug": "Markaz Al-Najaax",
+    "slug": "mkz-Native",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,11 +18,13 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1E1E1F"
-      }
+      },
+      "package": "com.hygalac.mkzNative"
     },
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hygalac.mkzNative"
     },
     "plugins": [
       "expo-font",
